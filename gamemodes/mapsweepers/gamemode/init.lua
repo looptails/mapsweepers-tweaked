@@ -1146,6 +1146,8 @@ end
 	end
 
 	function GM:PlayerNoClip(ply, flying)
+		if not flying then return true end -- Always allow stopping noclip
+
 		if jcms.director and jcms.director.debug then
 			return true
 		else
