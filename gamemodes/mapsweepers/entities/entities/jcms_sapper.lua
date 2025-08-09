@@ -131,20 +131,24 @@ if SERVER then
 
 						local closestEnt, closestInfo
 						local closestDist = math.huge
+						local closestZDiff = math.huge
 						
 						for ent, tagInfo in pairs(tagEnts) do 
 							if tagInfo.active then 
-								local dist = ent:GetPos():Distance(selfPos)
+								local entPos = ent:GetPos()
+								local dist = entPos:Distance(selfPos)
 								if dist < closestDist then 
 									closestDist = dist
 									closestEnt = ent
 									closestInfo = tagInfo
+									closestZDiff = entPos.z - selfPos.z
 								end
 							end
 						end
 
 						if IsValid(closestEnt) then 
 							self:SetNWInt("jcms_locator_distance", math.floor(closestDist) )
+							self:SetNWInt("jcms_locator_zdiff", math.floor(closestZDiff) )
 							self:SetNWString("jcms_locator_target", closestInfo.name)
 							self:SetNWInt("jcms_locator_direction", jcms.util_GetCompassDir(selfPos, closestEnt:GetPos()))
 							self:EmitSound("buttons/combine_button5.wav", 100, 110, 1)
@@ -210,6 +214,7 @@ if CLIENT then
 			local progress = math.TimeFraction(self:GetTimeStart(), self:GetTimeToComplete(), time)
 			
 			local color = Color(255, 0, 0)
+			local color_pulsing = Color(255, (1-time%1)*255, 0, 100)
 			local color_dark = Color(50, 0, 0)
 
 			if progress < 1 then
@@ -252,24 +257,32 @@ if CLIENT then
 				local dist = self:GetNWInt("jcms_locator_distance", 0)
 				local distFormatted = jcms.util_ToDistance(dist, true)
 
+				local zdiff = self:GetNWInt("jcms_locator_zdiff", 0)
+				local zdiffFormatted = "#jcms.compasszdiff_same"
+				if zdiff <= -100 then
+					zdiffFormatted = language.GetPhrase("jcms.compasszdiff_below"):format( jcms.util_ToDistance(-zdiff, true) )
+				elseif zdiff >= 300 then
+					zdiffFormatted = language.GetPhrase("jcms.compasszdiff_above"):format( jcms.util_ToDistance(zdiff, true) )
+				end
+
 				local targetName = self:GetNWString("jcms_locator_target", "ERR_UNKNOWN_TARGET")
 
 				local dir = self:GetNWInt("jcms_locator_direction")
 				local dirFormatted = jcms.util_compassDirs[ dir ] or "???"
 
 				cam.Start3D2D(v, a, 1/32)
-					local tw, th = draw.SimpleText(distFormatted, "jcms_hud_big", 0, -4, color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+					local tw, th = draw.SimpleText(distFormatted .. " " .. dirFormatted, "jcms_hud_big", 0, -4, color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 					draw.SimpleText(targetName, "jcms_hud_medium", 0, -th/2 + 4, color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
-					draw.SimpleText(dirFormatted, "jcms_hud_medium", 0, th/2 - 12, color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+					draw.SimpleText(zdiffFormatted, "jcms_hud_medium", 0, th/2 - 12, color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
 				cam.End3D2D()
 
 				v:Add(a:Up()*0.2)
 
 				cam.Start3D2D(v, a, 1/32)
 					render.OverrideBlend( true, BLEND_SRC_ALPHA, BLEND_ONE, BLENDFUNC_ADD )
-						draw.SimpleText(distFormatted, "jcms_hud_big", 0, -4, color, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+						draw.SimpleText(distFormatted .. " " .. dirFormatted, "jcms_hud_big", 0, -4, color, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 						draw.SimpleText(targetName, "jcms_hud_medium", 0, -th/2 + 4, color, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
-						draw.SimpleText(dirFormatted, "jcms_hud_medium", 0, th/2 - 12, color, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+						draw.SimpleText(zdiffFormatted, "jcms_hud_medium", 0, th/2 - 12, color_pulsing, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
 					render.OverrideBlend( false )
 				cam.End3D2D()
 			end
