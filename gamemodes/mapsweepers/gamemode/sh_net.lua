@@ -799,7 +799,8 @@ if CLIENT then
 					end
 
 					if #fmt > 0 then
-						local s, rtn = pcall(string.format, objectivetype, unpack(fmt)) -- TODO Fix this in next update. objectivetype is NOT localized. Formatting must apply afterwards.
+						objectivetype = jcms.objective_Localize(objectivetype)
+						local s, rtn = pcall(string.format, objectivetype, unpack(fmt))
 						objectivetype = tostring(s and rtn or objectivetype)
 					end
 
