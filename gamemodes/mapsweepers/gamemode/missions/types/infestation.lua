@@ -91,13 +91,17 @@
 
 			if totalComplete < #beacons then 
 				local objectives = {
-					{ type = "armbombs", completed = false, progress = totalComplete, total = #beacons },
+					{ type = "armbombs", progress = totalComplete, total = #beacons },
 				} 
 				
 				for i, beacon in ipairs(beacons) do 
 					if beacon:GetActive() then 
 						table.insert(objectives, {
-							type = "defendbomb", completed = false, percent = true, progress = beacon:GetCharge() * 100, total = 100 
+							type = "defendbomb", percent = true, progress = beacon:GetCharge() * 100, total = 100 
+						})
+
+						table.insert(objectives, {
+							type = "defendbomb", style = 2, progress = beacon:Health()/beacon:GetMaxHealth()*100, total = 100
 						})
 					end
 				end

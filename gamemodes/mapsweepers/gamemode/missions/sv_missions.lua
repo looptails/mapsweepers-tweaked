@@ -497,9 +497,9 @@
 
 		if secondsUntilSuddenDeath then
 			if secondsUntilSuddenDeath > 0 then
-				objectives[2] = { type = "suddendeath", progress = secondsUntilSuddenDeath, total = 0, style = 1 }
+				objectives[2] = { type = "suddendeath", progress = secondsUntilSuddenDeath, style = 1 }
 			else
-				objectives[2] = { type = "die", progress = 0, total = 0, completed = false }
+				objectives[2] = { type = "die" }
 
 				if missionData and not missionData.suddenDeathTip then
 					jcms.net_SendTip("all", true, "#jcms.suddendeathtip", 1)

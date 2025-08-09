@@ -1690,13 +1690,13 @@
 				local y = 0
 				for i, objective in ipairs(jcms.objectives) do
 					cam.PushModelMatrix(shiftMatrix, true)
-						local doDrawDiamond, yShift = jcms.objective_Draw(i, objective)
+						local doDrawDiamond, yShift, diamondColor = jcms.objective_Draw(i, objective)
 					cam.PopModelMatrix()
 
 					if doDrawDiamond then
-						local color, colorDark = jcms.color_bright, jcms.color_dark
+						local color, colorDark = diamondColor or jcms.color_bright, jcms.color_dark
 						if objective.completed then
-							color, colorDark = jcms.color_bright_alt, jcms.color_dark_alt
+							color, colorDark = diamondColor or jcms.color_bright_alt, jcms.color_dark_alt
 						end
 
 						off = 2

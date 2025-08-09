@@ -40,7 +40,7 @@
 			
 			if time < 60 then
 				return {
-					{ type = "prep", progress = math.floor(time), total = 60 }
+					{ type = "prep", progress = 60 - math.floor(time), style = 1, completed = true },
 				}
 			else
 				local progress = math.floor( (time - 60) / (60*7.5 * jcms.runprogress_GetDifficulty()) * 100 )
