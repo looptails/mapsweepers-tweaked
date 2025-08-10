@@ -123,7 +123,7 @@
 
 	function jcms.paint_Button(p, w, h)
 		local pad = math.min(w/4, 8)
-		local clr = p:IsHovered() and jcms.color_bright_alt or jcms.color_bright
+		local clr = (p:IsEnabled() and p:IsHovered()) and jcms.color_bright_alt or jcms.color_bright
 		
 		surface.SetDrawColor(clr)
 		drawHollowPolyButton(0, 0, w, h, pad)
@@ -135,8 +135,9 @@
 	
 	function jcms.paint_ButtonFilled(p, w, h)
 		local pad = math.min(w/4, 8)
-		local clr = p:IsHovered() and jcms.color_bright_alt or jcms.color_bright
-		local clr_dark = p:IsHovered() and jcms.color_dark_alt or jcms.color_dark
+		local cond = p:IsEnabled() and p:IsHovered()
+		local clr = cond and jcms.color_bright_alt or jcms.color_bright
+		local clr_dark = cond and jcms.color_dark_alt or jcms.color_dark
 		
 		surface.SetDrawColor(clr)
 		drawFilledPolyButton(0, 0, w, h, pad)
@@ -300,6 +301,67 @@
 		draw.SimpleText("#jcms.changeclass", "jcms_big", 16, 8, jcms.color_bright)
 
 		return true
+	end
+
+	function jcms.paint_ModalGameBranch(p, w, h)
+		Derma_DrawBackgroundBlur(p, 0)
+		jcms_Modal(p, w, h)
+
+		local str1 = "#jcms.antilag_title"
+		local str2 = "#jcms.antilag_desc"
+		local str3 = "#jcms.antilag_64bit"
+		local str4 = "#jcms.antilag_mcore"
+		draw.SimpleText(str1, "jcms_big", 16, 8, jcms.color_bright)
+		draw.SimpleText(str2, "jcms_small_bolder", 16, 48, jcms.color_bright)
+
+		if not p.mcorecvar then p.mcorecvar = GetConVar("gmod_mcore_test") end
+		local cvar = p.mcorecvar
+
+		if cvar:GetBool() then
+			local col = jcms.color_pulsing
+			surface.SetDrawColor(col)
+			drawHollowPolyButton(24, 84-9, 18, 18, 4)
+			drawFilledPolyButton(24+2, 84-9+2, 18-4, 18-4, 3)
+			local tw = draw.SimpleText(str4, "jcms_small_bolder", 48, 84, col, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+			surface.DrawRect(48-2, 84, tw+4, 1)
+		else
+			local col = CurTime()%1.5<0.5 and jcms.color_alert or jcms.color_bright
+			surface.SetDrawColor(col)
+			drawHollowPolyButton(24, 84-9, 18, 18, 4)
+			draw.SimpleText(str4, "jcms_small_bolder", 48, 84, col, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+		end
+
+		if BRANCH == "x86-64" then
+			local col = jcms.color_pulsing
+			surface.SetDrawColor(col)
+			drawHollowPolyButton(24, 84-9+28, 18, 18, 4)
+			drawFilledPolyButton(24+2, 84-9+2+28, 18-4, 18-4, 3)
+			local tw = draw.SimpleText(str3, "jcms_small_bolder", 48, 84+28, col, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+			surface.DrawRect(48-2, 84+28, tw+4, 1)
+		else
+			local col = CurTime()%1.5<0.5 and jcms.color_alert or jcms.color_bright
+			surface.SetDrawColor(col)
+			drawHollowPolyButton(24, 84-9+28, 18, 18, 4)
+			draw.SimpleText(str3, "jcms_small_bolder", 48, 84+28, col, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+		end
+
+		return true
+	end
+
+	function jcms.paint_Modal64BitInstruction(p, w, h)
+		local imgw, imgh = 1286, 318
+		local scale = math.min(1, (w*0.8)/imgw, (h*0.9)/imgh)
+
+		Derma_DrawBackgroundBlur(p, 0)
+		if p.img then
+			surface.SetMaterial(p.img)
+			surface.SetDrawColor(255, 255, 255)
+			surface.DrawTexturedRectRotated(w/2, h/2, 1286*scale, 318*scale, 0)
+		end
+
+		if IsValid(p.close) then
+			p.close:SetPos(w/2-p.close:GetWide()/2, h/2+318*scale/2+64)
+		end
 	end
 
 	function jcms.paint_Separator(p, w, h)

@@ -556,6 +556,70 @@ jcms.offgame = jcms.offgame or NULL
 			pnl.onlinePlayers:SetTooltipPanel(onlineTooltip)
 
 			bMis.BuildFunc(pnl.tabPnl)
+
+			if (not jcms.seenLagPopup) and (BRANCH ~= "x86-64" or not GetConVar("gmod_mcore_test"):GetBool()) then
+				jcms.seenLagPopup = true
+				local popup = vgui.Create("DFrame")
+				popup:SetBackgroundBlur(true)
+				popup:SetSize(500, 150)
+				popup:Center()
+				popup:MakePopup()
+				popup:SetTitle("")
+				popup:ShowCloseButton(false)
+				popup.Paint = jcms.paint_ModalGameBranch
+
+				local close = popup:Add("DButton")
+				close:SetText("x")
+				close:SetSize(64, 24)
+				close:SetPos(popup:GetWide() - close:GetWide() - 8, 8)
+				close.Paint = jcms.paint_Button
+				close:SetEnabled(false)
+				function close:DoClick()
+					popup:Remove()
+				end
+				timer.Simple(1.5, function()
+					if IsValid(close) then
+						close:SetEnabled(true)
+						close.Paint = jcms.paint_ButtonFilled
+					end
+				end)
+
+				popup.b1 = popup:Add("DButton")
+				popup.b1:SetPos(24, 84-9)
+				popup.b1:SetSize(300, 18)
+				function popup.b1:DoClick()
+					if not GetConVar("gmod_mcore_test"):GetBool() then
+						RunConsoleCommand("gmod_mcore_test", "1")
+						surface.PlaySound("buttons/button9.wav")
+					end
+				end
+				popup.b1.Paint = BLANK_DRAW
+
+				popup.b2 = popup:Add("DButton")
+				popup.b2:SetPos(24, 84-9+28)
+				popup.b2:SetSize(300, 18)
+				function popup.b2:DoClick()
+					local instruction = vgui.Create("DFrame")
+					instruction:SetSize(ScrW(), ScrH())
+					instruction:Center()
+					instruction:MakePopup()
+					instruction:SetTitle("")
+					instruction.Paint = jcms.paint_Modal64BitInstruction
+					instruction.img = Material("jcms/how_to_beta.png")
+					surface.PlaySound("buttons/bell1.wav")
+
+					instruction.close = instruction:Add("DButton")
+					instruction.close:SetText("OK")
+					instruction.close:SetSize(150, 32)
+					instruction.close.jFont = "jcms_medium"
+					instruction.close:SetPos(-512, -512)
+					instruction.close.Paint = jcms.paint_ButtonFilled
+					function instruction.close:DoClick()
+						instruction:Remove()
+					end
+				end
+				popup.b2.Paint = BLANK_DRAW
+			end
 		end
 
 		function jcms.offgame_BuildMissionTab(tab)
