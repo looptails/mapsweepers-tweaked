@@ -1440,7 +1440,9 @@
 			
 			for i=1, math.min(#queue, #allVectors) do
 				local enemyType, pos = queue[i], allVectors[i]
-				jcms.npc_SpawnFancy(enemyType, pos, delay + i * 0.1)
+				if isstring(enemyType) then
+					jcms.npc_SpawnFancy(enemyType, pos, delay + i * 0.1)
+				end
 			end
 			
 			return #queue >= 1 and #allVectors >= 1

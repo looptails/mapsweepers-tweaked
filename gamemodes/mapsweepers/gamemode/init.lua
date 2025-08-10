@@ -23,11 +23,15 @@ DEFINE_BASECLASS("gamemode_base")
 include "sh_debugtools.lua"
 
 include "sh_bspReader.lua" --Data from the BSP. We probably(?) want to use this in mapgen and missions, so I put it at the top. - J
-bspReader.readLeafData()
-bspReader.readNodeData()
-bspReader.readPlaneData()
-bspReader.readPVSData()
-bspReader.readBrushData(CONTENTS_PLAYERCLIP)
+do
+	local bspReadStart = SysTime()
+	bspReader.readLeafData()
+	bspReader.readNodeData()
+	bspReader.readPlaneData()
+	bspReader.readPVSData()
+	bspReader.readBrushData(CONTENTS_PLAYERCLIP)
+	print("[MapSweepers] BSP Data read in: " .. tostring( math.Round(SysTime() - bspReadStart, 3) ) .. " seconds")
+end
 
 include "sh_ainReader.lua" --i like eating binrary numbrs- j
 ainReader.readNodeData()

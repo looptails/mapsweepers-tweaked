@@ -23,6 +23,8 @@ jcms.pathfinder = jcms.pathfinder or {}
 
 -- // Generating Our Air Nodes {{{
 	hook.Add("InitPostEntity", "jcms_pathfinder_initialize", function()
+		local pathfinderStart = SysTime()
+
 		jcms.pathfinder.airNodes = {} --air nodes
 		jcms.pathfinder.leafAirNodes = {} --Nodes for each leaf
 
@@ -150,6 +152,9 @@ jcms.pathfinder = jcms.pathfinder or {}
 				end
 			end
 		-- // }}}
+
+		
+		print("[MapSweepers] Airgraph nodes generated in: " .. tostring( math.Round(SysTime() - pathfinderStart, 3) ) .. " seconds")
 	end)
 -- // }}}
 

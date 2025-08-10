@@ -323,6 +323,8 @@ jcms.MAPGEN_CONSTRUCT_DIAMETER = math.sqrt(82411875)
 	jcms.mapdata = jcms.mapdata or { analyzed = false, vaild = false }
 
 	function jcms.mapgen_AnalyzeMap()
+		local analyseStart = SysTime()
+
 		local md = jcms.mapdata
 		local nav = navmesh.GetAllNavAreas()
 		table.Shuffle(nav)
@@ -615,6 +617,8 @@ jcms.MAPGEN_CONSTRUCT_DIAMETER = math.sqrt(82411875)
 		if md.valid and (not ai.GetNodeCount or ai.GetNodeCount() > 0) then --checks if the function exists bc I don't wanna boot up 32bit just to check if it's only on dev rn
 			jcms.addValidMap(game.GetMap()) --might be more accurate to call this setValidMap?
 		end
+
+		print("[MapSweepers] Map analysed in: " .. tostring( math.Round(SysTime() - analyseStart, 3) ) .. " seconds")
 	end
 
 	function jcms.mapgen_ExpandedAreaList(areas)
