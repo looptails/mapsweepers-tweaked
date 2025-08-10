@@ -140,6 +140,7 @@ end
 function EFFECT:Render()
 	local selfTbl = self:GetTable()
 	if selfTbl.isPortal and selfTbl.t <= 1 then
+		local whiteFactor = math.Clamp( (2 + selfTbl.t)/2, 0, 1)
 		local dist = jcms.EyePos_lowAccuracy:DistToSqr(self:WorldSpaceCenter())
 
 		local clr = selfTbl.colorCached
@@ -171,7 +172,6 @@ function EFFECT:Render()
 						p:SetDieTime(0.5 + math.random()*selfTbl.scale)
 		
 						local r,g,b = selfTbl.color:Unpack()
-						local whiteFactor = math.Clamp( (2 + selfTbl.t)/2, 0, 1)
 						r = Lerp(whiteFactor, r, 255)
 						g = Lerp(whiteFactor, g, 255)
 						b = Lerp(whiteFactor, b, 255)
@@ -199,7 +199,7 @@ function EFFECT:Render()
 			
 			render.OverrideBlend( true, BLEND_SRC_ALPHA, BLEND_ONE, BLENDFUNC_ADD )
 				render.SetMaterial(selfTbl.MatGlow)
-				local f = selfTbl.fadein * selfTbl.scale
+				local f = selfTbl.fadein * (selfTbl.scale + whiteFactor^2)
 
 				if lodLevel <= 1 then
 					clr.a = selfTbl.alphaout*255

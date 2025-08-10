@@ -285,6 +285,7 @@
 			local time = CurTime()
 			local aggroChance = (#d.npcs > 0 and jcms.director_GetMissionTime() >= 20) and Lerp(d.npcs_alarm or 0, 0.15, 0.95) or 0.1
 			local zoneList = jcms.mapgen_ZoneList()
+			local difficulty_warn = math.Clamp(jcms.cvar_swarm_warning:GetFloat(), 0, 30)
 			
 			if d.missionData.evacuating then
 				aggroChance = (aggroChance + 0.95)/2
@@ -412,7 +413,7 @@
 							end)
 						else
 							-- Spawn a regular NPC
-							local delay = 1 + (i + math.random()*0.5)*0.23
+							local delay = difficulty_warn + 1 + (i + math.random()*0.5)*0.23
 							jcms.npc_SpawnFancy(enemyType, pos, delay, giveAwayPlayer, patrolArea)
 						end
 					end
@@ -1308,8 +1309,8 @@
 					cooldown = missionTypeData.swarmCalcCooldown(d, cooldown, swarmCost)
 				end
 
-				local difficulty_freq = jcms.cvar_swarm_frequency:GetFloat()
-				local difficulty_size = jcms.cvar_swarm_size:GetFloat()
+				local difficulty_freq = math.Clamp(jcms.cvar_swarm_frequency:GetFloat(), 0.001, 5)
+				local difficulty_size = math.Clamp(jcms.cvar_swarm_size:GetFloat(), 0, 5)
 
 				d.swarmNext = missionTime + cooldown/difficulty_freq
 				swarmCost = swarmCost * difficulty_size
@@ -1349,13 +1350,16 @@
 		
 		function jcms.director_ThinkEncounters(d)
 			if d.encounters then
+				local difficulty_freq = math.Clamp(jcms.cvar_swarm_frequency:GetFloat(), 0.001, 5)
+				local difficulty_size = math.Clamp(jcms.cvar_swarm_size:GetFloat(), 0, 5)
+
 				local curNpcCount = #d.npcs
 				
 				if curNpcCount > jcms.cvar_softcap:GetInt() then
 					return
 				end
 				
-				if CurTime() - d.encounterTriggerLast >= 12 then
+				if CurTime() - d.encounterTriggerLast >= 12/difficulty_freq then
 					local sweepers = jcms.GetAliveSweepers()
 					
 					for i, enc in ipairs(d.encounters) do
@@ -1364,7 +1368,7 @@
 					
 					for i=#d.encounters, 1, -1 do
 						local enc = d.encounters[i]
-						if curNpcCount + enc.npcCount >= 77 then
+						if curNpcCount + math.max(enc.npcCount*difficulty_size) >= 77 then
 							continue
 						end
 						
@@ -1392,11 +1396,14 @@
 		end
 		
 		function jcms.director_TriggerEncounter(d, enc, aggressor)
+			local difficulty_size = math.Clamp(jcms.cvar_swarm_size:GetFloat(), 0, 5)
+			local difficulty_warn = math.Clamp(jcms.cvar_swarm_warning:GetFloat(), 0, 30)
+
 			d.encounterTriggerLast = CurTime()
 			d.swarmNext = (d.swarmNext or 0) + 2
 			
 			local areas = navmesh.Find(enc.pos, enc.rad + 100, 128, 128)
-			local npcCount = tonumber(enc.npcCount) or 0
+			local npcCount = math.ceil( (tonumber(enc.npcCount) or 0)*difficulty_size )
 			local npcCountRemaining = npcCount
 			
 			local allVectors = {}
@@ -1429,7 +1436,7 @@
 			end
 			
 			local queue = jcms.director_MakeQueue(d, tonumber(enc.cost) or npcCount + 2.5, enc.danger or jcms.NPC_DANGER_FODDER)
-			local delay = tonumber(enc.delay) or 5
+			local delay = (tonumber(enc.delay) or 5) + difficulty_warn
 			
 			for i=1, math.min(#queue, #allVectors) do
 				local enemyType, pos = queue[i], allVectors[i]

@@ -496,8 +496,10 @@ jcms.npcSquadSize = 4 -- Let's see if smaller squads fix their strange behavior.
 		local vectors, fully = jcms.director_PackSquadVectors(navArea:GetRandomPoint(), x, math.random(72, 200), { filter = ent })
 		local colorInteger = jcms.factions_GetColorInteger(faction)
 
+		local difficulty_warn = math.Clamp(jcms.cvar_swarm_warning:GetFloat(), 0, 30)
+
 		for i, v in ipairs(vectors) do
-			local delay = math.Rand(0.6, 3.5)
+			local delay = math.Rand(0.6, 3.5) + difficulty_warn
 
 			local npcKind
 			if isfunction(npcType) then 
@@ -523,7 +525,6 @@ jcms.npcSquadSize = 4 -- Let's see if smaller squads fix their strange behavior.
 			ed:SetMagnitude(delay)
 			ed:SetScale(npcData and npcData.portalScale or 1)
 			util.Effect("jcms_spawneffect", ed)
-			
 			
 			timer.Simple(delay, function()
 				local npc = jcms.npc_Spawn(npcKind, v + Vector(0,0,10), true)

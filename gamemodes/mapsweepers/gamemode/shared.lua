@@ -128,6 +128,7 @@ jcms.vectorOne = Vector(1, 1, 1)
 
 	jcms.cvar_swarm_frequency = CreateConVar("jcms_swarm_frequency", "1", FCVAR_JCMS_NOTIFY_AND_SAVE, "Swarm frequency multiplier.", 0, 5)
 	jcms.cvar_swarm_size = CreateConVar("jcms_swarm_size", "1", FCVAR_JCMS_NOTIFY_AND_SAVE, "Swarm size multiplier.", 0, 5)
+	jcms.cvar_swarm_warning = CreateConVar("jcms_swarm_warning", "1", FCVAR_JCMS_NOTIFY_AND_SAVE, "Extra seconds between a portal opening and enemies coming out of it.", 0, 30)
 	
 	-- Replicated
 	jcms.cvar_announcer_type = CreateConVar("jcms_announcer_type", "default", FCVAR_JCMS_SHARED_SAVED, "Selects the current announcer by name.")
