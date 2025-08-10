@@ -74,8 +74,15 @@ if SERVER then
 	end
 
 	function ENT:PhysicsCollide(cData, physObj)
-		-- TODO Remove/nocollide props in the way on huge stress
-		--Doesn't seem to get called for blocking props - J
+		if cData.Speed > 1000 then
+			local externalStress = physObj:GetStress()
+			if externalStress >= 40000 then
+				local blocker = cData.HitEntity
+				if IsValid(blocker) then
+					blocker:Dissolve(1)
+				end
+			end
+		end
 	end
 	
 	function ENT:DoMove()
