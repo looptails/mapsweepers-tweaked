@@ -516,6 +516,20 @@ end
 			end
 		end
 	end)
+
+	hook.Add("PlayerDroppedWeapon", "jcms_weaponDrop", function(owner, wep)
+		if IsValid(owner) and IsValid(wep) and owner:IsPlayer() then
+			timer.Simple(0, function()
+				if IsValid(owner) and IsValid(wep) then
+					if jcms.util_IsStunstick(wep) then
+						owner:PickupWeapon(wep)
+					else
+						wep.jcms_canPickup = true -- So that we can pick it back up.
+					end
+				end
+			end)
+		end
+	end)
 -- // }}}
 
 -- // Run Progress {{{
@@ -1110,7 +1124,7 @@ end
 			return true
 		else
 			if jcms.team_JCorp_player(ply) then
-				if (wep:CreatedByMap() and wep:IsPlayerHolding()) then
+				if (wep:CreatedByMap() and wep:IsPlayerHolding()) or (wep.jcms_canPickup) then
 					return true
 				else
 					local ammoType = wep:GetPrimaryAmmoType()

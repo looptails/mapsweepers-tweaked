@@ -843,7 +843,7 @@
 				local isProp = entClass == "prop_physics"
 
 				if not (isWeapon or jcms.director_debrisClasses[entClass] or isImportant or isProp) then continue end --Only our entities
-				if IsValid(ent:GetOwner()) or ent:CreatedByMap() then continue end  --Don't kill map-entities or ones in an inventory
+				if IsValid(ent:GetOwner()) or ent:CreatedByMap() or ent.jcms_canPickup then continue end  --Don't kill map-entities or ones in an inventory
 				local model = ent:GetModel() 
 				if isProp and not jcms.director_debrisPropNames[model] then continue end
 
