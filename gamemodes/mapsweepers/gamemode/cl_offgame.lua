@@ -137,7 +137,7 @@ jcms.offgame = jcms.offgame or NULL
 		parentPanel.chatEntry:SetHighlightColor(jcms.color_bright_alt)
 		parentPanel.chatEntry:SetTextColor(jcms.color_bright)
 		parentPanel.chatEntry:SetPlaceholderColor(jcms.color_pulsing)
-		parentPanel.chatEntry:SetPlaceholderText("Say something...")
+		parentPanel.chatEntry:SetPlaceholderText(language.GetPhrase("jcms.chatplaceholder"))
 		parentPanel.chatEntry:SetPaintBackground(false)
 		parentPanel.chatEntry.PaintOver = jcms.offgame_paint_ChatEntryOver
 
@@ -349,6 +349,11 @@ jcms.offgame = jcms.offgame or NULL
 					end
 				end
 				function pnl.plyPnlSweeper:Think()
+					local lowres = jcms.util_IsLowRes()
+					if lowres then
+						self:SetWide(350)
+					end
+
 					local index = 0
 					local mismatchDetected = false
 
@@ -378,6 +383,7 @@ jcms.offgame = jcms.offgame or NULL
 						end
 					end
 
+					local elemSize = lowres and 32 or 48
 					for i=#self.list, 1, -1 do
 						local ply = self.list[i]
 
@@ -387,25 +393,27 @@ jcms.offgame = jcms.offgame or NULL
 							local elem = self.elementDict[ ply ]
 							if not IsValid(elem) then
 								elem = self:Add("DPanel")
-								elem:SetPos(self:GetWide(), 48 * (i-1))
-								elem:SetSize(self:GetWide(), 48)
+								elem:SetPos(self:GetWide(), elemSize * (i-1))
+								elem:SetSize(self:GetWide(), elemSize)
 								elem.Paint = jcms.paint_PlayerLobby
 								elem.player = ply
 								elem.classMats = self.classMats
 								elem.gunStats = self.gunStats
+								elem.lowres = lowres
 								self.elementDict[ ply ] = elem
-
+								
+								local avSize = lowres and 16 or 32
 								local av = elem:Add("AvatarImage")
-								av:SetPlayer( ply, 32 )
-								av:SetSize(32, 32)
-								av:SetPos(12, elem:GetTall() - 32 - 8)
+								av:SetPlayer(ply, avSize)
+								av:SetSize(avSize, avSize)
+								av:SetPos(12, elem:GetTall() - avSize - 8)
 								elem.av = av
 
 								surface.PlaySound("buttons/button4.wav")
 							end
 
 							local x, y = elem:GetPos()
-							elem:SetPos(x * 0.9, ((48 * (i-1)) + y*6)/7)
+							elem:SetPos(x * 0.9, ((elemSize * (i-1)) + y*6)/7)
 						end
 					end
 
@@ -490,27 +498,28 @@ jcms.offgame = jcms.offgame or NULL
 					end
 				end
 
+				local lowres = jcms.util_IsLowRes()
 				pnl.controlPanel = pnl:Add("DPanel")
-				pnl.controlPanel:SetSize(650, 64)
+				pnl.controlPanel:SetSize(lowres and 400 or 650, 64)
 				pnl.controlPanel:SetPos(-1000, ScrH())
 				pnl.controlPanel.Paint = jcms.offgame_paint_ControlPanel
 
 				pnl.controlPanel.bReady = pnl.controlPanel:Add("DButton")
 				pnl.controlPanel.bReady:SetText("")
 				pnl.controlPanel.bReady:SetPos(4, 32+4)
-				pnl.controlPanel.bReady:SetSize(200, 24)
+				pnl.controlPanel.bReady:SetSize(lowres and 120 or 200, 24)
 				pnl.controlPanel.bReady.Paint = jcms.paint_ButtonFilled
-				pnl.controlPanel.bReady.jFont = "jcms_medium"
+				pnl.controlPanel.bReady.jFont = lowres and "jcms_small_bolder" or "jcms_medium"
 				function pnl.controlPanel.bReady:DoClick()
 					RunConsoleCommand("jcms_ready")
 				end
 
 				pnl.controlPanel.bLeave = pnl.controlPanel:Add("DButton")
 				pnl.controlPanel.bLeave:SetText("#jcms.leavelobby")
-				pnl.controlPanel.bLeave:SetPos(200 + 8, 32+4)
-				pnl.controlPanel.bLeave:SetSize(200, 24)
+				pnl.controlPanel.bLeave:SetPos(pnl.controlPanel.bReady:GetX() + pnl.controlPanel.bReady:GetWide() + 4, 32+4)
+				pnl.controlPanel.bLeave:SetSize(lowres and 120 or 200, 24)
 				pnl.controlPanel.bLeave.Paint = jcms.paint_ButtonFilled
-				pnl.controlPanel.bLeave.jFont = "jcms_medium"
+				pnl.controlPanel.bLeave.jFont = lowres and "jcms_small_bolder" or "jcms_medium"
 				function pnl.controlPanel.bLeave:DoClick()
 					RunConsoleCommand("jcms_jointeam", 0)
 					
@@ -525,8 +534,8 @@ jcms.offgame = jcms.offgame or NULL
 				if LocalPlayer():IsAdmin() and not game.SinglePlayer() then
 					pnl.controlPanel.bForceStart = pnl.controlPanel:Add("DButton")
 					pnl.controlPanel.bForceStart:SetText("#jcms.forcestart")
-					pnl.controlPanel.bForceStart:SetPos(400 + 12, 32 + 4)
-					pnl.controlPanel.bForceStart:SetSize(200, 24)
+					pnl.controlPanel.bForceStart:SetPos(pnl.controlPanel.bLeave:GetX() + pnl.controlPanel.bLeave:GetWide() + 4, 32 + 4)
+					pnl.controlPanel.bForceStart:SetSize(lowres and 145 or 200, 24)
 					pnl.controlPanel.bForceStart.Paint = jcms.paint_Button
 					pnl.controlPanel.bForceStart.jFont = "jcms_small"
 					function pnl.controlPanel.bForceStart:DoClick()
@@ -534,7 +543,9 @@ jcms.offgame = jcms.offgame or NULL
 					end
 				end
 
-				jcms.offgame_CreateChatAsChild(pnl, pnl:GetWide() - 600 - 32, pnl:GetTall() - 200 - 64, 600, 200)
+				local chatWidth = lowres and 400 or 600
+				local chatHeight = lowres and 140 or 200
+				jcms.offgame_CreateChatAsChild(pnl, pnl:GetWide() - chatWidth - 32, pnl:GetTall() - chatHeight - 64, chatWidth, chatHeight)
 			-- }}}
 
 			local onlineTooltip = pnl:Add("DPanel")
@@ -779,11 +790,14 @@ jcms.offgame = jcms.offgame or NULL
 		end
 
 		function jcms.offgame_BuildMissionPrepTab(tab)
+			local lowres = jcms.util_IsLowRes()
+
 			-- Class {{{
 				tab.classPnl = tab:Add("DPanel")
 				tab.classPnl:SetPos(32, 32)
-				tab.classPnl:SetSize(800, 200)
+				tab.classPnl:SetSize(lowres and 500 or 800, lowres and 120 or 200)
 				tab.classPnl.Paint = jcms.offgame_paint_ClassPanel
+				tab.classPnl.lowres = lowres
 
 				tab.classPnl.mdl = tab.classPnl:Add("DModelPanel")
 				tab.classPnl.mdl:SetSize(tab.classPnl:GetTall()-2, tab.classPnl:GetTall()-2)
@@ -833,13 +847,13 @@ jcms.offgame = jcms.offgame or NULL
 					jcms.cvar_favclass:SetString(self.classname)
 				end
 
-				local minimizeButtons = #jcms.classesOrder > 4
+				local minimizeButtons = lowres or #jcms.classesOrder > 4
 
 				for i, classname in ipairs( jcms.classesOrder ) do
-					local size = minimizeButtons and 32 or 64
+					local size = minimizeButtons and (lowres and 24 or 32) or 64
 					local cbtn = tab.classPnl:Add("DImageButton")
 					if minimizeButtons then
-						cbtn:SetPos(tab.classPnl.mdl:GetWide() + size*math.floor( (i-1)/2 ), tab.classPnl:GetTall() - 64 - 8 + (i%2==0 and 32 or 0))
+						cbtn:SetPos(tab.classPnl.mdl:GetWide() + size*math.floor( (i-1)/2 ), tab.classPnl:GetTall() - size*2 - 8 + (i%2==0 and size or 0) + (lowres and 6 or 0))
 					else
 						cbtn:SetPos(tab.classPnl.mdl:GetWide() + size*(i-1), tab.classPnl:GetTall() - 64 - 8)
 					end
@@ -852,17 +866,19 @@ jcms.offgame = jcms.offgame or NULL
 			-- }}}
 
 			-- Loadout {{{
+				local loadoutButtonsY = lowres and 115 or 188
 				tab.loadoutPnl = tab:Add("DPanel")
 				tab.loadoutPnl:SetPos(64, tab.classPnl:GetY() + tab.classPnl:GetTall() + 8)
-				tab.loadoutPnl:SetSize(800, tab:GetTall() - tab.loadoutPnl:GetY() - tab.loadoutPnl:GetTall())
+				tab.loadoutPnl:SetSize(lowres and 500 or 800, tab:GetTall() - tab.loadoutPnl:GetY() - tab.loadoutPnl:GetTall())
 				tab.loadoutPnl.Paint = jcms.offgame_paint_LoadoutPanel
 				tab.loadoutPnl.gunStats = {}
 				tab.loadoutPnl.weaponButtons = {}
+				tab.loadoutPnl.lowres = lowres
 
 				tab.loadoutPnl.randomLoadout = tab.loadoutPnl:Add("DImageButton")
 				tab.loadoutPnl.randomLoadout:SetSize(24, 24)
 				tab.loadoutPnl.randomLoadout:SetImage("jcms/random.png")
-				tab.loadoutPnl.randomLoadout:SetPos(tab.loadoutPnl:GetWide()-24-8, 188 - 24)
+				tab.loadoutPnl.randomLoadout:SetPos(tab.loadoutPnl:GetWide()-24-8, loadoutButtonsY - 24)
 				tab.loadoutPnl.randomLoadout:SetStretchToFit(false)
 				function tab.loadoutPnl.randomLoadout:DoClick()
 					local weaponPool = {}
@@ -884,7 +900,7 @@ jcms.offgame = jcms.offgame or NULL
 				tab.loadoutPnl.clearLoadout = tab.loadoutPnl:Add("DButton")
 				tab.loadoutPnl.clearLoadout:SetSize(128, 24)
 				tab.loadoutPnl.clearLoadout:SetText("#jcms.clearloadout")
-				tab.loadoutPnl.clearLoadout:SetPos(tab.loadoutPnl.randomLoadout:GetX() - tab.loadoutPnl.clearLoadout:GetWide() - 8, 188 - 24)
+				tab.loadoutPnl.clearLoadout:SetPos(tab.loadoutPnl.randomLoadout:GetX() - tab.loadoutPnl.clearLoadout:GetWide() - 8, loadoutButtonsY - 24)
 				tab.loadoutPnl.clearLoadout.Paint = jcms.paint_ButtonFilled
 				function tab.loadoutPnl.clearLoadout:DoClick()
 					surface.PlaySound("items/ammocrate_close.wav")
@@ -897,7 +913,7 @@ jcms.offgame = jcms.offgame or NULL
 				tab.loadoutPnl.getExtraAmmo = tab.loadoutPnl:Add("DButton")
 				tab.loadoutPnl.getExtraAmmo:SetSize(128, 24)
 				tab.loadoutPnl.getExtraAmmo:SetText("#jcms.getextraammo")
-				tab.loadoutPnl.getExtraAmmo:SetPos(tab.loadoutPnl.clearLoadout:GetX() - tab.loadoutPnl.getExtraAmmo:GetWide() - 8, 188 - 24)
+				tab.loadoutPnl.getExtraAmmo:SetPos(tab.loadoutPnl.clearLoadout:GetX() - tab.loadoutPnl.getExtraAmmo:GetWide() - 8, loadoutButtonsY - 24)
 				tab.loadoutPnl.getExtraAmmo.Paint = jcms.paint_ButtonFilled
 				function tab.loadoutPnl.getExtraAmmo:DoClick()
 					surface.PlaySound("items/ammo_pickup.wav")
@@ -913,7 +929,7 @@ jcms.offgame = jcms.offgame or NULL
 				end
 
 				tab.loadoutPnl.shopScroller = tab.loadoutPnl:Add("DScrollPanel")
-				tab.loadoutPnl.shopScroller:SetPos(256, 270)
+				tab.loadoutPnl.shopScroller:SetPos(256, lowres and 180 or 270)
 				tab.loadoutPnl.shopScroller:SetSize(tab.loadoutPnl:GetWide() - 16 - tab.loadoutPnl.shopScroller:GetX(), tab.loadoutPnl:GetTall() - 16 - tab.loadoutPnl.shopScroller:GetY())
 				tab.loadoutPnl.shop = tab.loadoutPnl.shopScroller:Add("DListLayout")
 				tab.loadoutPnl.shop:SetPos(0, 0)
@@ -1080,7 +1096,7 @@ jcms.offgame = jcms.offgame or NULL
 						gunicos:DockPadding(0, 0, 0, 32)
 						bar:SetContents(gunicos)
 
-						local bsize = mini and 64 or 80
+						local bsize = lowres and 48 or (mini and 64 or 80)
 						for i, class in ipairs(categorizedGuns[ category ]) do
 							local wbtn = gunicos:Add("DButton")
 							wbtn:SetSize(bsize, bsize)
@@ -1106,7 +1122,7 @@ jcms.offgame = jcms.offgame or NULL
 
 				tab.loadoutPnl.sortComboBox = tab.loadoutPnl:Add("DComboBox")
 				tab.loadoutPnl.sortComboBox:SetSize(224 - 24 - 4, 24)
-				tab.loadoutPnl.sortComboBox:SetPos(16, 286 + 32)
+				tab.loadoutPnl.sortComboBox:SetPos(16, lowres and 160+32 or 286+32)
 				tab.loadoutPnl.sortComboBox:SetSortItems(false)
 				tab.loadoutPnl.sortComboBox:SetValue("#jcms.sortmode_name")
 				tab.loadoutPnl.sortComboBox:AddChoice("#jcms.sortmode_name", 1)
@@ -1134,7 +1150,7 @@ jcms.offgame = jcms.offgame or NULL
 
 				tab.loadoutPnl.categoryComboBox = tab.loadoutPnl:Add("DComboBox")
 				tab.loadoutPnl.categoryComboBox:SetSize(224, 24)
-				tab.loadoutPnl.categoryComboBox:SetPos(16, 286)
+				tab.loadoutPnl.categoryComboBox:SetPos(16, tab.loadoutPnl.sortComboBox:GetY() + tab.loadoutPnl.sortComboBox:GetTall() + 8)
 				tab.loadoutPnl.categoryComboBox:SetSortItems(false)
 				tab.loadoutPnl.categoryComboBox:SetValue("#jcms.catmode_default")
 				tab.loadoutPnl.categoryComboBox:AddChoice("#jcms.catmode_none", 0)
@@ -1171,17 +1187,20 @@ jcms.offgame = jcms.offgame or NULL
 		end
 
 		function jcms.offgame_BuildPersonalTab(tab)
+			local lowres = jcms.util_IsLowRes()
+			tab.lowres = lowres
 			tab.Paint = jcms.offgame_paint_PersonalTab
 
+			local avSize = lowres and 64 or 128
 			local av = tab:Add("AvatarImage")
-			av:SetPlayer( LocalPlayer(), 128 )
-			av:SetSize(128, 128)
+			av:SetPlayer( LocalPlayer(), avSize )
+			av:SetSize(avSize, avSize)
 			av:SetPos(64, 64)
 
 			-- Stats {{{
 				local stats = tab:Add("DPanel")
-				stats:SetPos(64, 208)
-				stats:SetSize(600, 340)
+				stats:SetPos(lowres and 24 or 64, lowres and 150 or 208)
+				stats:SetSize(600, lowres and 220 or 340)
 				stats.Paint = jcms.offgame_paint_PersonalPanel
 				stats.jText = "#jcms.stats"
 				stats.classFilter = nil
@@ -1373,8 +1392,8 @@ jcms.offgame = jcms.offgame or NULL
 
 			-- Achievements {{{
 				local achievs = tab:Add("DPanel")
-				achievs:SetPos(80, stats:GetY() + stats:GetTall() + 32)
-				achievs:SetSize(500, tab:GetTall() - achievs:GetY() - 32)
+				achievs:SetPos(lowres and 28 or 80, stats:GetY() + stats:GetTall() + (lowres and 8 or 32))
+				achievs:SetSize(500, tab:GetTall() - achievs:GetY() - (lowres and 8 or 32))
 				achievs.Paint = jcms.offgame_paint_PersonalPanel
 				achievs.jText = "#jcms.achievements"
 				local inner = achievs:Add("DPanel")
@@ -1436,10 +1455,13 @@ jcms.offgame = jcms.offgame or NULL
 		end
 
 		function jcms.offgame_BuildInfoTab(tab)
+			local lowres = jcms.util_IsLowRes()
+			tab.lowres = lowres
+
 			-- Credits {{{
 				local creditsContainer = tab:Add("DPanel")
 				creditsContainer:SetPos(64, 32)
-				creditsContainer:SetSize(700, 284)
+				creditsContainer:SetSize(lowres and 500 or 700, 284)
 				creditsContainer:SetPaintBackground(false)
 				creditsContainer.switchTime = 1
 				creditsContainer.switchInterval = 5
@@ -1474,7 +1496,7 @@ jcms.offgame = jcms.offgame or NULL
 				local devs = creditsContainer:Add("DPanel")
 				devs.Paint = jcms.offgame_paint_CreditsPanelDevs
 				devs:SetPos(0, 0)
-				devs:SetSize(700, creditsContainer:GetTall())
+				devs:SetSize(creditsContainer:GetWide(), creditsContainer:GetTall())
 				devs.baseX = devs:GetX()
 				devs.OnMousePressed = clickSwitch
 				
@@ -1488,6 +1510,7 @@ jcms.offgame = jcms.offgame or NULL
 				testers:SetSize(256, creditsContainer:GetTall())
 				testers.baseX = testers:GetX()
 				testers.OnMousePressed = clickSwitch
+				testers.lowres = lowres
 
 				local thanks = creditsContainer:Add("DPanel")
 				thanks.jText = "#jcms.credits_thanks"
@@ -1499,23 +1522,24 @@ jcms.offgame = jcms.offgame or NULL
 				thanks:SetSize(devs:GetWide() - testers:GetWide() - 8, testers:GetTall())
 				thanks.baseX = thanks:GetX()
 				thanks.OnMousePressed = clickSwitch
+				thanks.lowres = lowres
 			-- }}}
 
 			-- Social Media {{{
-				local socialmedia = jcms.offgame_CreateSocialPanel(tab, 64, tab:GetTall() - 128, 700, 128)
+				local socialmedia = jcms.offgame_CreateSocialPanel(tab, 64, tab:GetTall() - 128, lowres and 500 or 700, 128)
 			-- }}}
 
 			-- Other content {{{
 				local other = tab:Add("DPanel")
-				other:SetPos(72, creditsContainer:GetY() + creditsContainer:GetTall() + 8)
-				other:SetSize(700, socialmedia:GetY() - other:GetY() - 16)
+				other:SetPos(lowres and 32 or 72, creditsContainer:GetY() + creditsContainer:GetTall() + 8)
+				other:SetSize(lowres and 520 or 700, socialmedia:GetY() - other:GetY() - 16)
 				other.Paint = jcms.paint_Panel
 				other.jText = "#jcms.othercontent"
-				other.jFont = "jcms_big"
+				other.jFont = lowres and "jcms_medium" or "jcms_big"
 
 				local scroller = other:Add("DScrollPanel")
-				scroller:SetPos(24, 48)
-				scroller:SetSize(other:GetWide() - 48, other:GetTall() - 48 - 24)
+				scroller:SetPos(24, lowres and 32 or 48)
+				scroller:SetSize(other:GetWide() - 48, other:GetTall() - scroller:GetY() - (lowres and 12 or 24))
 				function scroller:Think()
 					if IsValid(self.VBar) then
 						self.VBar.Paint = BLANK_DRAW
@@ -1650,8 +1674,9 @@ jcms.offgame = jcms.offgame or NULL
 		end
 
 		function jcms.offgame_BuildCodexTab(tab)
+			local lowres = jcms.util_IsLowRes()
 			local listPanel = tab:Add("DPanel")
-			listPanel:SetSize(700, tab:GetTall() / 2.5 - 32)
+			listPanel:SetSize(lowres and 400 or 700, tab:GetTall() / 2.5 - 32)
 			listPanel:SetPos(32, tab:GetTall() - listPanel:GetTall() - 32)
 			listPanel.Paint = jcms.paint_Panel
 			listPanel.jText = "#jcms.codex"
@@ -1660,8 +1685,8 @@ jcms.offgame = jcms.offgame or NULL
 			scrollArea:SetSize(listPanel:GetWide() - 16, listPanel:GetTall() - 32 - 8)
 
 			local textArea = tab:Add("DPanel")
-			textArea:SetPos(64, 48)
-			textArea:SetWide(700)
+			textArea:SetPos(lowres and 24 or 64, 48)
+			textArea:SetWide(lowres and 500 or 700)
 			textArea:SetTall(listPanel:GetY() - textArea:GetY() - 24)
 			textArea.Paint = jcms.paint_Panel
 			textArea.jText = "#jcms.codex"
@@ -1780,9 +1805,11 @@ jcms.offgame = jcms.offgame or NULL
 		end
 
 		function jcms.offgame_BuildBestiaryTab(tab)
+			local lowres = jcms.util_IsLowRes()
+
 			local listPanel = tab:Add("DPanel")
-			listPanel:SetSize(220, tab:GetTall() - 64)
-			listPanel:SetPos(32, 32)
+			listPanel:SetSize(lowres and 128 or 220, tab:GetTall() - 64)
+			listPanel:SetPos(4, 32)
 			listPanel.Paint = jcms.paint_Panel
 			listPanel.jText = "#jcms.bestiary"
 			local scrollArea = listPanel:Add("DScrollPanel")
@@ -1790,8 +1817,8 @@ jcms.offgame = jcms.offgame or NULL
 			scrollArea:SetSize(listPanel:GetWide() - 16, listPanel:GetTall() - 32 - 8)
 			
 			local imageArea = tab:Add("DPanel")
-			imageArea:SetPos(220 + 32 + 16, 48)
-			imageArea:SetSize(500, 300)
+			imageArea:SetPos(listPanel:GetWide() + listPanel:GetX() + 16, 48)
+			imageArea:SetSize(lowres and 400 or 500, lowres and 250 or 300)
 			imageArea.Paint = BLANK_DRAW
 			imageArea.PaintOver = jcms.offgame_paint_BestiaryImageArea
 			imageArea.jText = "#jcms.bestiaryselectnpc"
@@ -1800,7 +1827,7 @@ jcms.offgame = jcms.offgame or NULL
 			imageArea.anim = 0
 			local model = imageArea:Add("DModelPanel")
 			model:SetPos(8, 8)
-			model:SetSize(380, imageArea:GetTall() - 16)
+			model:SetSize(lowres and 280 or 380, imageArea:GetTall() - 16)
 			model:SetCamPos( Vector(180, 180, 72) )
 			model:SetFOV(38)
 			function model:LayoutEntity(ent)
@@ -1816,8 +1843,9 @@ jcms.offgame = jcms.offgame or NULL
 			imageArea.modelPanel = model
 			local descArea = tab:Add("DPanel")
 			descArea:SetPos(imageArea:GetX() + 24, imageArea:GetY() + imageArea:GetTall() + 24)
-			descArea:SetSize(530, tab:GetTall() - descArea:GetTall() - descArea:GetY() - 32)
+			descArea:SetSize(lowres and 380 or 530, tab:GetTall() - descArea:GetTall() - descArea:GetY() - 32)
 			descArea.Paint = jcms.offgame_paint_BestiaryDescription
+			descArea.lowres = lowres
 
 			local factions = {}
 			local bestiaryData = {}
@@ -1906,7 +1934,7 @@ jcms.offgame = jcms.offgame or NULL
 				b:Dock(TOP)
 				b:DockMargin(0, 12, 0, 4)
 				b:SetEnabled(false)
-				b.jFont = "jcms_medium"
+				b.jFont = lowres and "jcms_small_bolder" or "jcms_medium"
 				b.Paint = jcms.paint_ButtonFilled
 
 				local entryNames = bestiaryData[ faction ]
@@ -1919,6 +1947,9 @@ jcms.offgame = jcms.offgame or NULL
 					b.entryName = entryName
 					b.DoClick = entryBtnFunc
 					b.Paint = jcms.paint_ButtonSmall
+					if lowres then
+						b.jFont = "DefaultSmall"
+					end
 				end
 			end
 
@@ -2770,13 +2801,16 @@ jcms.offgame = jcms.offgame or NULL
 
 	-- Post-mission screen {{{
 		function jcms.offgame_ShowPostMission(victory)
+			local lowres = jcms.util_IsLowRes()
 			local pnl = makeBasePanel(jcms.offgame_paint_PostMission)
 			pnl.victory = victory
 			pnl.allowSceneRender = true
+			pnl.lowres = lowres
 
 			pnl.statsPnl = pnl:Add("DPanel")
-			pnl.statsPnl:SetPos(48, ScrH())
-			pnl.statsPnl:SetSize(800, ScrH() - 72 - 48)
+			pnl.statsPnl:SetPos(lowres and 8 or 48, ScrH())
+			pnl.statsPnl:SetSize(lowres and 500 or 800, ScrH() - 72 - 48)
+			pnl.statsPnl.lowres = lowres
 
 			-- Header (Personal achievements) {{{
 				pnl.statsPnl.header = pnl.statsPnl:Add("DPanel")
@@ -2788,23 +2822,26 @@ jcms.offgame = jcms.offgame or NULL
 				pnl.statsPnl.header.victory = victory
 				pnl.statsPnl.header.missiontime = tonumber(jcms.aftergame.missionTime) or 0
 				pnl.statsPnl.header.Paint = jcms.offgame_paint_Header
-				pnl.statsPnl.header:SetSize(700, 238)
+				pnl.statsPnl.header:SetSize(lowres and 400 or 700, lowres and 170 or 238)
 				pnl.statsPnl.header:CenterHorizontal(0.5)
 
+				local avSize = lowres and 32 or 64
 				pnl.statsPnl.header.av = pnl.statsPnl.header:Add("AvatarImage")
-				pnl.statsPnl.header.av:SetPlayer(jcms.locPly, 64)
+				pnl.statsPnl.header.av:SetPlayer(jcms.locPly, avSize)
 				pnl.statsPnl.header.av:SetPos(16, 38)
-				pnl.statsPnl.header.av:SetSize(64, 64)
+				pnl.statsPnl.header.av:SetSize(avSize, avSize)
+				pnl.statsPnl.header.lowres = lowres
 			-- }}}
 
 			-- Level & EXP {{{
 				pnl.statsPnl.level = pnl.statsPnl:Add("DPanel")
 				pnl.statsPnl.level.victory = victory
 				pnl.statsPnl.level.Paint = jcms.offgame_paint_LvlUp
-				pnl.statsPnl.level:SetSize(672, 32)
-				pnl.statsPnl.level:SetY( pnl.statsPnl.header:GetY() + pnl.statsPnl.header:GetTall() + 16 - 64 )
+				pnl.statsPnl.level:SetSize(lowres and 350 or 672, lowres and 24 or 32)
+				pnl.statsPnl.level:SetY( pnl.statsPnl.header:GetY() + pnl.statsPnl.header:GetTall() + 16 - (lowres and 48 or 64) )
 				pnl.statsPnl.level:CenterHorizontal(0.5)
 				pnl.statsPnl.level.showDelay = 0.5
+				pnl.statsPnl.level.lowres = lowres
 				pnl.statsPnl.level.values = {
 					oldLevel = jcms.statistics.mylevel_premission,
 					oldExp = jcms.statistics.myexp_premission,
@@ -2817,22 +2854,24 @@ jcms.offgame = jcms.offgame or NULL
 				pnl.statsPnl.wincash = pnl.statsPnl:Add("DPanel")
 				pnl.statsPnl.wincash.victory = victory
 				pnl.statsPnl.wincash.Paint = jcms.offgame_paint_WinStreakAndCash
-				pnl.statsPnl.wincash:SetSize(800, 128)
+				pnl.statsPnl.wincash:SetSize(lowres and 500 or 800, lowres and 100 or 128)
 				pnl.statsPnl.wincash:SetY( pnl.statsPnl.header:GetY() + pnl.statsPnl.header:GetTall() + 16 )
 				pnl.statsPnl.wincash:CenterHorizontal(0.5)
 				pnl.statsPnl.wincash.showDelay = 2.1
+				pnl.statsPnl.wincash.lowres = lowres
 			-- }}}
 			
 			-- Map Voting {{{
 				pnl.statsPnl.voting = pnl.statsPnl:Add("DPanel")
 				pnl.statsPnl.voting.victory = victory
 				pnl.statsPnl.voting.Paint = jcms.offgame_paint_Voting
-				pnl.statsPnl.voting:SetWide(760)
+				pnl.statsPnl.voting:SetWide(lowres and 440 or 760)
 				pnl.statsPnl.voting:CenterHorizontal(0.5)
 				pnl.statsPnl.voting:SetY(pnl.statsPnl.wincash:GetY() + pnl.statsPnl.wincash:GetTall() + 16)
 				pnl.statsPnl.voting:SetTall( pnl.statsPnl:GetTall() - pnl.statsPnl.voting:GetY() )
 				pnl.statsPnl.voting.mapButtons = {}
 				pnl.statsPnl.voting.time = 0
+				pnl.statsPnl.voting.lowres = lowres
 
 				local voteFunc = function(btn)
 					jcms.net_SendVote(btn.mapname or game.GetMap())
@@ -2859,6 +2898,7 @@ jcms.offgame = jcms.offgame or NULL
 					mapButton.colorMain = victory and jcms.color_bright_alt
 					mapButton.DoClick = voteFunc
 					mapButton.Paint = jcms.paint_MapButton
+					mapButton.lowres = lowres
 					table.insert(pnl.statsPnl.voting.mapButtons, mapButton)
 				end
 			-- }}}
@@ -2866,12 +2906,13 @@ jcms.offgame = jcms.offgame or NULL
 			function pnl.statsPnl:Think()
 				self.voting.time = self.voting.time + FrameTime()
 
-				self:SetSize(800, ScrH() - 72 - 48)
+				self:SetSize(lowres and 500 or 800, ScrH() - 72 - 48)
 				self:SetY( ( ( (pnl.time or 0) > 3.6 and 72 or ScrH() ) + self:GetY()*5 ) / 6 )
 
-				self:CenterHorizontal(0.5)
 				if not game.SinglePlayer() then
-					self:SetX( math.max(0, self:GetX() - self:GetWide()/2 ) )
+					self:SetX( math.max(54, ScrW()/2 - self:GetWide() ) )
+				else
+					self:CenterHorizontal(0.5)
 				end
 				
 				local intendedVotingY = self.wincash:GetY() + self.wincash:GetTall() + 16
@@ -2937,8 +2978,9 @@ jcms.offgame = jcms.offgame or NULL
 			
 			if not game.SinglePlayer() then
 				pnl.multiPnl = pnl:Add("DPanel")
-				pnl.multiPnl:SetPos(848, ScrH())
-				pnl.multiPnl:SetSize(700, ScrH() - 72 - 48)
+				pnl.multiPnl:SetPos(lowres and 400 or 848, ScrH())
+				pnl.multiPnl:SetSize(lowres and 400 or 700, ScrH() - 72 - 48)
+				pnl.multiPnl.lowres = lowres
 
 				-- Leaderboards {{{
 					pnl.multiPnl.leaderboardSweeper = pnl.multiPnl:Add("DPanel")
@@ -2947,7 +2989,7 @@ jcms.offgame = jcms.offgame or NULL
 					pnl.multiPnl.leaderboardSweeper:SetSize(32, 32)
 					pnl.multiPnl.leaderboardSweeper.entries = {}
 					pnl.multiPnl.leaderboardSweeper.scrollArea = pnl.multiPnl.leaderboardSweeper:Add("DScrollPanel")
-					pnl.multiPnl.leaderboardSweeper.scrollArea:SetPos( 16, 48 )
+					pnl.multiPnl.leaderboardSweeper.scrollArea:SetPos( 16, lowres and 28 or 48 )
 
 					pnl.multiPnl.leaderboardNPC = pnl.multiPnl:Add("DPanel")
 					pnl.multiPnl.leaderboardNPC.victory = not victory
@@ -2955,7 +2997,7 @@ jcms.offgame = jcms.offgame or NULL
 					pnl.multiPnl.leaderboardNPC:SetSize(32, 32)
 					pnl.multiPnl.leaderboardNPC.entries = {}
 					pnl.multiPnl.leaderboardNPC.scrollArea = pnl.multiPnl.leaderboardNPC:Add("DScrollPanel")
-					pnl.multiPnl.leaderboardNPC.scrollArea:SetPos( 16, 48 )
+					pnl.multiPnl.leaderboardNPC.scrollArea:SetPos( 16, lowres and 28	 or 48 )
 
 					for i, pd in ipairs(jcms.aftergame.statistics) do
 						if pd.wasSweeper then
@@ -2979,7 +3021,10 @@ jcms.offgame = jcms.offgame or NULL
 						return totalFirst > totalLast
 					end)
 					
-					do -- Sweepers
+					if not lowres then -- Sweepers
+						local sizemul = 1
+						local iconsize = 24
+
 						local col = victory and jcms.color_bright_alt or jcms.color_bright
 						local colTransparent = ColorAlpha(col, 128)
 						local colBg = ColorAlpha(victory and jcms.color_dark_alt or jcms.color_dark, 100)
@@ -2996,32 +3041,32 @@ jcms.offgame = jcms.offgame or NULL
 						pnl.multiPnl.leaderboardSweeper.separatorsThick = { 160, 420, 540, (420+540)/2 }
 						pnl.multiPnl.leaderboardSweeper.separators = { 184 + spac, 184 + spac*2, 184 + spac*3 }
 						local ico_kills = pnl.multiPnl.leaderboardSweeper:Add("DImage")
-						ico_kills:SetSize(24, 24)
+						ico_kills:SetSize(iconsize, iconsize)
 						ico_kills:SetImage("jcms/kills.png")
 						ico_kills:SetImageColor(col)
 						ico_kills:SetPos(176, 16)
 						for i, category in ipairs { "direct", "defenses", "explosions" } do
 							local ico_c_kills = pnl.multiPnl.leaderboardSweeper:Add("DImage")
-							ico_c_kills:SetSize(24, 24)
+							ico_c_kills:SetSize(iconsize, iconsize)
 							ico_c_kills:SetImage("jcms/kills_" .. category .. ".png")
 							ico_c_kills:SetImageColor(colTransparent)
-							ico_c_kills:SetPos(184 + 18 + spac*i, 16)
+							ico_c_kills:SetPos((184 + 18) + spac*i, 16)
 						end
 
 						local ico_deaths = pnl.multiPnl.leaderboardSweeper:Add("DImage")
-						ico_deaths:SetSize(24, 24)
+						ico_deaths:SetSize(iconsize, iconsize)
 						ico_deaths:SetImage("jcms/deaths.png")
 						ico_deaths:SetImageColor(col)
 						ico_deaths:SetPos(436, 16)
 
 						local ico_ff = pnl.multiPnl.leaderboardSweeper:Add("DImage")
-						ico_ff:SetSize(24, 24)
+						ico_ff:SetSize(iconsize, iconsize)
 						ico_ff:SetImage("jcms/friendlyfire.png")
 						ico_ff:SetImageColor(colTransparent)
-						ico_ff:SetPos((420+540)/2 + 16, 16)
+						ico_ff:SetPos(((420+540)/2 + 16), 16)
 
 						local ico_orders = pnl.multiPnl.leaderboardSweeper:Add("DImage")
-						ico_orders:SetSize(24, 24)
+						ico_orders:SetSize(iconsize, iconsize)
 						ico_orders:SetImage("jcms/orders.png")
 						ico_orders:SetImageColor(colTransparent)
 						ico_orders:SetPos(564, 16)
@@ -3100,6 +3145,114 @@ jcms.offgame = jcms.offgame or NULL
 							orders_used:SetFont("jcms_small_bolder")
 							orders_used:SetTextColor(colTransparent)
 						end
+					else -- Sweepers, lowres
+						pnl.multiPnl.leaderboardSweeper.lowres = true
+						local iconsize = 16
+
+						local col = victory and jcms.color_bright_alt or jcms.color_bright
+						local colTransparent = ColorAlpha(col, 128)
+						local colBg = ColorAlpha(victory and jcms.color_dark_alt or jcms.color_dark, 100)
+
+						local label = pnl.multiPnl.leaderboardSweeper:Add("DLabel")
+						label:SetText("#jcms.as_sweeper")
+						label:SetWide(512)
+						label:SetTall(24)
+						label:SetPos(12, 0)
+						label:SetFont("jcms_small_bolder")
+						label:SetTextColor(col)
+
+						pnl.multiPnl.leaderboardSweeper.separatorsThick = { 160, 210, 260, 310 }
+
+						local ico_kills = pnl.multiPnl.leaderboardSweeper:Add("DImage")
+						ico_kills:SetSize(iconsize, iconsize)
+						ico_kills:SetImage("jcms/kills.png")
+						ico_kills:SetImageColor(col)
+						ico_kills:SetPos(178, 5)
+
+						local ico_deaths = pnl.multiPnl.leaderboardSweeper:Add("DImage")
+						ico_deaths:SetSize(iconsize, iconsize)
+						ico_deaths:SetImage("jcms/deaths.png")
+						ico_deaths:SetImageColor(col)
+						ico_deaths:SetPos(228, 5)
+
+						local ico_ff = pnl.multiPnl.leaderboardSweeper:Add("DImage")
+						ico_ff:SetSize(iconsize, iconsize)
+						ico_ff:SetImage("jcms/friendlyfire.png")
+						ico_ff:SetImageColor(colTransparent)
+						ico_ff:SetPos(278, 5)
+
+						local ico_orders = pnl.multiPnl.leaderboardSweeper:Add("DImage")
+						ico_orders:SetSize(iconsize, iconsize)
+						ico_orders:SetImage("jcms/orders.png")
+						ico_orders:SetImageColor(colTransparent)
+						ico_orders:SetPos(328, 5)
+
+						for i, pd in ipairs(pnl.multiPnl.leaderboardSweeper.entries) do
+							local entry = pnl.multiPnl.leaderboardSweeper.scrollArea:Add("DPanel")
+							entry:SetTall(18)
+							entry:Dock(TOP)
+							entry:SetBackgroundColor(colBg)
+							entry:DockMargin(0, 0, 0, 2)
+
+							if pd.evacuated then
+								local evac = entry:Add("DImage")
+								evac:Dock(RIGHT)
+								evac:DockMargin(0, 1, 0, 1)
+								evac:SetSize(16, 16)
+								evac:SetImage("jcms/landmarks/evac.png")
+								evac:SetImageColor(col)
+							end
+
+							local av = entry:Add("AvatarImage", 16)
+							av:SetSize(16, 16)
+							av:SetPos(0, 4)
+							if IsValid(pd.ply) then
+								av:SetPlayer(pd.ply)
+							end
+
+							local class = entry:Add("DImage")
+							class:SetPos(16, 4)
+							class:SetSize(16, 16)
+							class:SetImage("jcms/classes/" .. (pd.class or "infantry") .. ".png")
+							class:SetImageColor(col)
+
+							local name = entry:Add("DLabel")
+							name:SetText(pd.nickname)
+							name:SetPos(34, 0)
+							name:SetTall(24)
+							name:SetWide(120)
+							name:SetFont("DefaultSmall")
+							name:SetTextColor(colTransparent)
+
+							local totalKils = pd.kills_direct + pd.kills_defenses + pd.kills_explosions
+							local kills = entry:Add("DLabel")
+							kills:SetText(jcms.util_CashFormat(totalKils))
+							kills:SetPos(160, 0)
+							kills:SetTall(24)
+							kills:SetFont("DefaultSmall")
+							kills:SetTextColor(col)
+
+							local deaths = entry:Add("DLabel")
+							deaths:SetText(pd.deaths_sweeper)
+							deaths:SetPos(210, 0)
+							deaths:SetTall(24)
+							deaths:SetFont("DefaultSmall")
+							deaths:SetTextColor(col)
+
+							local friendlyfires = entry:Add("DLabel")
+							friendlyfires:SetText(pd.kills_friendly or 0)
+							friendlyfires:SetPos(260, 0)
+							friendlyfires:SetTall(24)
+							friendlyfires:SetFont("DefaultSmall")
+							friendlyfires:SetTextColor(colTransparent)
+
+							local orders_used = entry:Add("DLabel")
+							orders_used:SetText(pd.ordersUsedCounts)
+							orders_used:SetPos(310, 0)
+							orders_used:SetTall(24)
+							orders_used:SetFont("DefaultSmall")
+							orders_used:SetTextColor(colTransparent)
+						end
 					end
 
 					local areNpcsVisible = #pnl.multiPnl.leaderboardNPC.entries > 0
@@ -3108,101 +3261,173 @@ jcms.offgame = jcms.offgame or NULL
 						local col = victory and jcms.color_bright or jcms.color_bright_alt
 						local colTransparent = ColorAlpha(col, 128)
 						local colBg = ColorAlpha(victory and jcms.color_dark or jcms.color_dark_alt, 100)
+						
+						if not lowres then
+							local label = pnl.multiPnl.leaderboardNPC:Add("DLabel")
+							label:SetText("#jcms.as_npc")
+							label:SetWide(512)
+							label:SetTall(24)
+							label:SetPos(24, 12)
+							label:SetFont("jcms_medium")
+							label:SetTextColor(col)
 
-						local label = pnl.multiPnl.leaderboardNPC:Add("DLabel")
-						label:SetText("#jcms.as_npc")
-						label:SetWide(512)
-						label:SetTall(24)
-						label:SetPos(24, 12)
-						label:SetFont("jcms_medium")
-						label:SetTextColor(col)
+							local ico_kills = pnl.multiPnl.leaderboardNPC:Add("DImage")
+							ico_kills:SetSize(24, 24)
+							ico_kills:SetImage("jcms/kills.png")
+							ico_kills:SetImageColor(col)
+							ico_kills:SetPos(216, 16)
+							local label_deaths = pnl.multiPnl.leaderboardNPC:Add("DLabel")
+							label_deaths:SetText("#jcms.stats_kills_sweepers")
+							label_deaths:SetWide(512)
+							label_deaths:SetTall(24)
+							label_deaths:SetPos(216 + 32, 16)
+							label_deaths:SetTextColor(colTransparent)
 
-						local ico_kills = pnl.multiPnl.leaderboardNPC:Add("DImage")
-						ico_kills:SetSize(24, 24)
-						ico_kills:SetImage("jcms/kills.png")
-						ico_kills:SetImageColor(col)
-						ico_kills:SetPos(216, 16)
-						local label_deaths = pnl.multiPnl.leaderboardNPC:Add("DLabel")
-						label_deaths:SetText("#jcms.stats_kills_sweepers")
-						label_deaths:SetWide(512)
-						label_deaths:SetTall(24)
-						label_deaths:SetPos(216 + 32, 16)
-						label_deaths:SetTextColor(colTransparent)
+							local ico_turrets = pnl.multiPnl.leaderboardNPC:Add("DImage")
+							ico_turrets:SetSize(24, 24)
+							ico_turrets:SetImage("jcms/kills_defenses.png")
+							ico_turrets:SetImageColor(col)
+							ico_turrets:SetPos(346, 16)
+							local label_turrets = pnl.multiPnl.leaderboardNPC:Add("DLabel")
+							label_turrets:SetText("#jcms.stats_kills_turrets")
+							label_turrets:SetWide(512)
+							label_turrets:SetTall(24)
+							label_turrets:SetPos(346 + 32, 16)
+							label_turrets:SetTextColor(colTransparent)
 
-						local ico_turrets = pnl.multiPnl.leaderboardNPC:Add("DImage")
-						ico_turrets:SetSize(24, 24)
-						ico_turrets:SetImage("jcms/kills_defenses.png")
-						ico_turrets:SetImageColor(col)
-						ico_turrets:SetPos(346, 16)
-						local label_turrets = pnl.multiPnl.leaderboardNPC:Add("DLabel")
-						label_turrets:SetText("#jcms.stats_kills_turrets")
-						label_turrets:SetWide(512)
-						label_turrets:SetTall(24)
-						label_turrets:SetPos(346 + 32, 16)
-						label_turrets:SetTextColor(colTransparent)
+							local ico_deaths = pnl.multiPnl.leaderboardNPC:Add("DImage")
+							ico_deaths:SetSize(24, 24)
+							ico_deaths:SetImage("jcms/deaths.png")
+							ico_deaths:SetImageColor(col)
+							ico_deaths:SetPos(506, 16)
+							local label_deaths = pnl.multiPnl.leaderboardNPC:Add("DLabel")
+							label_deaths:SetText("#jcms.stats_deaths")
+							label_deaths:SetWide(512)
+							label_deaths:SetTall(24)
+							label_deaths:SetPos(506 + 32, 16)
+							label_deaths:SetTextColor(colTransparent)
 
-						local ico_deaths = pnl.multiPnl.leaderboardNPC:Add("DImage")
-						ico_deaths:SetSize(24, 24)
-						ico_deaths:SetImage("jcms/deaths.png")
-						ico_deaths:SetImageColor(col)
-						ico_deaths:SetPos(506, 16)
-						local label_deaths = pnl.multiPnl.leaderboardNPC:Add("DLabel")
-						label_deaths:SetText("#jcms.stats_deaths")
-						label_deaths:SetWide(512)
-						label_deaths:SetTall(24)
-						label_deaths:SetPos(506 + 32, 16)
-						label_deaths:SetTextColor(colTransparent)
+							pnl.multiPnl.leaderboardNPC.separatorsThick = { 200, 330, 490 }
 
-						pnl.multiPnl.leaderboardNPC.separatorsThick = { 200, 330, 490 }
+							for i, pd in ipairs(pnl.multiPnl.leaderboardNPC.entries) do
+								local entry = pnl.multiPnl.leaderboardNPC.scrollArea:Add("DPanel")
+								entry:SetTall(24)
+								entry:Dock(TOP)
+								entry:SetBackgroundColor(colBg)
+								entry:DockMargin(0, 0, 0, 2)
 
-						for i, pd in ipairs(pnl.multiPnl.leaderboardNPC.entries) do
-							local entry = pnl.multiPnl.leaderboardNPC.scrollArea:Add("DPanel")
-							entry:SetTall(24)
-							entry:Dock(TOP)
-							entry:SetBackgroundColor(colBg)
-							entry:DockMargin(0, 0, 0, 2)
+								local av = entry:Add("AvatarImage", 16)
+								av:SetSize(16, 16)
+								av:SetPos(4, 4)
+								if IsValid(pd.ply) then
+									av:SetPlayer(pd.ply)
+								end
 
-							local av = entry:Add("AvatarImage", 16)
-							av:SetSize(16, 16)
-							av:SetPos(4, 4)
-							if IsValid(pd.ply) then
-								av:SetPlayer(pd.ply)
+								local class = entry:Add("DImage")
+								class:SetPos(24, 4)
+								class:SetSize(16, 16)
+								class:SetImage("jcms/classes/" .. (pd.class or "infantry") .. ".png")
+								class:SetImageColor(col)
+
+								local name = entry:Add("DLabel")
+								name:SetText(pd.nickname)
+								name:SetPos(44, 0)
+								name:SetTall(24)
+								name:SetWide(120)
+								name:SetFont("jcms_small")
+								name:SetTextColor(colTransparent)
+
+								local kills = entry:Add("DLabel")
+								kills:SetText(jcms.util_CashFormat(pd.kills_sweepers))
+								kills:SetPos(200, 0)
+								kills:SetTall(24)
+								kills:SetFont("jcms_small_bolder")
+								kills:SetTextColor(col)
+
+								local turrets = entry:Add("DLabel")
+								turrets:SetText(jcms.util_CashFormat(pd.kills_turrets))
+								turrets:SetPos(330, 0)
+								turrets:SetTall(24)
+								turrets:SetFont("jcms_small_bolder")
+								turrets:SetTextColor(col)
+
+								local deaths = entry:Add("DLabel")
+								deaths:SetText(pd.deaths_npc)
+								deaths:SetPos(490, 0)
+								deaths:SetTall(24)
+								deaths:SetFont("jcms_small_bolder")
+								deaths:SetTextColor(col)
 							end
+						else
+							pnl.multiPnl.leaderboardNPC.lowres = true
 
-							local class = entry:Add("DImage")
-							class:SetPos(24, 4)
-							class:SetSize(16, 16)
-							class:SetImage("jcms/classes/" .. (pd.class or "infantry") .. ".png")
-							class:SetImageColor(col)
+							local label = pnl.multiPnl.leaderboardNPC:Add("DLabel")
+							label:SetText("#jcms.as_npc")
+							label:SetWide(512)
+							label:SetTall(24)
+							label:SetPos(12, 0)
+							label:SetFont("jcms_small_bolder")
+							label:SetTextColor(col)
 
-							local name = entry:Add("DLabel")
-							name:SetText(pd.nickname)
-							name:SetPos(44, 0)
-							name:SetTall(24)
-							name:SetWide(120)
-							name:SetFont("jcms_small")
-							name:SetTextColor(colTransparent)
+							pnl.multiPnl.leaderboardNPC.separatorsThick = { 110, 210, 310 }
 
-							local kills = entry:Add("DLabel")
-							kills:SetText(jcms.util_CashFormat(pd.kills_sweepers))
-							kills:SetPos(200, 0)
-							kills:SetTall(24)
-							kills:SetFont("jcms_small_bolder")
-							kills:SetTextColor(col)
+							local label_kills = pnl.multiPnl.leaderboardNPC:Add("DLabel")
+							label_kills:SetText("#jcms.stats_kills_sweepers")
+							label_kills:SetWide(512)
+							label_kills:SetTall(16)
+							label_kills:SetPos(120, 5)
+							label_kills:SetTextColor(colTransparent)
+							
+							local label_turrets = pnl.multiPnl.leaderboardNPC:Add("DLabel")
+							label_turrets:SetText("#jcms.stats_kills_turrets")
+							label_turrets:SetWide(512)
+							label_turrets:SetTall(16)
+							label_turrets:SetPos(220, 5)
+							label_turrets:SetTextColor(colTransparent)
 
-							local turrets = entry:Add("DLabel")
-							turrets:SetText(jcms.util_CashFormat(pd.kills_turrets))
-							turrets:SetPos(330, 0)
-							turrets:SetTall(24)
-							turrets:SetFont("jcms_small_bolder")
-							turrets:SetTextColor(col)
+							local label_deaths = pnl.multiPnl.leaderboardNPC:Add("DLabel")
+							label_deaths:SetText("#jcms.stats_deaths")
+							label_deaths:SetWide(512)
+							label_deaths:SetTall(16)
+							label_deaths:SetPos(320, 5)
+							label_deaths:SetTextColor(colTransparent)
 
-							local deaths = entry:Add("DLabel")
-							deaths:SetText(pd.deaths_npc)
-							deaths:SetPos(490, 0)
-							deaths:SetTall(24)
-							deaths:SetFont("jcms_small_bolder")
-							deaths:SetTextColor(col)
+							for i, pd in ipairs(pnl.multiPnl.leaderboardNPC.entries) do
+								local entry = pnl.multiPnl.leaderboardNPC.scrollArea:Add("DPanel")
+								entry:SetTall(18)
+								entry:Dock(TOP)
+								entry:SetBackgroundColor(colBg)
+								entry:DockMargin(0, 0, 0, 2)
+
+								local name = entry:Add("DLabel")
+								name:SetText(pd.nickname)
+								name:SetPos(0, 0)
+								name:SetTall(18)
+								name:SetWide(120)
+								name:SetFont("DefaultSmall")
+								name:SetTextColor(colTransparent)
+
+								local kills = entry:Add("DLabel")
+								kills:SetText(jcms.util_CashFormat(pd.kills_sweepers))
+								kills:SetPos(110, 0)
+								kills:SetTall(18)
+								kills:SetFont("DefaultSmall")
+								kills:SetTextColor(col)
+
+								local turrets = entry:Add("DLabel")
+								turrets:SetText(jcms.util_CashFormat(pd.kills_turrets))
+								turrets:SetPos(210, 0)
+								turrets:SetTall(18)
+								turrets:SetFont("DefaultSmall")
+								turrets:SetTextColor(col)
+
+								local deaths = entry:Add("DLabel")
+								deaths:SetText(pd.deaths_npc)
+								deaths:SetPos(310, 0)
+								deaths:SetTall(18)
+								deaths:SetFont("DefaultSmall")
+								deaths:SetTextColor(col)
+							end
 						end
 					end
 				-- }}}
@@ -3212,8 +3437,8 @@ jcms.offgame = jcms.offgame or NULL
 				-- }}}
 
 				function pnl.multiPnl:Think()
-					self:SetSize(700, ScrH() - 72 - 48)
-					self:SetX( pnl.statsPnl:GetX() + pnl.statsPnl:GetWide() + 32 )
+					self:SetSize(lowres and 450 or 700, ScrH() - 72 - 48)
+					self:SetX( pnl.statsPnl:GetX() + pnl.statsPnl:GetWide() + (lowres and 8 or 32) )
 					self:SetY( ( ( (pnl.time or 0) > 3.6 and 72 or ScrH() ) + self:GetY()*5 ) / 6 )
 
 					self.chatEntry:SetY(self:GetTall() - self.chatEntry:GetTall() - 24)

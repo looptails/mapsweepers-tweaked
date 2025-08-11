@@ -376,6 +376,7 @@
 	end
 
 	function jcms.paint_PlayerLobby(p, w, h)
+		local lowres = p.lowres
 		local ply = p.player
 		if IsValid(ply) then
 			local ready = ply:GetNWBool("jcms_ready")
@@ -403,7 +404,7 @@
 			drawHollowPolyButton(0, 8, w, h-8)
 
 			local av = p:GetChild(0)
-			jcms.hud_DrawStripedRect(av:GetX()-1, av:GetY()-1, av:GetWide()+2, av:GetTall()+2, 32, (CurTime()%1)*16)
+			jcms.hud_DrawStripedRect(av:GetX()-1, av:GetY()-1, av:GetWide()+2, av:GetTall()+2, av:GetTall(), (CurTime()%1)*16)
 			surface.DrawRect(av:GetX(), av:GetY() + av:GetTall() + 2, av:GetWide(), 1)
 
 			local baseX = av:GetX() + av:GetWide() + 4
@@ -412,8 +413,9 @@
 			if ply == LocalPlayer() then
 				drawFilledPolyButton(0, 8, 8, h-8)
 			end
-
-			draw.SimpleText(ply:Nick(), "jcms_small_bolder", baseX + 42, baseY + 4, jcms.color_bright)
+			
+			local iconSize = lowres and 16 or 32
+			draw.SimpleText(ply:Nick(), "jcms_small_bolder", baseX + iconSize + 10, baseY + 4, jcms.color_bright)
 
 			local desiredclass = ply:GetNWString("jcms_desiredclass", "")
 			local genuinely = true
@@ -427,7 +429,7 @@
 			surface.SetAlphaMultiplier(genuinely and 1 or 0.25)
 			surface.SetDrawColor(jcms.color_bright)
 			surface.SetAlphaMultiplier(1)
-			surface.DrawTexturedRect(baseX + 4, baseY + 4, 32, 32)
+			surface.DrawTexturedRect(baseX + 4, baseY + 4, iconSize, iconSize)
 
 			local col = Color( jcms.color_bright:Unpack() )
 			col.r = (col.r + 255)/2
@@ -437,33 +439,35 @@
 			local index = 0
 
 			local mx, my = p:LocalCursorPos()
-			local selectionIndex = (my >= 0 and my <= h) and math.floor( (mx - baseX - 150) / 36 ) or -1
+			local selectionIndex = (my >= 0 and my <= h) and math.floor( (mx - baseX - 150) / (iconSize+2) ) or -1
 			local selectionWeapon = nil
 
 			local weps = ply:GetWeapons()
 			for _, weapon in ipairs(weps) do
 				local class = weapon:GetClass()
 				if class == "weapon_stunstick" then continue end
+
+				local size = iconSize
+				local sizePad = size + 2
 				
 				if selectionIndex ~= index then
-					local size = 32
 					surface.SetDrawColor(jcms.color_pulsing)
-					jcms.hud_DrawNoiseRect(baseX + 150 + index*34, size - 22, size - 4, 24)
+					jcms.hud_DrawNoiseRect(baseX + 150 + index*sizePad, size - 22, size - 4, 24)
 
 					surface.SetDrawColor(jcms.color_bright)
-					surface.DrawRect(baseX + 150 + index*34, size + 8, size - 4, 1)
+					surface.DrawRect(baseX + 150 + index*sizePad, size + 8, size - 4, 1)
 					surface.SetMaterial(jcms.gunstats_GetMat(class))
-					surface.DrawTexturedRectRotated(baseX + 150 + index*34 + 4 + 16, size/2 + 4, size, size, 0)
+					surface.DrawTexturedRectRotated(baseX + 150 + index*sizePad + 4 + size/2, size/2 + 4, size, size, 0)
 					surface.SetDrawColor(col)
-					surface.DrawTexturedRectRotated(baseX + 150 + index*34 + 16, size/2, size, size, 0)
+					surface.DrawTexturedRectRotated(baseX + 150 + index*sizePad + size/2, size/2, size, size, 0)
 				else
 					selectionWeapon = weapon
 				end
 
 				index = index + 1
 
-				if (baseX + 150 + index*34) > w * 0.8 and weps[_+1] then
-					draw.SimpleTextOutlined("+", "jcms_hud_small", w * 0.8, h/2, jcms.color_bright, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, jcms.color_dark)
+				if (baseX + 150 + index*sizePad) > w * 0.8 and weps[_+1] then
+					draw.SimpleTextOutlined("+", "jcms_hud_small", w*0.8+iconSize, h/2, jcms.color_bright, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, jcms.color_dark)
 					break
 				end
 			end
@@ -471,12 +475,13 @@
 			if IsValid(selectionWeapon) then
 				local class = selectionWeapon:GetClass()
 
-				local size = 48
+				local sizePad = iconSize + 2
+				local size = iconSize*1.5
 				surface.SetMaterial(jcms.gunstats_GetMat(class))
 				surface.SetDrawColor(jcms.color_bright)
-				surface.DrawTexturedRectRotated(baseX + 150 + selectionIndex*34 + 4 + 16, size/2 + 4, size, size, 0)
+				surface.DrawTexturedRectRotated(baseX + 150 + selectionIndex*sizePad + 4 + sizePad/2, size/2 + 4, size, size, 0)
 				surface.SetDrawColor(color_white)
-				surface.DrawTexturedRectRotated(baseX + 150 + selectionIndex*34 + 16, size/2, size, size, 0)
+				surface.DrawTexturedRectRotated(baseX + 150 + selectionIndex*sizePad + sizePad/2, size/2, size, size, 0)
 
 				if p.gunStats then
 					if not p.gunStats[ class ] then
@@ -485,7 +490,7 @@
 
 					local stats = p.gunStats[ class ]
 					if stats then
-						draw.SimpleTextOutlined(stats.name, "jcms_small", baseX + 150 + selectionIndex*34 + 16, 1, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 1, jcms.color_dark)
+						draw.SimpleTextOutlined(stats.name, "jcms_small", baseX + 150 + selectionIndex*sizePad + sizePad/2, 1, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 1, jcms.color_dark)
 					end
 				end
 			end
@@ -808,6 +813,7 @@
 	end
 
 	function jcms.paint_MapButton(p, w, h)
+		local lowres = p.lowres
 		p.hovAnim = ((p.hovAnim or 0) * 6 + (p:IsHovered() and 1 or 0)) / 7
 		local anim = p.hovAnim
 		local oldState = DisableClipping(true)
@@ -880,6 +886,8 @@
 					end
 				end
 
+				local avatarSize = lowres and 16 or 32
+				local avatarSizePad = avatarSize + 2
 				local i = 0
 				local iForSubtraction = 0
 				local levelsOfSubtraction = 0
@@ -887,16 +895,16 @@
 					i = i + 1
 					if not p.avatars[ply] then
 						local av = p:Add("AvatarImage")
-						av:SetPlayer(ply, 32)
-						av:SetSize(32, 32)
+						av:SetPlayer(ply, avatarSize)
+						av:SetSize(avatarSize, avatarSize)
 						p.avatars[ply] = av
 					end
 
-					local avx, avy = x + p:GetWide() - (i - iForSubtraction)*34 - 12, y + p:GetTall() - 34*(levelsOfSubtraction+1) - 12
+					local avx, avy = x + p:GetWide() - (i - iForSubtraction)*avatarSizePad - 12, y + p:GetTall() - avatarSizePad*(levelsOfSubtraction+1) - 12
 					if avx < size + 24 then
 						iForSubtraction = i - 1
 						levelsOfSubtraction = levelsOfSubtraction + 1
-						avx, avy = x + p:GetWide() - (i - iForSubtraction)*34 - 12, y + p:GetTall() - 34*(levelsOfSubtraction+1) - 12
+						avx, avy = x + p:GetWide() - (i - iForSubtraction)*avatarSizePad - 12, y + p:GetTall() - avatarSizePad*(levelsOfSubtraction+1) - 12
 					end
 					p.avatars[ply]:SetPos(avx, avy)
 				end
@@ -929,6 +937,8 @@
 
 	-- Lobby {{{
 		function jcms.offgame_paint_LobbyFrame(p, w, h)
+			local lowres = jcms.util_IsLowRes()
+
 			jcms.statistics.mylevel_premission = jcms.statistics.mylevel
 			jcms.statistics.myexp_premission = jcms.statistics.myexp
 
@@ -937,7 +947,7 @@
 			local color_faded = ColorAlpha(jcms.color_bright, 100)
 			
 			local bx = 32
-			local bw = 180
+			local bw = lowres and 120 or 180
 			local bh = 32
 
 			surface.SetDrawColor(r2, g2, b2)
@@ -949,7 +959,7 @@
 				local selected = i == p.buttonsPrimary.selection
 				btn:SetSize(bw, selected and (bh + 8) or (bh - 4))
 				btn:SetPos(bx, 2)
-				btn.jFont = "jcms_medium"
+				btn.jFont = lowres and "jcms_small_bolder" or "jcms_medium"
 				btn.Paint = selected and jcms.paint_ButtonFilled or jcms.paint_Button
 
 				if not selected then
@@ -1002,7 +1012,7 @@
 					local xpad = 48
 					local ypad = 8
 
-					local mup = markup.Parse( ("<color=%d,%d,%d><font=jcms_missiondesc>\"" .. desc .. "\"</font></color>"):format(jcms.color_bright:Unpack()), math.max(520, tw + 48))
+					local mup = markup.Parse( ("<color=%d,%d,%d><font="..(lowres and "jcms_small" or "jcms_small")..">\"" .. desc .. "\"</font></color>"):format(jcms.color_bright:Unpack()), math.max(lowres and 300 or 520, tw + 48))
 					mup:Draw(w - 48, 100 + ypad + th + 36, TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP, 100, TEXT_ALIGN_RIGHT)
 
 					surface.SetDrawColor(jcms.color_pulsing)
@@ -1036,6 +1046,7 @@
 						local hoveredTag
 						local mx, my = input.GetCursorPos()
 						local tagy = 100 + th + mup:GetHeight() + 56
+						local tagSize = lowres and 16 or 32
 						if istable(missionData.tags) and #missionData.tags > 0 then
 							if not p.tagMats then
 								p.tagMats = {}
@@ -1046,19 +1057,19 @@
 									p.tagMats[ tag ] = Material("jcms/missiontags/" .. tostring(tag) .. ".png")
 								end
 
-								local tagx = w-48-42*i
+								local tagx = w-48-(tagSize+4)*i
 
 								surface.SetDrawColor(jcms.color_bright_alt)
 
 								if not hoveredTag and  mx >= tagx and my >= tagy and mx < tagx + 32 and my < tagy + 32 then
 									hoveredTag = tag
-									drawHollowPolyButton(tagx-3, tagy-3, 32+6, 32+6, 6)
+									drawHollowPolyButton(tagx-3, tagy-3, tagSize+6, tagSize+6, 6)
 								end
 
-								drawFilledPolyButton(tagx, tagy, 32, 32, 4)
+								drawFilledPolyButton(tagx, tagy, tagSize, tagSize, 4)
 								surface.SetMaterial(p.tagMats[tag])
 								surface.SetDrawColor(jcms.color_dark_alt)
-								surface.DrawTexturedRect(tagx, tagy, 32, 32)
+								surface.DrawTexturedRect(tagx, tagy, tagSize, tagSize)
 							end
 						end
 
@@ -1067,8 +1078,8 @@
 							local hoveredTagName = language.GetPhrase("jcms.missiontag_"..hoveredTag)
 							local hoveredTagDesc = language.GetPhrase("jcms.missiontag_"..hoveredTag.."_desc")
 
-							local lastTagX = w-48-42*#missionData.tags-32
-							local font = "jcms_medium"
+							local lastTagX = w-48-(tagSize+2)*#missionData.tags-32
+							local font = lowres and "jcms_small_bolder" or "jcms_medium"
 							surface.SetFont(font)
 							local tw2, th2 = surface.GetTextSize(hoveredTagName)
 							tw2 = tw2 + 32
@@ -1078,7 +1089,7 @@
 							surface.DrawRect(lastTagX, tagy, 2, th2)
 							surface.DrawRect(lastTagX-tw2-2, tagy, 2, th2)
 							draw.SimpleText(hoveredTagName, font, lastTagX-tw2/2, tagy+th2/2, jcms.color_bright_alt, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-							draw.SimpleText(hoveredTagDesc, "jcms_small", lastTagX, tagy+th2+4, ColorAlpha(jcms.color_bright_alt, 100), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
+							draw.SimpleText(hoveredTagDesc, lowres and "DefaultSmall" or "jcms_small", lastTagX, tagy+th2+4, ColorAlpha(jcms.color_bright_alt, 100), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
 						end
 					end
 				end
@@ -1092,9 +1103,9 @@
 			-- }}}
 
 			-- Main Panels {{{
-				local npcPanelY = 320
+				local npcPanelY = lowres and 270 or 320
 				if IsValid(p.plyPnlSweeper) then
-					p.plyPnlSweeper:SetPos(w - p.plyPnlSweeper:GetWide() - 16, 320)
+					p.plyPnlSweeper:SetPos(w - p.plyPnlSweeper:GetWide() - 16, npcPanelY)
 
 					local canvasHeight = p.plyPnlSweeper:GetCanvas():GetTall()
 					local overflow = canvasHeight > p.plyPnlSweeper:GetTall()
@@ -1223,30 +1234,33 @@
 		end
 
 		function jcms.offgame_paint_PersonalTab(p, w, h)
+			local lowres = p.lowres
+			local avSize = lowres and 64 or 128
 			local pad = 3
 
 			surface.SetDrawColor(jcms.color_pulsing)
-			jcms.hud_DrawStripedRect(64-pad, 64-pad, 128+pad*2, 128+pad*2, 32, CurTime()*8)
+			jcms.hud_DrawStripedRect(64-pad, 64-pad, avSize+pad*2, avSize+pad*2, 32, CurTime()*8)
 
 			surface.SetDrawColor(jcms.color_bright)
 			surface.DrawRect(64-pad, 64-pad, 72, 1)
-			surface.DrawRect(64-pad+8, 64-pad-2, 96, 1)
+			surface.DrawRect(64-pad+8, 64-pad-2, lowres and 48 or 96, 1)
 			surface.DrawRect(64-pad, 64-pad+1, 1, 48)
-			surface.DrawRect(128, 64+128+pad, 64, 1)
+			surface.DrawRect(avSize, 64+avSize+pad, 64, 1)
 
-			local profileX = 64 + 128 + 24
-			draw.SimpleText(LocalPlayer():Nick(), "jcms_hud_small", profileX, 72, jcms.color_bright)
+			local profileX = 64 + avSize + 24
+			local yOffset = lowres and -16 or 0
+			draw.SimpleText(LocalPlayer():Nick(), "jcms_hud_small", profileX, 72+yOffset, jcms.color_bright)
 
 			local level, exp = jcms.statistics_GetLevelAndEXP()
 			local nextLevelExp = jcms.statistics_GetEXPForNextLevel(level + 1)
 
 			surface.SetDrawColor(jcms.color_bright)
-			drawFilledPolyButton(profileX, 118, 64, 24)
-			drawHollowPolyButton(profileX + 64 + 8, 118, 256, 8, 4)
-			drawFilledPolyButton(profileX + 64 + 8, 118, 256*math.Clamp(exp/nextLevelExp, 0, 1), 8, 4)
+			drawFilledPolyButton(profileX, 118+yOffset, 64, 24)
+			drawHollowPolyButton(profileX + 64 + 8, 118+yOffset, 256, 8, 4)
+			drawFilledPolyButton(profileX + 64 + 8, 118+yOffset, 256*math.Clamp(exp/nextLevelExp, 0, 1), 8, 4)
 
-			draw.SimpleText(level, level >= 100000 and "jcms_small_bolder" or "jcms_medium", profileX + 32, 118 + 24/2, jcms.color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-			draw.SimpleText(("%d / %d"):format(exp, nextLevelExp), "jcms_small", profileX + 64 + 254, 118 + 12, jcms.color_bright, TEXT_ALIGN_RIGHT)
+			draw.SimpleText(level, level >= 100000 and "jcms_small_bolder" or "jcms_medium", profileX + 32, 118+yOffset + 24/2, jcms.color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			draw.SimpleText(("%d / %d"):format(exp, nextLevelExp), "jcms_small", profileX + 64 + 254, 118+yOffset + 12, jcms.color_bright, TEXT_ALIGN_RIGHT)
 		end
 
 		function jcms.offgame_paint_ClassPanel(p, w, h)
@@ -1256,44 +1270,70 @@
 			local myclass = LocalPlayer():GetNWString("jcms_desiredclass", "infantry")
 			local classData = jcms.classes[ myclass ]
 
-			local tw1 = draw.SimpleText("#jcms.class_" .. myclass, "jcms_hud_small", h + 8, 16, jcms.color_bright)
-			local tw2 = draw.SimpleText("#jcms.class_" .. myclass .. "_special", "jcms_medium", w - 32, 24, jcms.color_bright, TEXT_ALIGN_RIGHT)
+			if p.lowres then
+				local tw1 = draw.SimpleText("#jcms.class_" .. myclass, "jcms_medium", h + 8, 12, jcms.color_bright)
+				local tw2 = draw.SimpleText("#jcms.class_" .. myclass .. "_special", "jcms_small", w - 32, 16, jcms.color_bright, TEXT_ALIGN_RIGHT)
+			
+				local widthMul = (w - h*2 - 64 - 16)/200
+				local healthWidth = classData.health*widthMul
+				local armorWidth = classData.shield*widthMul
 
-			local widthMul = (w - h*2 - 64 - 16)/200
-			local healthWidth = classData.health*widthMul
-			local armorWidth = classData.shield*widthMul
+				surface.SetDrawColor(jcms.color_bright)
+				drawFilledPolyButton(h + 8, 36, healthWidth, 8, 4)
+				surface.SetDrawColor(jcms.color_bright_alt)
+				drawFilledPolyButton(h + 8, 36 + 10, armorWidth, 8, 4)
+				draw.SimpleText(classData.health, "DefaultVerySmall", h + 4, 36 + 4, jcms.color_bright, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+				draw.SimpleText(classData.shield, "DefaultVerySmall", h + 4, 36 + 14, jcms.color_bright_alt, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+				surface.SetAlphaMultiplier(0.5)
+				draw.SimpleText(language.GetPhrase("jcms.shieldregen"):format(classData.shieldRegen, classData.shieldDelay), "DefaultVerySmall", h, 36+20, jcms.color_bright_alt)
+				surface.SetAlphaMultiplier(1)
 
-			surface.SetDrawColor(jcms.color_bright)
-			drawFilledPolyButton(h + 8, 58, healthWidth, 18)
-			surface.SetDrawColor(jcms.color_bright_alt)
-			drawFilledPolyButton(h + 8, 58 + 20, armorWidth, 18)
-			draw.SimpleText(classData.health, "jcms_medium", h + 16, 58 + 9, jcms.color_dark, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
-			draw.SimpleText(classData.shield, "jcms_medium", h + 16, 58 + 20 + 9, jcms.color_dark_alt, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
-			surface.SetAlphaMultiplier(0.5)
-			draw.SimpleText(language.GetPhrase("jcms.shieldregen"):format(classData.shieldRegen, classData.shieldDelay), "jcms_small", h + 16, 58 + 42, jcms.color_bright_alt)
-			surface.SetAlphaMultiplier(1)
+				local xpos = h + 8 + tw1 + 8
+				surface.SetDrawColor(jcms.color_bright)
+				jcms.hud_DrawNoiseRect(xpos, 22, w - 32 - tw2 - xpos - 8, 1)
+				local mup = markup.Parse( ("<color=%d,%d,%d><font=DefaultVerySmall>• "):format( jcms.color_bright:Unpack() ) .. language.GetPhrase("jcms.class_" .. myclass .. "_desc"):gsub("\n", "\n• "), h + 96)
+				mup:Draw(w - h - 64 - 32, 34, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP, 200, TEXT_ALIGN_LEFT)
+			else
+				local tw1 = draw.SimpleText("#jcms.class_" .. myclass, "jcms_hud_small", h + 8, 16, jcms.color_bright)
+				local tw2 = draw.SimpleText("#jcms.class_" .. myclass .. "_special", "jcms_medium", w - 32, 24, jcms.color_bright, TEXT_ALIGN_RIGHT)
 
-			local xpos = h + 8 + tw1 + 8
-			surface.SetDrawColor(jcms.color_bright)
-			jcms.hud_DrawNoiseRect(xpos, 34, w - 32 - tw2 - xpos - 8, 1)
-			local mup = markup.Parse( ("<color=%d,%d,%d><font=jcms_small>• "):format( jcms.color_bright:Unpack() ) .. language.GetPhrase("jcms.class_" .. myclass .. "_desc"):gsub("\n", "\n• "), h + 64)
-			mup:Draw(w - h - 64 - 32, 54, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP, 200, TEXT_ALIGN_LEFT)
+				local widthMul = (w - h*2 - 64 - 16)/200
+				local healthWidth = classData.health*widthMul
+				local armorWidth = classData.shield*widthMul
+
+				surface.SetDrawColor(jcms.color_bright)
+				drawFilledPolyButton(h + 8, 58, healthWidth, 18)
+				surface.SetDrawColor(jcms.color_bright_alt)
+				drawFilledPolyButton(h + 8, 58 + 20, armorWidth, 18)
+				draw.SimpleText(classData.health, "jcms_medium", h + 16, 58 + 9, jcms.color_dark, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+				draw.SimpleText(classData.shield, "jcms_medium", h + 16, 58 + 20 + 9, jcms.color_dark_alt, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+				surface.SetAlphaMultiplier(0.5)
+				draw.SimpleText(language.GetPhrase("jcms.shieldregen"):format(classData.shieldRegen, classData.shieldDelay), "jcms_small", h + 16, 58 + 42, jcms.color_bright_alt)
+				surface.SetAlphaMultiplier(1)
+
+				local xpos = h + 8 + tw1 + 8
+				surface.SetDrawColor(jcms.color_bright)
+				jcms.hud_DrawNoiseRect(xpos, 34, w - 32 - tw2 - xpos - 8, 1)
+				local mup = markup.Parse( ("<color=%d,%d,%d><font=jcms_small>• "):format( jcms.color_bright:Unpack() ) .. language.GetPhrase("jcms.class_" .. myclass .. "_desc"):gsub("\n", "\n• "), h + 64)
+				mup:Draw(w - h - 64 - 32, 54, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP, 200, TEXT_ALIGN_LEFT)
+			end
 		end
 
 		function jcms.offgame_paint_LoadoutPanel(p, w, h)
-			local y1 = 164 + 32 + 8
+			local lowres = p.lowres
+			local y1 = lowres and 128 or 164 + 32 + 8
 			surface.SetDrawColor(jcms.color_bright)
-			drawHollowPolyButton(0, 0, w, 164 + 32, 8)
+			drawHollowPolyButton(0, 0, w, y1-8, 8)
 			drawHollowPolyButton(0, y1, w, h - y1, 8)
 
-			draw.SimpleText("#jcms.loadout", "jcms_hud_small", 24, 8, jcms.color_bright)
+			draw.SimpleText("#jcms.loadout", lowres and "jcms_medium" or "jcms_hud_small", 24, 8, jcms.color_bright)
 			surface.SetAlphaMultiplier(0.5)
-			draw.SimpleText("#jcms.loadout_tip", "jcms_small", 24, 42, jcms.color_bright)
+			draw.SimpleText("#jcms.loadout_tip", lowres and "DefaultVerySmall" or "jcms_small", 24, lowres and 30 or 42, jcms.color_bright)
 			surface.SetAlphaMultiplier(1)
 
-			draw.SimpleText("#jcms.shop", "jcms_hud_small", 24, y1 + 8, jcms.color_bright)
+			draw.SimpleText("#jcms.shop", lowres and "jcms_medium" or "jcms_hud_small", 24, y1 + 8, jcms.color_bright)
 			surface.SetAlphaMultiplier(0.5)
-			draw.SimpleText("#jcms.shop_tip", "jcms_small", 24, y1 + 42, jcms.color_bright)
+			draw.SimpleText("#jcms.shop_tip", lowres and "DefaultVerySmall" or "jcms_small", 24, y1 + (lowres and 30 or 42), jcms.color_bright)
 			surface.SetAlphaMultiplier(1)
 			
 			local loadoutCost = LocalPlayer():GetNWInt("jcms_pendingLoadoutCost", 0)
@@ -1334,14 +1374,14 @@
 
 				local myweapons = LocalPlayer():GetWeapons()
 				local mini = h <= 600
-				local bsize = mini and 64 or 80
+				local bsize = lowres and 38 or (mini and 64 or 80)
 				local fitMul = math.min(1, (w - 48) / #myweapons / (bsize+4))
 				for i, wep in ipairs(myweapons) do
 					local class = wep:GetClass()
 
 					local wbtn = p:Add("DButton")
 					wbtn:SetSize(bsize*fitMul, bsize)
-					wbtn:SetPos(24 + (bsize*fitMul+4)*(i-1), 64 + (mini and 12 or 4))
+					wbtn:SetPos(24 + (bsize*fitMul+4)*(i-1), lowres and 50 or (64 + (mini and 12 or 4)))
 					wbtn.Paint = jcms.paint_Gun
 					wbtn.DoClick = wbtnClick
 					wbtn.gunSale = jcms.util_GetLobbyWeaponCostMultiplier()
@@ -1365,7 +1405,7 @@
 
 			local hoveredElement = vgui.GetHoveredPanel()
 			if IsValid(hoveredElement) and hoveredElement.gunClass then
-				local y = 270 + 8
+				local y = lowres and 188 or 278
 				local class = hoveredElement.gunClass
 				local stats = hoveredElement.gunStats
 
@@ -1476,7 +1516,11 @@
 			else
 				surface.SetAlphaMultiplier(0.3)
 				surface.SetDrawColor(jcms.color_bright)
-				jcms.hud_DrawNoiseRect(16, 270 + 8, 256 - 24, h - 270 - 8 - 16, 128)
+				if lowres then
+					jcms.hud_DrawNoiseRect(16, 172 + 8, 256 - 24, h - 172 - 8 - 16, 128)
+				else
+					jcms.hud_DrawNoiseRect(16, 270 + 8, 256 - 24, h - 270 - 8 - 16, 128)
+				end
 				surface.SetAlphaMultiplier(1)
 
 				if IsValid(p.categoryComboBox) then
@@ -1562,6 +1606,11 @@
 			local rows = math.ceil( #people / columns )
 			local col, row = 0, 1
 
+			local font, spacing = "jcms_small_bolder", 16
+			if p.lowres then
+				font, spacing = "DefaultSmall", 16
+			end
+
 			for i, person in ipairs(people) do
 				col = col + 1
 				if col > columns then
@@ -1569,7 +1618,7 @@
 					row = row + 1
 				end
 
-				draw.SimpleText(person, "jcms_small_bolder", col * w/(columns+1), 24 + row*16, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+				draw.SimpleText(person, font, col * w/(columns+1), 24 + row*spacing, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
 			end
 		end
 
@@ -1813,9 +1862,11 @@
 		end
 
 		function jcms.offgame_paint_BestiaryDescription(p, w, h)
+			local lowres = p.lowres
+
 			if p.jText and not p.markup then
 				local col = jcms.color_bright
-				p.markup = markup.Parse(("<color=%d, %d, %d><font=jcms_small_bolder>\t"):format(col:Unpack()) .. p.jText, w - 64)
+				p.markup = markup.Parse(("<color=%d, %d, %d><font="..(lowres and "DefaultSmall" or "jcms_small_bolder")..">\t"):format(col:Unpack()) .. p.jText, w - 64)
 			end
 
 			if p.name then
@@ -1871,6 +1922,7 @@
 
 	-- Post-mission {{{
 		function jcms.offgame_paint_PostMission(p, w, h)
+			local lowres = p.lowres
 			p.time = (p.time or 0) + FrameTime()
 			p.allowSceneRender = p.time <= 3.5
 			
@@ -1953,7 +2005,7 @@
 					jcms.hud_DrawStripedRect(w/2+tw/2+32, 32-th/2+8, w/2-tw/2-64, 16, 24)
 					
 					surface.SetAlphaMultiplier(f*0.3)
-					draw.SimpleText(bottomline, "jcms_small", w/2, h-16, color1, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
+					draw.SimpleText(bottomline, lowres and "DefaultSmall" or "jcms_small", w/2, h-16, color1, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
 					
 					surface.SetAlphaMultiplier(1)
 					drawScanlines(w,h,r2,g2,b2)
@@ -2014,7 +2066,7 @@
 						jcms.hud_DrawStripedRect(w/2+tw/2+32, 32-th/2+8, w/2-tw/2-64, 16, 24)
 						
 						surface.SetAlphaMultiplier(f*0.3)
-						draw.SimpleText(bottomline, "jcms_small", w/2, h-16, jcms.color_bright_alt, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
+						draw.SimpleText(bottomline, lowres and "DefaultSmall" or "jcms_small", w/2, h-16, jcms.color_bright_alt, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
 						
 						surface.SetAlphaMultiplier(1)
 						drawScanlines(w,h,r2,g2,b2)
@@ -2100,7 +2152,7 @@
 						func(w/2+tw/2+32, 32-th/2+8, w/2-tw/2-64, 16, 24)
 						
 						surface.SetAlphaMultiplier(f*0.3)
-						draw.SimpleText(bottomline, "jcms_small", w/2, h-16, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
+						draw.SimpleText(bottomline, lowres and "DefaultSmall" or "jcms_small", w/2, h-16, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
 						surface.SetAlphaMultiplier(1)
 						drawScanlines(w,h,r2,g2,b2)
 
@@ -2130,13 +2182,14 @@
 		end
 
 		function jcms.offgame_paint_Header(p, w, h)
+			local lowres = p.lowres
 			local col = p.victory and jcms.color_bright_alt or jcms.color_bright
 			local colPulsing = ColorAlpha(col, jcms.color_pulsing.a)
 
 			local missiontime = p.missiontime
 			local time = string.FormattedTime(missiontime)
 			local formatted = string.format("%02i:%02i:%02i", time.h, time.m, time.s)
-			draw.SimpleText(formatted, "jcms_big", w-32, 64, col, TEXT_ALIGN_RIGHT, nil)
+			draw.SimpleText(formatted, lowres and "jcms_medium" or "jcms_big", lowres and w-8 or w-32, lowres and 52 or 64, col, TEXT_ALIGN_RIGHT, nil)
 
 			surface.SetDrawColor(colPulsing)
 			drawHollowPolyButton(0, 50, w, h-50)
@@ -2148,9 +2201,10 @@
 			end
 
 			if p.stats then
-				draw.SimpleText(p.stats.nickname, "jcms_big", 96, 64, col)
+				draw.SimpleText(p.stats.nickname, lowres and "jcms_medium" or "jcms_big", lowres and 54 or 96, lowres and 52 or 64, col)
 				
-				local globalX = 22
+				local globalX = lowres and 8 or 22
+				local iconSize = lowres and 24 or 64
 				if p.stats.wasSweeper then
 					if IsValid( p.stats.ply ) then
 						local tgclass = p.stats.ply:GetNWString("jcms_class", "infantry")
@@ -2168,33 +2222,35 @@
 						if classmat and not classmat:IsError() then
 							surface.SetMaterial(classmat)
 							surface.SetDrawColor(col)
-							surface.DrawTexturedRect(globalX + 4, 114, 64, 64)
+							surface.DrawTexturedRect(globalX + 4, lowres and 84 or 114, iconSize, iconSize)
 						end
 					end
 
 					surface.SetDrawColor(colPulsing)
-					if p.stats.wasNPC then
+					if p.stats.wasNPC and not lowres then
 						drawHollowPolyButton(globalX, 110, 340, 72)
 					end
-					local x, y = globalX + 64 + 8, 114
-					draw.SimpleText(("%s: %d"):format(language.GetPhrase("#jcms.stats_deaths"), p.stats.deaths_sweeper or 0), "jcms_small", x, y + 16, col)
-					draw.SimpleText(("%s: %d"):format(language.GetPhrase("#jcms.stats_orders"), p.stats.ordersUsedCounts or 0), "jcms_small", x, y + 32, col)
-					x = x + 132
-					surface.DrawRect(x - 12, y + 4, 1, 64 - 8)
+					local x, y = globalX + (lowres and 24 or 64) + 8, lowres and 75 or 114
+					local font = lowres and "DefaultSmall" or "jcms_small"
+					local spacing = lowres and 10 or 16
+					draw.SimpleText(("%s: %d"):format(language.GetPhrase("#jcms.stats_deaths"), p.stats.deaths_sweeper or 0), font, x, y + spacing, col)
+					draw.SimpleText(("%s: %d"):format(language.GetPhrase("#jcms.stats_orders"), p.stats.ordersUsedCounts or 0), font, x, y + spacing*2, col)
+					x = x + (lowres and 96 or 132)
+					surface.DrawRect(x - 12, y + 4, 1, (lowres and 46 or 64) - 8)
 					local totalKills = p.stats.kills_direct + p.stats.kills_defenses + p.stats.kills_explosions
-					draw.SimpleText(("%s: %s"):format(language.GetPhrase("#jcms.stats_kills"), jcms.util_CashFormat(totalKills)), "jcms_small", x, y, col)
-					draw.SimpleText(("%s: %s"):format(language.GetPhrase("#jcms.stats_kills_direct"), jcms.util_CashFormat(p.stats.kills_direct)), "jcms_small", x + 4, y + 16, colPulsing)
-					draw.SimpleText(("%s: %s"):format(language.GetPhrase("#jcms.stats_kills_defenses"), jcms.util_CashFormat(p.stats.kills_defenses)), "jcms_small", x + 4, y + 32, colPulsing)
-					draw.SimpleText(("%s: %s"):format(language.GetPhrase("#jcms.stats_kills_explosions"), jcms.util_CashFormat(p.stats.kills_explosions)), "jcms_small", x + 4, y + 48, colPulsing)
-					globalX = globalX + 340 + 8
+					draw.SimpleText(("%s: %s"):format(language.GetPhrase("#jcms.stats_kills"), jcms.util_CashFormat(totalKills)), font, x, y, col)
+					draw.SimpleText(("%s: %s"):format(language.GetPhrase("#jcms.stats_kills_direct"), jcms.util_CashFormat(p.stats.kills_direct)), font, x + 4, y + spacing, colPulsing)
+					draw.SimpleText(("%s: %s"):format(language.GetPhrase("#jcms.stats_kills_defenses"), jcms.util_CashFormat(p.stats.kills_defenses)), font, x + 4, y + spacing*2, colPulsing)
+					draw.SimpleText(("%s: %s"):format(language.GetPhrase("#jcms.stats_kills_explosions"), jcms.util_CashFormat(p.stats.kills_explosions)), font, x + 4, y + spacing*3, colPulsing)
+					globalX = globalX + (lowres and 200 or 340) + 8
 				end
 				
 				if p.stats.wasNPC then
 					surface.SetDrawColor(colPulsing)
-					if p.stats.wasSweeper then
+					if p.stats.wasSweeper and not lowres then
 						drawHollowPolyButton(globalX, 110, 304, 72)
 					end
-					local x, y = globalX + 64 + 8, 114
+					local x, y = globalX + (lowres and 24 or 64) + 8, lowres and 75 or 114
 
 					if not p.factionMat then
 						p.factionMat = Material("jcms/factions/" .. jcms.util_GetMissionFaction() .. ".png")
@@ -2203,19 +2259,23 @@
 					if p.factionMat and not p.factionMat:IsError() then
 						surface.SetMaterial(p.factionMat)
 						surface.SetDrawColor(col)
-						surface.DrawTexturedRect(globalX + 4, 114, 64, 64)
-						draw.SimpleText(("%s: %d"):format(language.GetPhrase("#jcms.stats_deaths"), p.stats.deaths_npc or 0), "jcms_small", x, y + 32, col, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+						surface.DrawTexturedRect(globalX + 4, lowres and 84 or 114, iconSize, iconSize)
+						local font = lowres and "DefaultSmall" or "jcms_small"
+						local spacing = lowres and 10 or 16
+						draw.SimpleText(("%s: %d"):format(language.GetPhrase("#jcms.stats_deaths"), p.stats.deaths_npc or 0), font, x, y + spacing*2, col, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
 						
-						x = x + 86
-						surface.DrawRect(x - 12, y + 4, 1, 64 - 8)
-						draw.SimpleText(("%s: %d"):format(language.GetPhrase("#jcms.stats_kills_sweepers"), p.stats.kills_sweepers or 0), "jcms_small", x, y + 12, col)
-						draw.SimpleText(("%s: %d"):format(language.GetPhrase("#jcms.stats_kills_turrets"), p.stats.kills_turrets or 0), "jcms_small", x, y + 38, col)
+						x = x + (lowres and 68 or 86)
+						surface.DrawRect(x - 12, y + 4, 1, (lowres and 46 or 64) - 8)
+						draw.SimpleText(("%s: %d"):format(language.GetPhrase("#jcms.stats_kills_sweepers"), p.stats.kills_sweepers or 0), font, x, y + spacing*0.5, col)
+						draw.SimpleText(("%s: %d"):format(language.GetPhrase("#jcms.stats_kills_turrets"), p.stats.kills_turrets or 0), font, x, y + spacing*2.5, col)
 					end
 				end
 			end
 		end
 		
 		function jcms.offgame_paint_LvlUp(p, w, h)
+			local lowres = p.lowres
+			
 			p.time = (p.time or 0) + FrameTime()
 			p.colorAnim = (p.colorAnim or 0) * 0.95
 
@@ -2260,11 +2320,11 @@
 					local levelPlateWidth = h*2
 					surface.SetDrawColor(color)
 					drawFilledPolyButton(0, 0, levelPlateWidth, h, 8)
-					draw.SimpleText(animatedLevel, "jcms_medium", h, h/2, jcms.color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+					draw.SimpleText(animatedLevel, lowres and "jcms_small_bolder" or "jcms_medium", h, h/2, jcms.color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 					drawFilledPolyButton(levelPlateWidth + 8, h*2/3, (w-levelPlateWidth-8) * (animatedExp / forNextLevel), h/3, 4)
 					drawHollowPolyButton(levelPlateWidth + 8, h*2/3, w-levelPlateWidth-8, h/3, 4)
-					draw.SimpleText( ("%s / %s EXP"):format(jcms.util_CashFormat(animatedExp), jcms.util_CashFormat(forNextLevel)), "jcms_small_bolder", levelPlateWidth + 16, h*2/3 - 6, color, TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM)
-					draw.SimpleText( ("LVL %d ➞ %d"):format(values.oldLevel, values.newLevel), "jcms_small", w - 16, h*2/3 - 6, color, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM)
+					draw.SimpleText( ("%s / %s EXP"):format(jcms.util_CashFormat(animatedExp), jcms.util_CashFormat(forNextLevel)), lowres and "DefaultSmall" or "jcms_small_bolder", levelPlateWidth + 16, h*2/3 - 6, color, TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM)
+					draw.SimpleText( ("LVL %d ➞ %d"):format(values.oldLevel, values.newLevel), lowres and "DefaultSmall" or "jcms_small", w - 16, h*2/3 - 6, color, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM)
 				
 					render.OverrideBlend( true, BLEND_SRC_ALPHA, BLEND_ONE, BLENDFUNC_ADD )
 						DisableClipping(true)
@@ -2280,6 +2340,7 @@
 		end
 
 		function jcms.offgame_paint_WinStreakAndCash(p, w, h)
+			local lowres = p.lowres
 			local col = p.victory and jcms.color_bright_alt or jcms.color_bright
 			local colAlt = p.victory and jcms.color_bright or jcms.color_bright_alt
 			local colPulsing = ColorAlpha(col, jcms.color_pulsing.a)
@@ -2292,24 +2353,28 @@
 				EmitSound("friends/friend_join.wav", EyePos(), -2, CHAN_AUTO, 1, 75, 0, 60)
 			end
 
+			local winstreakWidth = lowres and 100 or 172
 			if alpha > 0 then
 				surface.SetAlphaMultiplier(alpha)
 				surface.SetDrawColor(colPulsing)
 				drawHollowPolyButton(-1, 0, w+2, h, 16)
+				local plaqueWidth = lowres and 100 or 150
+				local plaqueFontOutside = lowres and "DefaultSmall" or "jcms_small_bolder"
+				local plaqueFontInside = lowres and "jcms_small_bolder" or "jcms_medium"
 
 				-- Cash {{{
 				local stages = jcms.aftergame_bonuses
 				if stages and #stages > 0 then
 					local startingCash = jcms.aftergame_bonuses.oldCash or 0
 					local endingCash = jcms.aftergame_bonuses.newCash or 0
-					draw.SimpleText("#jcms.cashhud_old", "jcms_small_bolder", 172 + 24 + 150/2, 12, colPulsing, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+					draw.SimpleText("#jcms.cashhud_old", plaqueFontOutside, winstreakWidth + 24 + plaqueWidth/2, 12, colPulsing, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
 
 					surface.SetDrawColor(col)
-					drawHollowPolyButton(172 + 24, 32, 150, 24)
-					draw.SimpleText(jcms.util_CashFormat(startingCash) .. " J", "jcms_medium", 172 + 24 + 150/2, 32 + 24/2, col, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+					drawHollowPolyButton(winstreakWidth + 24, 32, plaqueWidth, 24)
+					draw.SimpleText(jcms.util_CashFormat(startingCash) .. " J", plaqueFontInside, winstreakWidth + 24 + plaqueWidth/2, 32 + 24/2, col, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 					surface.SetDrawColor(colPulsing)
 
-					local x1, x2 = 172 + 24 + 32, w - 24 - 32
+					local x1, x2 = winstreakWidth + 24 + 32, w - 24 - 32
 					surface.DrawRect(x1, 32 + 24 + 4, 1, 12)
 					for i, stage in ipairs(stages) do
 						local stageAlpha = math.Clamp((p.time - p.showDelay - i*0.3)*2, 0, 1)
@@ -2324,8 +2389,13 @@
 						end
 						
 						local str = language.GetPhrase("jcms.reward_" .. stage.name):format(stage.format)
-						draw.SimpleText(str, "jcms_small", x, 32 + 40 + 12, colPulsing, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
-						draw.SimpleText(("%s%s J"):format(stage.cash>=0 and "+" or "", jcms.util_CashFormat(stage.cash)), "jcms_medium", x, 32 + 40 + 24, col, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+						if lowres then
+							draw.SimpleText(str, "DefaultVerySmall", x, 32 + 44, colPulsing, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+							draw.SimpleText(("%s%s J"):format(stage.cash>=0 and "+" or "", jcms.util_CashFormat(stage.cash)), "DefaultSmall", x, 32 + 44 + 10, col, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+						else
+							draw.SimpleText(str, "jcms_small", x, 32 + 40 + 12, colPulsing, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+							draw.SimpleText(("%s%s J"):format(stage.cash>=0 and "+" or "", jcms.util_CashFormat(stage.cash)), "jcms_medium", x, 32 + 40 + 24, col, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+						end
 						surface.SetDrawColor(col)
 						jcms.draw_Circle(x, 32 + 40, 4, 4, 4, 12)
 
@@ -2338,15 +2408,15 @@
 							local stageAlpha = math.Clamp((p.time - p.showDelay - i*0.3 - 0.3)*2, 0, 1)
 							surface.SetAlphaMultiplier(stageAlpha)
 							surface.SetDrawColor(colAlt)
-							drawFilledPolyButton(w - 150 - 24, 32, 150, 24)
-							draw.SimpleText(jcms.util_CashFormat(endingCash) .. " J", "jcms_medium", w - 24 - 150/2, 32 + 24/2, jcms.color_dark_alt, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+							drawFilledPolyButton(w - plaqueWidth - 24, 32, plaqueWidth, 24)
+							draw.SimpleText(jcms.util_CashFormat(endingCash) .. " J", plaqueFontInside, w - 24 - plaqueWidth/2, 32 + 24/2, jcms.color_dark_alt, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 							surface.SetDrawColor(colPulsing)
 							surface.DrawRect(x2, 32 + 24 + 4, 1, 12)
-							draw.SimpleText("#jcms.cashhud_new", "jcms_small_bolder", w - 24 - 150/2, 12, colAlt, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+							draw.SimpleText("#jcms.cashhud_new", plaqueFontOutside, w - 24 - plaqueWidth/2, 12, colAlt, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
 						end
 					end
 				else
-					draw.SimpleText("#jcms.cashhud_none", "jcms_big", (w - 172)/2 + 172, h/2, col, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+					draw.SimpleText("#jcms.cashhud_none", lowres and "jcms_medium" or "jcms_big", (w - winstreakWidth)/2 + winstreakWidth, h/2, col, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 				end
 				surface.SetAlphaMultiplier(1)
 			end
@@ -2360,8 +2430,8 @@
 
 				if winstreakAnim > 0 then
 					surface.SetAlphaMultiplier(winstreakAnim)
-					local font1 = "jcms_hud_big"
-					local font2 = "jcms_hud_medium"
+					local font1 = lowres and "jcms_hud_medium" or "jcms_hud_big"
+					local font2 = lowres and "jcms_hud_small" or "jcms_hud_medium"
 
 					if winstreak >= 100 then
 						font1 = "jcms_hud_medium"
@@ -2370,10 +2440,10 @@
 
 					local col = winstreak > 0 and colAlt or col
 					surface.SetDrawColor(col.r, col.g, col.b, jcms.color_pulsing.a)
-					drawHollowPolyButton(6, 6, 172, h - 12, 12)
-					draw.SimpleText("#jcms.winstreak_title", "jcms_medium", 6 + 172/2, 12, col, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+					drawHollowPolyButton(6, 6, winstreakWidth, h - 12, 12)
+					draw.SimpleText("#jcms.winstreak_title", lowres and "DefaultSmall" or "jcms_medium", 6 + winstreakWidth/2, 12, col, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
 
-					local nx, ny = 6 + 172/2, h * 0.6
+					local nx, ny = 6 + winstreakWidth/2, h * 0.6
 					surface.SetFont(font1)
 					local n_width = surface.GetTextSize(winstreak)
 					surface.SetFont(font2)
@@ -2385,8 +2455,10 @@
 					if winstreakFailed and winstreak > 0 then
 						draw.NoTexture()
 						surface.SetDrawColor(col)
-						surface.DrawTexturedRectRotated(nx, ny, 150, 4, 30)
-						surface.DrawTexturedRectRotated(nx, ny, 150, 4, -30)
+						local barLength = lowres and 90 or 150
+						local barWidth = lowres and 2 or 4
+						surface.DrawTexturedRectRotated(nx, ny, barLength, barWidth, 30)
+						surface.DrawTexturedRectRotated(nx, ny, barLength, barWidth, -30)
 					end
 				end
 				surface.SetAlphaMultiplier(1)
@@ -2439,6 +2511,8 @@
 		end
 
 		function jcms.offgame_paint_Leaderboard(p, w, h)
+			local lowres = p.lowres
+
 			local col = p.victory and jcms.color_bright_alt or jcms.color_bright
 			local colAlt = p.victory and jcms.color_bright or jcms.color_bright_alt
 			local colBg = p.victory and jcms.color_dark_alt or jcms.color_dark
@@ -2448,7 +2522,7 @@
 
 			surface.SetAlphaMultiplier(0.03)
 				surface.SetDrawColor(col)
-				drawFilledPolyButton(0, 0, w, 42)
+				drawFilledPolyButton(0, 0, w, lowres and 24 or 42)
 
 				if p.separatorsThick then
 					for i, sep in ipairs(p.separatorsThick) do

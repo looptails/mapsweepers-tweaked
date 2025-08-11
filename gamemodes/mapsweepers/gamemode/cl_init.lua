@@ -977,6 +977,10 @@ end)
 
 -- // Util {{{
 
+	function jcms.util_IsLowRes()
+		return ScrW() < 1600 or ScrH() < 900
+	end
+
 	function jcms.util_GetRealFOV()
 		local frame = FrameNumber()
 		if (not jcms.cachedValues.fov) or (frame > jcms.cachedValues.fov_frame) then
