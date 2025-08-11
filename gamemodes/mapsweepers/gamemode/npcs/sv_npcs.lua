@@ -581,6 +581,7 @@ jcms.npcSquadSize = 4 -- Let's see if smaller squads fix their strange behavior.
 
 				if data.bounty then
 					ent.jcms_bounty = data.bounty
+					ent.jcms_damageShare = {}
 				end
 
 				jcms.npc_UpdateRelations(ent)
