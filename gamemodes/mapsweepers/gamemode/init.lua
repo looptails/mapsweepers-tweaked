@@ -2798,6 +2798,15 @@ end
 		ed:SetFlags(1)
 		ed:SetColor(jcms.util_colorIntegerJCorp) -- Red effect
 		util.Effect("jcms_shieldeffect", ed)
+
+		if ent.nextAttack then
+			ent.nextAttack = CurTime() + 0.25
+		end
+
+		if ent.NextSlowThink and ent.TurretSlowThink then
+			ent.NextSlowThink = CurTime() - 0.1
+			ent:TurretSlowThink()
+		end
 	end
 
 	function jcms_util_shieldDamageEffect(dmginfo, shieldDmg)
