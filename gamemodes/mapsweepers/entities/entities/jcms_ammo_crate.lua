@@ -59,7 +59,7 @@ if SERVER then
 		if (ct > cooldown + lastTime) then
 			local pos = self:WorldSpaceCenter()
 
-			worked = jcms.util_TryGiveAmmo(Entity(1), 100)
+			worked = jcms.util_TryGiveAmmo(activator, 100)
 			if worked then
 
 				local shareRadius2 = self.ShareRadius^2
