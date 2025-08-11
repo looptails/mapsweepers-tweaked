@@ -361,8 +361,13 @@ end
 		if IsValid(attacker) and (attacker:GetClass() == "npc_headcrab_poison" or attacker:GetClass() == "npc_headcrab_black") then
 			--Their default behaviour seems to be hardcoded in hl2, and messing with the damageinfo breaks it (causes them to instakill).
 			--This is a bandaid solution to that. 
+
 			local hp = ent:Health()
-			dmg:SetDamage( math.min(hp-5, dmg:GetDamage()) )
+			if ent:IsPlayer() then
+				dmg:SetDamage( math.min(hp-5, dmg:GetDamage()) )
+			else
+				dmg:SetDamage(math.min(math.max(0, hp-1), 5))
+			end
 		end
 	end)
 	
