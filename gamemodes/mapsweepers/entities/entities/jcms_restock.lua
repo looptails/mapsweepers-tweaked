@@ -66,7 +66,7 @@ if SERVER then
 	end
 
 	function jcms.util_TryGiveAmmo(ply, cash)
-		if cash <= 0 then
+		if cash <= 0 or not IsValid(ply) then
 			return false
 		end
 

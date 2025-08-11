@@ -49,6 +49,12 @@ function ENT:SetupDataTables()
 end
 
 if SERVER then
+	function ENT:TryGiveAmmo(ply, cashOverride)
+		local cash = cashOverride
+		local worked = jcms.util_TryGiveAmmo(ply, cash)
+		return worked
+	end
+
 	function ENT:Use(activator)
 		if not ( IsValid(activator) and activator:IsPlayer() and jcms.team_JCorp_player(activator) and activator:Alive() and activator:GetObserverMode() == OBS_MODE_NONE ) then
 			return
