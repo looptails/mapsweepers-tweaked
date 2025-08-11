@@ -632,8 +632,8 @@ end
 
 	function jcms.runprogress_SetLastMission()
 		local rp = jcms.runprogress
-		rp.lastMission = jcms.util_GetMissionFaction()
-		rp.lastFaction = jcms.util_GetMissionType()
+		rp.lastMission = jcms.util_GetMissionType()
+		rp.lastFaction = jcms.util_GetMissionFaction()
 	end
 
 -- // }}}
