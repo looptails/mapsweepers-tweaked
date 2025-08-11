@@ -711,7 +711,7 @@
 			end
 			
 			if type1 ~= -1 then
-				if ammo1 > -1 then
+				if ammoMax1 > -1 then
 					tw1 = draw.SimpleText(ammo1, "jcms_hud_huge", -32, -8, jcms.color_dark, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM) + 16
 					draw.SimpleText(ammoOff1, "jcms_hud_medium", -32-tw1, -16, jcms.color_dark, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM)
 
@@ -730,13 +730,13 @@
 
 			if type2 ~= -1 then
 				local tw2 = 0
-				if ammo2 > -1 then
+				if ammoMax2 > -1 then
 					tw2 = draw.SimpleText(ammo2, "jcms_hud_big", -32-tw1, -96, jcms.color_dark, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM) + 16
 				end
 				draw.SimpleText(ammoOff2, "jcms_hud_small", -32-tw1-tw2, -88, jcms.color_dark, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM)
 
 				render.OverrideBlend( true, BLEND_SRC_ALPHA, BLEND_ONE, BLENDFUNC_ADD )
-				if ammo2 > -1 then
+				if ammoMax2 > -1 then
 					draw.SimpleText(ammo2, "jcms_hud_big", -32-tw1 - offset2, -96, jcms.color_bright_alt, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM)
 				end
 				draw.SimpleText(ammoOff2, "jcms_hud_small", -32-tw1-tw2 - offset2, -88, jcms.color_bright_alt, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM)
