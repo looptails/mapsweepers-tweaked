@@ -110,7 +110,7 @@ function class.Think(ply)
 
 						if self:GetMaxClip1() < 10 then --not helpful for high-capacity weapons.
 							timer.Simple(0, function()
-								if IsValid(self) and not SERVER then
+								if IsValid(self) and not CLIENT then
 									self:EmitSound("buttons/lever6.wav", 75, 150, 1, CHAN_STATIC)
 									self:EmitSound("buttons/lever7.wav", 75, 100, 1, CHAN_STATIC)
 								end
@@ -135,7 +135,7 @@ function class.Think(ply)
 
 						if self:GetMaxClip1() < 10 then --not helpful for high-capacity weapons.
 							timer.Simple(0, function()
-								if IsValid(self) and not SERVER then
+								if IsValid(self) and not CLIENT then
 									self:EmitSound("buttons/lever6.wav", 75, 150, 1, CHAN_STATIC)
 									self:EmitSound("buttons/lever7.wav", 75, 100, 1, CHAN_STATIC)
 								end

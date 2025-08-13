@@ -143,6 +143,7 @@ if CLIENT then
 		if FrameTime() == 0 then return end 
 
 		local shield = self:GetBlockerEnt()
+		if not IsValid(shield) then return end
 
 		local ed = EffectData()
 		ed:SetFlags(0)
