@@ -144,7 +144,7 @@
 		end
 
 		function jcms.director_IsSuddenDeath()
-			return jcms.director.suddenDeathTime and jcms.director_GetMissionTime() > jcms.director.suddenDeathTime
+			return jcms.director and jcms.director.suddenDeathTime and jcms.director_GetMissionTime() > jcms.director.suddenDeathTime
 		end
 		
 		function jcms.director_GetAreasAwayFrom(zoneAreas, origins, minDist, maxDist)
