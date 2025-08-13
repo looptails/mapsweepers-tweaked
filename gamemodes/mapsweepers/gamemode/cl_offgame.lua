@@ -2229,18 +2229,27 @@ jcms.offgame = jcms.offgame or NULL
 							self:SetText(language.GetPhrase("#jcms.opt_crosshair_showammo" .. math.floor(ammo:GetValue())))
 						end
 
-						local dot = content:Add("DCheckBoxLabel")
-						dot:SetPos(24, ammo:GetY() + ammo:GetTall() + 24)
-						dot:SetText("#jcms.opt_crosshair_dot")
-						dot:SetWide(400)
-						dot:SetConVar("jcms_crosshair_dot")
-						dot.Paint = jcms.paint_CheckBoxLabel
+						local sliderdot = content:Add("DNumSlider")
+						sliderdot:SetText("#jcms.opt_crosshair_dot")
+						sliderdot:SetSize(400, 24)
+						sliderdot:SetPos(24, ammo:GetY() + ammo:GetTall() + 24)
+						sliderdot:SetMinMax(0, 2)
+						sliderdot:SetDecimals(0)
+						sliderdot:SetConVar("jcms_crosshair_dot")
+						sliderdot.Paint = jcms.paint_NumSlider
+						local dotdesc = content:Add("DLabel")
+						dotdesc:SetTextColor(jcms.color_bright)
+						dotdesc:SetPos(sliderdot:GetX() + 172, sliderdot:GetY() + 8)
+						dotdesc:SetSize(sliderdot:GetWide() - 172, 48)
+						function dotdesc:Think()
+							self:SetText(language.GetPhrase("#jcms.opt_crosshair_dot" .. math.floor(sliderdot:GetValue())))
+						end
 
 						for i, var in ipairs { "length", "width", "gap" } do
 							local slider = content:Add("DNumSlider")
 							slider:SetText("#jcms.opt_crosshair_" .. var)
 							slider:SetSize(400, 24)
-							slider:SetPos(24, dot:GetY() + dot:GetTall() + 8 + 24*(i-1))
+							slider:SetPos(24, sliderdot:GetY() + sliderdot:GetTall() + 24*i)
 							slider:SetMinMax(1, i==1 and 64 or 8)
 							slider:SetDecimals(0)
 							slider:SetConVar("jcms_crosshair_" .. var)

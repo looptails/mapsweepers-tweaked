@@ -1230,8 +1230,14 @@
 					surface.DrawText(clip1)
 				end
 				
-				local shouldDrawDot = jcms.cachedValues.crosshair_dot
-				local blend2 = shouldDrawDot and math.max(blend, 1-blend_fov) or 1-blend_fov
+				local dotMode = jcms.cachedValues.crosshair_dot
+				local blend2 = 0
+
+				if dotMode == 1 then -- always
+					blend2 = 1
+				elseif dotMode == 2 then
+					blend2 = 1-blend_fov
+				end
 				surface.SetDrawColor(R*blend2, G*blend2, B*blend2)
 				wide = Lerp(1-blend_fov, wide, 4)
 				surface.DrawRect(-wide, -wide, wide*2, wide*2)
