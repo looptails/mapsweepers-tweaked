@@ -1019,37 +1019,37 @@
 					table.remove(npcs, i)
 				else
 					local npcTbl = npc:GetTable() 
-					
+					local npcpos --Messy
+
 					local confirmedStraggler = false
 					local state = npc:GetNPCState()
 
-					total = total + 1
-					if state == NPC_STATE_COMBAT then
-						combat = combat + 1
-					elseif not npcTbl.jcms_ignoreStraggling then
+					if not npcTbl.jcms_ignoreStraggling then
 						if not npc:IsInWorld() or npc:GetInternalVariable("startburrowed") then 
 							confirmedStraggler = true
 						end
-
-						local npcpos 
 						if not confirmedStraggler then 
 							npcpos = npc:WorldSpaceCenter()
 							local npcArea = navmesh.GetNearestNavArea(npcpos, false, 250, false)
-							if not IsValid(npcArea) or not jcms.mapgen_ValidArea(npcArea) then 
+							if not IsValid(npcArea) or not jcms.mapgen_ValidArea(npcArea) or (npcArea:GetZ( npcpos ) - npcpos.z > 85) then
 								confirmedStraggler = true
 							end
 						end
 
-						if not confirmedStraggler then 
-							confirmedStraggler = true
-							local maxDist2 = 6500^2
-							local pvsDist2 = 1000^2
-							for j, sweeper in ipairs(sweepers) do
-								local dist2 = sweeperPositions[j]:DistToSqr(npcpos)
-								if not((dist2 > maxDist2) or (dist2 > pvsDist2 and not sweeper:TestPVS(npc))) then
-									confirmedStraggler = false
-									break
-								end
+					end
+
+					total = total + 1
+					if state == NPC_STATE_COMBAT and not confirmedStraggler then
+						combat = combat + 1
+					elseif not npcTbl.jcms_ignoreStraggling and not confirmedStraggler then
+						confirmedStraggler = true
+						local maxDist2 = 6500^2
+						local pvsDist2 = 1000^2
+						for j, sweeper in ipairs(sweepers) do
+							local dist2 = sweeperPositions[j]:DistToSqr(npcpos)
+							if not((dist2 > maxDist2) or (dist2 > pvsDist2 and not sweeper:TestPVS(npc))) then
+								confirmedStraggler = false
+								break
 							end
 						end
 					end
