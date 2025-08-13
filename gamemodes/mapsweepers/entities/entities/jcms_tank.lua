@@ -661,6 +661,9 @@ if SERVER then
 		end
 		
 		local dmgAmount = dmg:GetDamage()
+		local difficultyMultiplier = (1 / (math.max(jcms.runprogress_GetDifficulty(), 1)^0.85))
+		dmgAmount = dmgAmount * difficultyMultiplier
+
 		if bit.band(dmg:GetDamageType(), bit.bor(DMG_BULLET, DMG_SLASH, DMG_CLUB, DMG_BUCKSHOT)) > 0 then
 			dmgAmount = math.max(dmgAmount*0.9 - 4, 0)
 		elseif bit.band(dmg:GetDamageType(), DMG_ACID, DMG_BLAST) > 0 then

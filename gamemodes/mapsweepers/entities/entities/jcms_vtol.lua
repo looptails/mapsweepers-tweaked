@@ -502,10 +502,13 @@ if SERVER then
 		end
 
 		local dmgAmount = dmg:GetDamage()
-		if bit.band( dmg:GetDamageType(), bit.bor(DMG_BUCKSHOT, DMG_BULLET) ) > 0 then
-			dmgAmount = math.max(0.1, dmgAmount - 2)
-		end
+		local difficultyMultiplier = IsValid(self:GetDriver()) and (1 / (math.max(jcms.runprogress_GetDifficulty(), 1)^0.75)) or 1
+		dmgAmount = dmgAmount * difficultyMultiplier
 
+		if bit.band( dmg:GetDamageType(), bit.bor(DMG_BUCKSHOT, DMG_BULLET) ) > 0 then
+			dmgAmount = math.max(math.min(dmgAmount, 0.1), dmgAmount - 2)
+		end
+		
 		self:SetHealth( self:Health() - dmgAmount )
 		self:SetHealthFraction(math.max(0, self:Health() / self:GetMaxHealth()))
 		
