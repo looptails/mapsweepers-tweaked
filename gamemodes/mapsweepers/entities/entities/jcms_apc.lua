@@ -57,8 +57,8 @@ function ENT:Initialize()
 		self.soundTurbo:ChangePitch(12)
 		self.soundWater = CreateSound(self, "vehicles/airboat/pontoon_fast_water_loop1.wav")
 		
-		self:SetMaxHealth(2000)
-		self:SetHealth(2000)
+		self:SetMaxHealth(1250)
+		self:SetHealth(1250)
 
 		self:AddEFlags(EFL_DONTBLOCKLOS)
 
@@ -66,6 +66,16 @@ function ENT:Initialize()
 		self:SetUseType(SIMPLE_USE)
 
 		self.delayedForces = { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+
+		for x=1, 3 do
+			for y=1, 2 do
+				local bs = ents.Create("jcms_bullseye")
+				bs:SetParent(self)
+				bs:SetPos(Vector(-200+100*x, -80+(y-1)*160, 4))
+				bs.DamageTarget = self
+				bs:Spawn()
+			end
+		end
 	end
 end
 
@@ -117,6 +127,28 @@ if SERVER then
 				self.soundWater:Stop()
 				self.soundWater = nil
 			end
+
+			if not self.despawning then
+				local despawnAfter = 7
+				
+				timer.Simple(despawnAfter, function()
+					if IsValid(self) then
+						local ed = EffectData()
+						ed:SetColor(jcms.util_colorIntegerJCorp)
+						ed:SetFlags(2)
+						ed:SetEntity(self)
+						util.Effect("jcms_spawneffect", ed)
+					end
+				end)
+
+				timer.Simple(despawnAfter + 2, function()
+					if IsValid(self) then
+						self:Remove()
+					end
+				end)
+
+				self.despawning = true
+			end
 		else
 			self:GetPhysicsObject():Wake()
 			local speed = self:GetVelocity():Length()
@@ -149,10 +181,6 @@ if SERVER then
 			
 			local driver = selfTbl.GetDriver(self)
 			if IsValid(driver) then
-				local pos = self:GetPos()
-				pos.z = pos.z - 48
-				driver:SetPos(pos)
-				
 				local wep = driver:GetActiveWeapon()
 				if IsValid(wep) then
 					wep:SetNextPrimaryFire( CurTime() + 1 )
@@ -201,12 +229,11 @@ if SERVER then
 	end
 	
 	function ENT:PhysicsCollide(data, phys)
-		local speed = data.OurOldVelocity:Length()
-
-		PrintTable(data)
-
+		local speed = data.OurOldVelocity
+		speed:Sub(data.OurNewVelocity)
+		speed = speed:Length()
 		local shieldOn = self:GetShieldActive()
-		
+
 		if speed > 120 and data.HitEntity:Health() > 0 then
 			local dmg = DamageInfo()
 			dmg:SetDamage(math.sqrt(speed) / 10 + 5)
@@ -224,15 +251,16 @@ if SERVER then
 			else
 				self:EmitSound("ATV_rollover")
 			end
-			self:TakeDamage(math.Remap(speed, 700, 1400, 35, 260), data.HitEntity, data.HitEntity)
+			self:TakeDamage(math.Remap(speed, 700, 1400, 75, 500), data.HitEntity, data.HitEntity)
 		elseif speed > 300 then
 			if shieldOn then
 				self:EmitSound("weapons/physcannon/energy_bounce1.wav", 100, 107, 1)
 			else
 				self:EmitSound("ATV_impact_heavy")
 			end
-			self:TakeDamage(math.Remap(speed, 300, 700, 5, 35), data.HitEntity, data.HitEntity)
-		elseif not shieldOn then
+			self:TakeDamage(math.Remap(speed, 300, 700, 15, 75), data.HitEntity, data.HitEntity)
+		elseif speed > 50 and not shieldOn then
+			self:TakeDamage(math.Remap(speed, 50, 300, 0, 15), data.HitEntity, data.HitEntity)
 			self:EmitSound("ATV_impact_medium")
 		end
 	end
@@ -436,11 +464,11 @@ if SERVER then
 	function ENT:SetDriver(ply)
 		-- Carjacking
 		if IsValid(self.driver) and self.driver:IsPlayer() then
-			self.driver:SetMoveType(MOVETYPE_WALK)
 			self.driver:DrawViewModel(true)
 			self.driver:DrawWorldModel(true)
 			self.driver:SetNoDraw(false)
 			self.driver:SetNWEntity("jcms_vehicle", NULL)
+			self.driver:SetParent()
 			
 			if ply == nil then
 				self.driver:SetPos(self:GetExitPos())
@@ -455,12 +483,13 @@ if SERVER then
 		
 		if IsValid(ply) and ply:IsPlayer() and ply:GetNWEntity("jcms_vehicle") == NULL then
 			self.driver = ply
-			ply:SetMoveType( MOVETYPE_NOCLIP )
 			ply:DrawViewModel(false)
 			ply:DrawWorldModel(false)
 			ply:SetNoDraw(true)
 			ply:SetNWEntity("jcms_vehicle", self)
 			ply:SetEyeAngles(self:GetAngles())
+			ply:SetParent(self)
+			ply:SetPos( Vector(0, 0, 0) )
 		end
 	end
 	
@@ -516,6 +545,7 @@ if SERVER then
 			util.Effect("Explosion", ed)
 
 			self:SetMaterial("models/jcms/jcorp_apc_destroyed")
+			self:SetBodygroup(0, 1)
 		end
 	end
 	
@@ -568,7 +598,7 @@ if CLIENT then
 		end
 	end
 
-	ENT.mat_shield = Material("effects/combineshield/comshieldwall")
+	ENT.mat_shield = jcms.render_matShield
 	ENT.scalematrix = Matrix()
 	ENT.scalematrix:Scale(Vector(1.05, 1.05, 1.08))
 

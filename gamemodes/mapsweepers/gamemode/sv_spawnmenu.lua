@@ -564,12 +564,44 @@
 				end
 			end
 		},
-		
+
+		--[[apc = {
+			category = jcms.SPAWNCAT_MOBILITY,
+			cost = 600,
+			cooldown = 600,
+			slotPos = 3,
+			argparser = "vehicle",
+			
+			func = function(ply, pos, angle)
+				local apc = ents.Create("jcms_apc")
+				apc:SetPos(pos)
+				apc:Spawn()
+				
+				apc:SetAngles(angle)
+				local mins = apc:OBBMins()
+				mins.x = 0
+				mins.y = 0
+				mins.z = -mins.z
+				apc:SetPos(pos + mins)
+				apc.jcms_owner = ply
+
+				local ed = EffectData()
+				ed:SetColor(jcms.util_colorIntegerJCorp)
+				ed:SetFlags(0)
+				ed:SetEntity(apc)
+				util.Effect("jcms_spawneffect", ed)
+
+				if CPPI then
+					apc:CPPISetOwner( game.GetWorld() )
+				end
+			end
+		},]]
+
 		hovertank = {
 			category = jcms.SPAWNCAT_MOBILITY,
 			cost = 4000,
 			cooldown = 600,
-			slotPos = 3,
+			slotPos = 4,
 			argparser = "vehicle",
 			
 			func = function(ply, pos, angle)
