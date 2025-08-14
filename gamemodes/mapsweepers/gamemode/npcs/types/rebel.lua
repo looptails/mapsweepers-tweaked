@@ -1153,9 +1153,16 @@ jcms.npc_types.rebel_vortigaunt = {
 	
 	think = function(npc, state)
 		if npc.jcms_vortNextCharge < CurTime() and not npc.jcms_vortCharging then --Apply shields every 30s
+			-- TODO: PLACEHOLDER. {{{
+				local ed = EffectData()
+				ed:SetEntity(npc)
+				ed:SetScale(1)
+				util.Effect("jcms_electricarcs", ed)
+			-- }}}
+
 			local targetCount = 0
 			for i, ent in ipairs(ents.FindInSphere(npc:GetPos(), 175)) do
-				if (ent:IsPlayer() or ent:IsNPC()) and not (nt == npc) then 
+				if (ent:IsPlayer() or ent:IsNPC()) and not (ent == npc) then 
 					targetCount = targetCount + 1
 				end
 			end
