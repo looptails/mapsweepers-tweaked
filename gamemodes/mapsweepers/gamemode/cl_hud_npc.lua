@@ -441,6 +441,7 @@
 		surface.SetAlphaMultiplier(1)
 	end
 
+	--[[
 	hook.Add("PreDrawHalos", "jcms_sweeperHalos", function()
 		local classData = jcms.class_GetLocPlyData()
 
@@ -482,5 +483,6 @@
 			halo.Add(brokenSweepers, Color(add2, 100 + add2*2, 200 + add2), 2, 2, 2, true, true)
 		end
 	end)
+	--]]
 
 -- // }}}
