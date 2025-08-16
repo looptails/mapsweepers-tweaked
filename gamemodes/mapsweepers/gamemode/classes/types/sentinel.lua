@@ -156,15 +156,7 @@ if SERVER then
 						local plyZone = zoneList[plyZoneId]
 						
 						if not plyZone or jcms.mapdata.zoneSizes[plyZoneId] < 5000^2 then
-							local weightedZones = {}
-							for zone, area in ipairs(jcms.mapdata.zoneSizes) do
-								if area >= 5000 then 
-									weightedZones[zone] = math.sqrt(area)
-								end
-							end
-							
-							plyZoneId = jcms.util_ChooseByWeight(weightedZones)
-							plyZone = zoneList[plyZoneId]
+							plyZone = zoneList[jcms.mapdata.largestZone]
 						end
 
 						if not plyZone then return end --This is stupid but I guess people are willing to play on maps made of tiny rooms.
