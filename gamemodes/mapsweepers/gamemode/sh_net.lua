@@ -390,6 +390,7 @@ if SERVER then
 
 				net.WriteBool(not not pd.wasSweeper)
 				if pd.wasSweeper then
+					net.WriteString(pd.class)
 					net.WriteUInt(pd.kills_direct, 24)
 					net.WriteUInt(pd.kills_defenses, 24)
 					net.WriteUInt(pd.kills_explosions, 24)
@@ -908,6 +909,7 @@ if CLIENT then
 
 						stat.wasSweeper = net.ReadBool()
 						if stat.wasSweeper then -- Stats as a Sweeper
+							stat.class = net.ReadString()
 							stat.kills_direct = net.ReadUInt(24)
 							stat.kills_defenses = net.ReadUInt(24)
 							stat.kills_explosions = net.ReadUInt(24)

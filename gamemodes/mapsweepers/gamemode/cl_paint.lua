@@ -2246,7 +2246,7 @@
 				local iconSize = lowres and 24 or 64
 				if p.stats.wasSweeper then
 					if IsValid( p.stats.ply ) then
-						local tgclass = p.stats.ply:GetNWString("jcms_class", "infantry")
+						local tgclass = p.stats.class or p.stats.ply:GetNWString("jcms_class", "infantry")
 		
 						if not jcms.classmats then
 							jcms.classmats = {}
