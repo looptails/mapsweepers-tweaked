@@ -32,7 +32,7 @@ function EFFECT:Init( data )
 	self:SetRenderBoundsWS(self.start, self.endpos)
 
 	self.t = 0
-	self.tout = 0.25
+	self.tout = 0.1 + math.random()*0.4
 	self.color = Color(255, 255, 255, 255)
 end
 
@@ -55,7 +55,7 @@ function EFFECT:Render()
 	selfTbl.color:SetUnpacked(255, 200*ff, 200*ff, 256*ff)
 	
 	render.SetMaterial(selfTbl.mat)
-	render.DrawBeam(selfTbl.start, selfTbl.endpos, (selfTbl.isIncendiary and 32 or 16)*ff, 0, 0.8, selfTbl.color)
+	render.DrawBeam(selfTbl.start, selfTbl.endpos, (selfTbl.isIncendiary and 32 or 16)*ff, 0.1, 0.5, selfTbl.color)
 	render.SetMaterial(selfTbl.mat_light)
 	render.DrawSprite(selfTbl.endpos, 64 * ff, 48 * ff, selfTbl.color)
 	

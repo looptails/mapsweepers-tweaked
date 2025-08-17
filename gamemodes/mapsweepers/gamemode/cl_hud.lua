@@ -2446,22 +2446,37 @@
 		end
 
 		local vehicle = locPly:GetNWEntity("jcms_vehicle")
+		local vehTable = vehicle:GetTable()
 		if IsValid(vehicle) then
-			if vehicle.DrawHUDBottom then
+			if vehTable.DrawHUDBottom then
 				setup3d2dCentral("bottom")
-					vehicle:DrawHUDBottom()
+					vehTable.DrawHUDBottom(vehicle)
 					jcms.draw_Tips()
 				cam.End3D2D()
 			end
 			
-			if vehicle.DrawHUDCenter then
+			if vehTable.DrawHUDCenter then
 				setup3d2dCentral("center")
-					vehicle:DrawHUDCenter()
+					vehTable.DrawHUDCenter(vehicle)
 				cam.End3D2D()
 			end
 			
-			if vehicle.DrawHUD then
-				vehicle:DrawHUD()
+			if vehTable.DrawHUD then
+				vehTable.DrawHUD(vehicle)
+			end
+
+			if vehTable.DoDrawHealthbar then
+				setup3d2dDiagonal(false, true)
+					jcms.draw_HUDHealthbar()
+					jcms.draw_DamageIndicators()
+				cam.End3D2D()
+			end
+
+			if vehTable.DoDrawAmmo then
+				setup3d2dDiagonal(false, false)
+					jcms.draw_HUDAmmo()
+					jcms.draw_NotifsAmmo()
+				cam.End3D2D()
 			end
 		else
 			setup3d2dDiagonal(false, true)

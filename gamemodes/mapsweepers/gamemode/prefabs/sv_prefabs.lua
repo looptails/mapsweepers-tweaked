@@ -395,7 +395,7 @@
 
 		ammocrate = {
 			natural = true,
-			weight = 0.08,
+			weight = 0.11,
 
 			check = function(area)
 				if not jcms.mapgen_ValidArea(area) then return false end
@@ -423,6 +423,98 @@
 				ent:Spawn()
 				ent:SetPos(data.pos)
 				ent:SetAngles(data.normal:Angle())
+				return ent
+			end
+		},
+
+		emplacement = {
+			natural = true,
+			weight = 0.12,
+
+			check = function(area)
+				if not jcms.mapgen_ValidArea(area) then return false end
+
+				if ( area:GetSizeX()*area:GetSizeY() ) <= 60000 then
+					return false
+				end
+
+				if #area:GetVisibleAreas() < jcms.mapgen_GetVisData().avg then
+					return false
+				end
+
+				local c1, c2, c3, c4 = area:GetCorner(1), area:GetCorner(2), area:GetCorner(3), area:GetCorner(0)
+				if math.max(c1.z, c2.z, c3.z, c4.z) - math.min(c1.z, c2.z, c3.z, c4.z) > 34 then
+					return false
+				end
+
+				local corners = { c1, c2, c3, c4 }
+				local sideVisibilities = { 0, 0, 0, 0 }
+				local weighed = {}
+				local sideVectors = {}
+
+				local tr = {}
+				local traceData = {
+					mins = Vector(-2, -2, 0),
+					maxs = Vector(2, 2, 4),
+					mask = MASK_SHOT,
+					output = tr
+				}
+
+				for side=1, 4 do
+					local v = corners[side%4+1] + corners[(side+1)%4+1]
+					v:Div(2)
+					v.z = v.z + 24
+
+					sideVectors[side] = v
+					traceData.start = v
+
+					for i = 1, 3 do
+						for j = 1, 6 do
+							local ang = Angle((i-1)*10, 90*side + math.Remap(j, 1, 6, -45, 45), 0)
+							traceData.endpos = ang:Forward()
+							traceData.endpos:Mul(500+i*500)
+							traceData.endpos:Add(v)
+							util.TraceHull(traceData)
+							
+							sideVisibilities[side] = sideVisibilities[side] + tr.Fraction
+						end
+					end
+
+					v.z = v.z - 24 - 10
+				end
+
+				do
+					local maximum = 0
+					for side=1,4 do
+						if sideVisibilities[side] > maximum then
+							maximum = sideVisibilities[side]
+						end
+					end
+
+					local threshold = (maximum >= 10) and 9.5 or (maximum >= 5) and 3 or 9999999
+					for side=1,4 do
+						if sideVisibilities[side] > threshold then
+							weighed[side] = sideVisibilities[side] + 1
+						end
+					end
+				end
+
+				local chosen = jcms.util_ChooseByWeight(weighed)
+				if chosen then
+					return true, { pos = sideVectors[ chosen ], ang = Angle(0, 90*chosen, 0) }
+				else
+					return false
+				end
+			end,
+
+			stamp = function(area, data)
+				local ent = ents.Create("jcms_emplacement")
+				if not IsValid(ent) then return end
+
+				ent:SetAngles(data.ang)
+				ent:SetPos(data.pos)
+				ent:Spawn()
+
 				return ent
 			end
 		},

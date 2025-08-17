@@ -1493,7 +1493,7 @@
 								phys:SetVelocityInstantaneous(norm)
 								phys:SetDamping(0, 0)
 
-								util.SpriteTrail(ent, 0, color_white, true, 2, 0, 3, 0.5, "trails/smoke")
+								--util.SpriteTrail(ent, 0, color_white, true, 2, 0, 3, 0.5, "trails/smoke")
 							end
 						end )
 					end

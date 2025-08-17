@@ -107,6 +107,10 @@ if SERVER then
 	}
 
 	function jcms.PlayerStuckCheck(ply)
+		if ply:Team() ~= 1 or IsValid( ply:GetNWEntity("jcms_vehicle") ) then
+			return false
+		end
+
 		if not ply:IsInWorld() then
 			return true
 		end
