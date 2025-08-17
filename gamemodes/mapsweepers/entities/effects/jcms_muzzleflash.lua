@@ -70,6 +70,7 @@ function EFFECT:Init(data)
 			self.offset = data:GetStart()
 
 			local v, a = turret:GetBonePosition(1)
+			a = a or Angle(0, 0, 0)
 			self.normal = a:Right()
 			self.normal:Mul(-1)
 			self.color = Color(unpack(colors[self.matId]))

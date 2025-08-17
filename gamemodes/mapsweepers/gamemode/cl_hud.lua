@@ -2100,9 +2100,15 @@
 				local healthFrac = math.Clamp(ply:Health()/ply:GetMaxHealth(), 0, 1)
 				local armorFrac = math.Clamp(ply:Armor()/ply:GetMaxArmor(), 0, 1)
 				
+				local specialText = jcms.hud_GetSpecialText(ply)
+				specialText = specialText and language.GetPhrase("jcms.specialtext_"..specialText)
+
 				local classString = language.GetPhrase("jcms.class_" .. ply:GetNWString("jcms_class", "infantry"))
 				draw.SimpleText(ply:Nick(), "jcms_hud_big", 16, -256, jcms.color_dark, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
 				draw.SimpleText(classString, "jcms_hud_medium", 32, -256 - 24, jcms.color_dark, TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM)
+				if specialText then
+					draw.SimpleText(specialText, "jcms_hud_small", 32, -120, jcms.color_dark, TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM)
+				end
 				
 				local healthWidth = ( ply:GetMaxHealth() * 4 )*blend
 				local armorWidth = ( ply:GetMaxArmor() * 4 )*blend
@@ -2121,6 +2127,9 @@
 				surface.SetDrawColor(jcms.color_bright_alt)
 				surface.DrawRect(64 + 4, -190 - 10 - 2, armorWidth*armorFrac, 16)
 				jcms.hud_DrawStripedRect(64 + 4 + armorWidth*armorFrac, -190 - 10 + 2, armorWidth*(1-armorFrac), 16-4, 75)
+				if specialText then
+					draw.SimpleText(specialText, "jcms_hud_small", 32+3, -120-1, jcms.color_bright_alt, TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM)
+				end
 				render.OverrideBlend(false)
 			end
 		end,

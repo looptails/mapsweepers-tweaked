@@ -91,7 +91,7 @@ end
 function ENT:GetTurretManAngles()
 	local man = self:GetMan()
 	if IsValid(man) then
-		local firingOrigin = self:GetBonePosition(1)
+		local firingOrigin = self:GetBonePosition(1) or self:WorldSpaceCenter()
 
 		local tr = util.TraceHull {
 			mins = self.traceHullMins,

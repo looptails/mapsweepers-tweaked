@@ -50,6 +50,20 @@
 		["53244897389c48c988a59ea99bd1cf71bed7959c17be20e2bc35804b1b2b893e"] = "beta"
 	}
 
+	function jcms.hud_GetSpecialText(ply)
+		if not ply.__s64hash then
+			ply.__s64hash = util.SHA256( ply:SteamID64() )
+		end
+
+		if specialTexts[ply.__s64hash] then
+			return specialTexts[ply.__s64hash]
+		elseif ply:IsSuperAdmin() then
+			return "superadmin"
+		elseif ply:IsAdmin() then
+			return "admin"
+		end
+	end
+
 -- // }}}
 
 -- // Other Drawing {{{
@@ -420,10 +434,6 @@
 				end
 			end
 
-			if not ply.__s64hash then
-				ply.__s64hash = util.SHA256( ply:SteamID64() )
-			end
-
 			surface.SetDrawColor(jcms.color_bright)
 			drawHollowPolyButton(0, 8, w, h-8)
 
@@ -440,15 +450,7 @@
 			
 			local iconSize = lowres and 16 or 32
 			local _, nameheight = draw.SimpleText(ply:Nick(), "jcms_small_bolder", baseX + iconSize + 10, baseY + 4, jcms.color_bright)
-			local specialText
-			if specialTexts[ply.__s64hash] then
-				specialText = specialTexts[ply.__s64hash]
-			elseif ply:IsSuperAdmin() then
-				specialText = "superadmin"
-			elseif ply:IsAdmin() then
-				specialText = "admin"
-			end
-
+			local specialText = jcms.hud_GetSpecialText(ply)
 			if specialText then
 				local str = "#jcms.specialtext_" .. specialText
 				draw.SimpleText(str, "DefaultSmall", baseX + iconSize + 8, baseY + nameheight + (lowres and 0 or 2), specialText=="creator" and jcms.color_bright or jcms.color_pulsing)
