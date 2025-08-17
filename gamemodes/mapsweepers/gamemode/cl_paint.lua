@@ -34,6 +34,7 @@
 	local specialTexts = {
 		["38f1f3e9410f60dd482026c2422322de5c548f49486641a6f0727732c92aae2a"] = "creator",
 		["74ca5f72412bf8e2f408ea574bd9febdc1c0a88d94ba2f20ec9e6224f26179ca"] = "creator",
+
 		["0e062e54c32c8eb7469aa84498fc60c2f2ad265961a499df4c45ac2f6610a016"] = "beta",
 		["dc4617818bdcc3af96d716ec70b492638cdc075cf5ad7485452f0c798c9e5bcf"] = "beta",
 		["4f92d868130e272c86a99ad26e3a4f0d920ad58d069aa59ee1b7d98568553a9f"] = "beta",
@@ -47,7 +48,11 @@
 		["05970fb36a49ce78bf4948e07f3ea4aeb68d34cb9983bed01ce2fc5b20767fcd"] = "beta",
 		["f6d70cdd7d219f2e8530ad0c5c5e9944ed7af698ea2d9e0b9807ac8b2a79e9dc"] = "beta",
 		["07a03556a1d529a6c704b5e59f87108eee88adae733aadd9613b26f90c60d947"] = "beta",
-		["53244897389c48c988a59ea99bd1cf71bed7959c17be20e2bc35804b1b2b893e"] = "beta"
+		["53244897389c48c988a59ea99bd1cf71bed7959c17be20e2bc35804b1b2b893e"] = "beta",
+
+		["fef48441d1120d940ce10aa072c5afbcdd6a06fdfae839b879a82848b25a17ba"] = "supporter",
+		["185f5d86bf27e1920a57b7664087c41f3862f01b215f39e099fb12a31ded0db2"] = "supporter",
+		["6fd09cbbf6c5c986667a5145d430d7bc4c085a6b6c5b94397a3c1b5993612bda"] = "supporter"
 	}
 
 	function jcms.hud_GetSpecialText(ply)
@@ -453,7 +458,15 @@
 			local specialText = jcms.hud_GetSpecialText(ply)
 			if specialText then
 				local str = "#jcms.specialtext_" .. specialText
-				draw.SimpleText(str, "DefaultSmall", baseX + iconSize + 8, baseY + nameheight + (lowres and 0 or 2), specialText=="creator" and jcms.color_bright or jcms.color_pulsing)
+
+				local color = jcms.color_pulsing
+				if specialText == "creator" then
+					color = jcms.color_bright_alt
+				elseif specialText == "supporter" then
+					color = jcms.color_bright
+				end
+
+				draw.SimpleText(str, "DefaultSmall", baseX + iconSize + 8, baseY + nameheight + (lowres and 0 or 2), color)
 			end
 
 			local desiredclass = ply:GetNWString("jcms_desiredclass", "")
