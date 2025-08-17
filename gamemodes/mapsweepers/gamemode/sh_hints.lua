@@ -44,6 +44,7 @@ jcms.HINT_LEECHES		= 7
 jcms.HINT_POLYP			= 8
 jcms.HINT_UNIQUEORDERS	= 9
 jcms.HINT_STUCK			= 10
+jcms.HINT_FLIPOVER		= 11
 
 if CLIENT then 
 	jcms.hints = {
@@ -57,7 +58,8 @@ if CLIENT then
 		[jcms.HINT_LEECHES] = "#jcms.hint_leeches",
 		[jcms.HINT_POLYP] = "#jcms.hint_polyp",
 		[jcms.HINT_UNIQUEORDERS] = "#jcms.hint_uniqueorders",
-		[jcms.HINT_STUCK] = "#jcms.hint_stuck"
+		[jcms.HINT_STUCK] = "#jcms.hint_stuck",
+		[jcms.HINT_FLIPOVER] = "#jcms.hint_flipover"
 	}
 end
 

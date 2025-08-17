@@ -76,6 +76,8 @@ function ENT:Initialize()
 				bs:Spawn()
 			end
 		end
+
+		constraint.Keepupright( self, angle_zero, 0, 3 )
 	end
 end
 
@@ -187,6 +189,11 @@ if SERVER then
 				if IsValid(wep) then
 					wep:SetNextPrimaryFire( CurTime() + 1 )
 					wep:SetNextSecondaryFire( CurTime() + 1 )
+				end
+
+				local roll = driver:EyeAngles().r
+				if math.abs(roll) > 160 then
+					jcms.director_TryShowTip(driver, jcms.HINT_FLIPOVER)
 				end
 			end
 
@@ -397,6 +404,10 @@ if SERVER then
 
 			xyDamp.x = math.Clamp(xyDamp.x, -500, 500)
 			xyDamp.y = math.Clamp(xyDamp.y, -500, 500)
+
+			if ctrlFwd == 0 and ctrlTurbo == 0 and ctrlDrift == 0 then
+				xyDamp:Mul(2.3)
+			end
 		-- }}}
 
 		-- Final {{{
@@ -409,7 +420,7 @@ if SERVER then
 			vecLinear:Add(vecLinearSum)
 			vecLinear:Add(xyDamp)
 			vecLinear.x = vecLinear.x + ctrlFwd * Lerp(ctrlTurbo, self.Speed, self.SpeedTurbo)
-
+			
 			return vecAngular, vecLinear, SIM_LOCAL_ACCELERATION
 		-- }}}
 	end
