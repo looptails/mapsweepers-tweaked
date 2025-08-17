@@ -258,6 +258,7 @@ if CLIENT then
 
 	function ENT:DrawTranslucent(flags)
 		local v, a = self:GetBonePosition(1)
+		if not v then return end
 		local eyeDist = jcms.EyePos_lowAccuracy:DistToSqr(v)
 
 		if eyeDist < 250000 then
