@@ -1341,6 +1341,8 @@ end)
 		end)
 
 		local function storeStats()
+			if not jcms.fullyLoaded then return end
+			
 			local dataStr = util.Compress( util.TableToJSON(jcms.statistics) )
 			file.Write(statsFile, dataStr)
 		end
@@ -1364,6 +1366,8 @@ end)
 		end)
 
 		local function storeFavWeapons()
+			if not jcms.fullyLoaded then return end
+
 			local favWeapons = {}
 			for k, v in pairs(jcms.weapon_favourites) do 
 				if v then

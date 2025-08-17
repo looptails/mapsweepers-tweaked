@@ -2854,6 +2854,8 @@ end
 		end)
 
 		hook.Add("ShutDown", "jcms_SaveRunData", function()
+			if not jcms.fullyLoaded then return end
+
 			if jcms.director and not jcms.director.gameover then
 				jcms.runprogress_Reset()
 				--Resets our run if we're in a mission. Prevents save-scumming.
@@ -2876,6 +2878,8 @@ end
 		end)
 
 		hook.Add("ShutDown", "jcms_SavePlayerData", function()
+			if not jcms.fullyLoaded then return end
+
 			local dataStr = util.Compress(util.TableToJSON(jcms.playerData))
 			file.Write(playerDataFile, dataStr)
 		end)
@@ -2883,7 +2887,7 @@ end
 
 	do
 		local validMapsFile = "mapsweepers/server/validMaps.json"
-		hook.Add("InitPostEntity", "jcms_RestorePlayerData", function()
+		hook.Add("InitPostEntity", "jcms_RestoreValidMaps", function()
 			if file.Exists(validMapsFile, "DATA") then
 				local dataTxt = file.Read(validMapsFile, "DATA")
 				local dataTbl = util.JSONToTable(dataTxt)
@@ -2892,7 +2896,9 @@ end
 			end
 		end)
 
-		hook.Add("ShutDown", "jcms_SavePlayerData", function()
+		hook.Add("ShutDown", "jcms_SaveValidMaps", function()
+			if not jcms.fullyLoaded then return end
+
 			local dataStr = util.TableToJSON(jcms.validMaps)
 			file.Write(validMapsFile, dataStr)
 		end)

@@ -137,6 +137,11 @@ jcms.vectorOne = Vector(1, 1, 1)
 -- // }}}
 
 -- Material Overrides {{{
+	hook.Add("InitPostEntity", "jcms_loaded", function()
+		timer.Simple(0, function() --after all our initPostEnt logic has run too.
+			jcms.fullyLoaded = true
+		end)
+	end)
 
 	hook.Add("InitPostEntity", "jcms_matOverride", function()
 		Material("models/humans/male/group03/citizen_sheet"):SetTexture("$basetexture", "models/jcms/rgg_male")
