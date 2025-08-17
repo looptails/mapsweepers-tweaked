@@ -1116,11 +1116,11 @@ jcms.MAPGEN_CONSTRUCT_DIAMETER = math.sqrt(82411875)
 
 	function jcms.mapgen_AreaPointAwayFromEdges(a, distance)
 		local sx, sy = a:GetSizeX(), a:GetSizeY()
-		distance = math.Clamp( tonumber(distance) or 64, 0, math.min(sx, sy) )
+		distance = math.Clamp( tonumber(distance) or 64, 0, math.max(sx, sy) )
 
 		local center = a:GetCenter()
-		center.x = center.x + (sx - distance*2) * (math.random() - 0.5)
-		center.y = center.y + (sy - distance*2) * (math.random() - 0.5)
+		center.x = center.x + math.max(0, sx-distance) * (math.random() - 0.5)
+		center.y = center.y + math.max(0, sy-distance) * (math.random() - 0.5)
 		return a:GetClosestPointOnArea(center)
 	end
 

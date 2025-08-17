@@ -550,6 +550,9 @@
 
 		thumper = {
 			check = function(area)
+				local sx, sy = area:GetSizeX(), area:GetSizeY()
+				if sx < 150 or sy < 150 then return false end
+				
 				local center = jcms.mapgen_AreaPointAwayFromEdges(area, 200)
 				local tr = util.TraceHull { start = center, endpos = center + Vector(0, 0, 100), mins = Vector(-24, -24, 0), maxs = Vector(24, 24, 64) }
 				
