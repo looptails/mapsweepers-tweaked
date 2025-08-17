@@ -97,11 +97,14 @@ table.Empty(jcms.classesOrderIndices)
 					ply:SetArmor(newValue)
 
 					if newValue == ply:GetMaxArmor() then
-						local ed = EffectData()
-						ed:SetEntity(ply)
-						ed:SetFlags(2)
-						ed:SetColor(jcms.util_colorIntegerSweeperShield)
-						util.Effect("jcms_shieldeffect", ed)
+						if not ply:GetNoDraw() then
+							local ed = EffectData()
+							ed:SetEntity(ply)
+							ed:SetFlags(2)
+							ed:SetColor(jcms.util_colorIntegerSweeperShield)
+							util.Effect("jcms_shieldeffect", ed)
+						end
+
 						ply:EmitSound("items/suitchargeok1.wav", 50, 130, 0.5)
 					end
 				end

@@ -46,6 +46,16 @@ do
 		end
 	end
 
+	hook.Add( "SetupMove", "jcms_VehicleNoMove", function(ply, mv, cmd)
+		if ply:GetMoveType() == MOVETYPE_NOCLIP and IsValid( ply:GetNWEntity("jcms_vehicle") ) then
+			mv:SetForwardSpeed(0)
+			mv:SetSideSpeed(0)
+			mv:SetUpSpeed(0)
+			mv:SetFinalStepHeight(0)
+			mv:SetButtons( bit.band( mv:GetButtons(), bit.bnot(IN_JUMP) ) )
+		end
+	end )
+
 	--Stops this from getting applied repeatedly when reloading code. This was fucking up my profiling - j
 	jcms.sprintHackSetup = true
 

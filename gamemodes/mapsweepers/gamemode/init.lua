@@ -794,7 +794,7 @@ end
 		if time >= nextWaterThink then
 			jcms.leechesThinkTime = time + interval
 
-			if jcms.team_JCorp_player(ply) then
+			if jcms.team_JCorp_player(ply) and not IsValid(ply:GetNWEntity("jcms_vehicle")) then
 				local wl = ply:WaterLevel()
 
 				if (wl > 0) then

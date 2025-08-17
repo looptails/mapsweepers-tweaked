@@ -181,6 +181,8 @@ if SERVER then
 			
 			local driver = selfTbl.GetDriver(self)
 			if IsValid(driver) then
+				driver:SetPos(self:GetPos())
+				
 				local wep = driver:GetActiveWeapon()
 				if IsValid(wep) then
 					wep:SetNextPrimaryFire( CurTime() + 1 )
@@ -468,7 +470,7 @@ if SERVER then
 			self.driver:DrawWorldModel(true)
 			self.driver:SetNoDraw(false)
 			self.driver:SetNWEntity("jcms_vehicle", NULL)
-			self.driver:SetParent()
+			self.driver:SetMoveType(MOVETYPE_WALK)
 			
 			if ply == nil then
 				self.driver:SetPos(self:GetExitPos())
@@ -488,8 +490,7 @@ if SERVER then
 			ply:SetNoDraw(true)
 			ply:SetNWEntity("jcms_vehicle", self)
 			ply:SetEyeAngles(self:GetAngles())
-			ply:SetParent(self)
-			ply:SetPos( Vector(0, 0, 0) )
+			ply:SetMoveType( MOVETYPE_NOCLIP )
 		end
 	end
 	
@@ -634,12 +635,19 @@ if CLIENT then
 		local shieldActive = self:GetShieldActive()
 		local shieldFrac = math.Clamp(self:GetShieldPower(), 0, 1)
 
+		local str1 = language.GetPhrase("jcms.apc_tip")
+		local str2 = language.GetPhrase("jcms.apc_tip_ready")
+		local str3 = language.GetPhrase("jcms.apc_tip_active")
+		local str4 = language.GetPhrase("jcms.apc_tip_charging")
+		local str = string.format(str1, shieldActive and str3 or (shieldFrac >= 1 and str2 or str4))
+
 		surface.SetDrawColor(jcms.color_dark_alt)
 		surface.DrawRect(-healthWidth/2 + 200, -114-64, healthWidth - 128, 32)
 		if not shieldActive then
 			surface.SetDrawColor(jcms.color_dark)
 		end
 		surface.DrawRect(-healthWidth/2, -114, healthWidth, 32)
+		draw.SimpleText(str, "jcms_hud_medium", -healthWidth/2 + 200, -114-64-8, jcms.color_dark_alt, TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM)
 
 		render.OverrideBlend(true, BLEND_SRC_ALPHA, BLEND_ONE, BLENDFUNC_ADD)
 			surface.SetDrawColor(jcms.color_pulsing)
@@ -658,6 +666,7 @@ if CLIENT then
 			end
 			jcms.hud_DrawStripedRect(-healthWidth/2, -114-off+2, healthWidth, 32-4, 128, shieldActive and CurTime()*-32 or 0)
 			surface.DrawRect(-healthWidth/2, -114-off, healthWidth*healthFrac, 32)
+			draw.SimpleText(str, "jcms_hud_medium", -healthWidth/2 + 200, -114-64-8-off, jcms.color_bright_alt, TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM)
 		render.OverrideBlend(false)
 	end
 	
