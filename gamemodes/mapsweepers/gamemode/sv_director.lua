@@ -1539,6 +1539,8 @@
 				local plyCount = table.Count(d.cachedNicknames)
 				for sid64, nickname in pairs(d.cachedNicknames) do
 					local ply = player.GetBySteamID64(sid64)
+					if not ply then continue end
+					
 					local pd = {}
 
 					pd.sid64 = sid64
