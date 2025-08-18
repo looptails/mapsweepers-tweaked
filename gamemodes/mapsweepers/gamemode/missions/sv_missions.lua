@@ -264,7 +264,7 @@
 		-- }}}
 
 		-- Rewards & Progress {{{
-			if victory then
+			if victory and not jcms.serverExtension_forcedEvac then
 				jcms.runprogress_Victory()
 
 				for i, pd in ipairs( postMissionStats.players ) do
@@ -341,6 +341,8 @@
 				end
 			end)
 		-- }}}
+		
+		jcms.serverExtension_forcedEvac = false
 	end
 
 	function jcms.mission_SetStartDelay(delay)
@@ -440,6 +442,10 @@
 -- // Info {{{
 
 	function jcms.mission_GetObjectives()
+		if jcms.serverExtension_forcedEvac then 
+			return jcms.mission_GenerateEvacObjective()
+		end
+
 		local d = jcms.director
 		if d then
 			local data = assert(jcms.missions[ d.missionType ], "invalid mission type: " .. tostring(arg))
