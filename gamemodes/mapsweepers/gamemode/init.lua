@@ -56,7 +56,16 @@ include "sh_statistics.lua"
 		for i, v in ipairs(missionFiles) do 
 			include("missions/types/" .. v)
 		end
+	end
+-- // }}}
+
+-- // Prefab Includes {{{
+	do
 		include "prefabs/sv_prefabs.lua"
+		local prefabFiles, _ = file.Find( "mapsweepers/gamemode/prefabs/types/*.lua", "LUA")
+		for i, v in ipairs(prefabFiles) do 
+			include("prefabs/types/" .. v)
+		end
 	end
 -- // }}}
 
