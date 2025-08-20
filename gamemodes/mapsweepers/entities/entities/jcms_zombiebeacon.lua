@@ -37,6 +37,9 @@ function ENT:SetupDataTables()
 	
 	self:NetworkVar("Float", 0, "Charge")
 	self:NetworkVar("Float", 1, "HealthFraction")
+
+	self:NetworkVar("Int", 0, "RequiredSwps")
+
 	if SERVER then 
 		self:SetCharge(0)
 		self:SetHealthFraction(1)
@@ -91,7 +94,10 @@ if SERVER then
 	function ENT:Think()
 		local selfPos = self:GetPos()
 
-		local required = math.ceil(#jcms.GetAliveSweepers() * 0.25)
+		local timeReduction = math.Clamp(1 - (jcms.util_GetMissionTime()/60 - 5) / 20, 0, 1)
+		local required = math.ceil(#jcms.GetAliveSweepers() * 0.25 * timeReduction)
+		self:SetRequiredSwps(required)
+
 		self:SetSwpNear( #jcms.GetSweepersInRange(selfPos, 650) >= required )
 
 		self:NextThink(CurTime() + 1)
