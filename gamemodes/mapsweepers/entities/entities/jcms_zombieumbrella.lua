@@ -74,6 +74,11 @@ if SERVER then
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
 			self:SetHealthFraction(self:Health() / self:GetMaxHealth())
+
+			local blocker = self:GetBlockerEnt()
+			if IsValid(blocker) then
+				blocker:Extinguish()
+			end
 		end)
 
 		if self:Health() > 0 then
