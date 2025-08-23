@@ -351,6 +351,7 @@
 		getObjectives = function(missionData)
 			local total = 0
 			local totalComplete = 0
+			local broken = false
 			for i, track in ipairs(missionData.terminal_tracks) do 
 				local trackComplete = 0 
 				local trackTotal = 0
@@ -358,6 +359,8 @@
 					if IsValid(terminal) then
 						trackComplete = trackComplete + ((terminal.isComplete and 1) or 0)
 						trackTotal = trackTotal + 1
+					else
+						broken = true --Hopefully these don't get garbage collected too quickly
 					end
 				end
 
@@ -375,7 +378,7 @@
 			end
 
 			
-			if totalComplete < total then 
+			if totalComplete < total or broken then 
 				local objectives = {} 
 
 				for i, track in ipairs(missionData.terminal_tracks) do 

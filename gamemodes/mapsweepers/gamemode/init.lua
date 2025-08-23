@@ -1922,6 +1922,7 @@ end
 		["gm_born"] = true,				--This one has packed content which means it just outright doesn't show up at all.
 		["gm_shattered_reality"] = true,
 		["gm_hillfoot_construct"] = true,
+		["gm_coast_bridge_prewar"] = true
 	}
 
 	concommand.Add("jcms_addValidMap", function(ply, cmd, args)
