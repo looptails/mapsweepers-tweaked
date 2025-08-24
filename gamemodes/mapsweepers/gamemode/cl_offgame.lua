@@ -2326,6 +2326,43 @@ jcms.offgame = jcms.offgame or NULL
 						end
 					-- }}}
 
+					-- Difficulty settings {{{
+						do
+							local bar = catList:Add("#jcms.opt_difficultysettings")
+							bar.Paint = jcms.paint_Category
+							bar.dontSubtractHeight = true
+							local content = vgui.Create("DPanel", bar)
+							content:SetPaintBackground(false)
+							content:DockPadding(0, 0, 0, 16)
+							bar:SetContents(content)
+
+							local freq = content:Add("DNumSlider")
+							freq:SetText("#jcms.opt_swarm_freq")
+							freq:SetSize(contentSize - 48, 24)
+							freq:SetPos(24, 24)
+							freq:SetMinMax(0, 5)
+							freq:SetConVar("jcms_swarm_frequency")
+							freq.Paint = jcms.paint_NumSlider
+
+							local size = content:Add("DNumSlider")
+							size:SetText("#jcms.opt_swarm_size")
+							size:SetSize(contentSize - 48, 24)
+							size:SetPos(24, 24 + 32)
+							size:SetMinMax(0, 5)
+							size:SetConVar("jcms_swarm_size")
+							size.Paint = jcms.paint_NumSlider
+
+							local warn = content:Add("DNumSlider")
+							warn:SetText("#jcms.opt_swarm_warn")
+							warn:SetSize(contentSize - 48, 24)
+							warn:SetPos(24, 24 + 64)
+							warn:SetMinMax(0, 30)
+							warn:SetConVar("jcms_swarm_warning")
+							warn:SetDecimals(0)
+							warn.Paint = jcms.paint_NumSlider
+						end
+					-- }}}
+
 					-- Map Rotation {{{
 						do
 							local bar = catList:Add("#jcms.opt_maps")
