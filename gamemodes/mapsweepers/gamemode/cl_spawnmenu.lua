@@ -690,6 +690,7 @@ end
 					end)
 				end
 			end
+			hook.Run("MapSweepersScoreboardPlayerMenu", m, elem, elem.ply, elem.i)
 			m:Open()
 		end
 	end
