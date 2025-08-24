@@ -343,6 +343,7 @@
 		-- }}}
 		
 		jcms.serverExtension_forcedEvac = false
+		jcms.serverExtension_suddenDeath = false
 	end
 
 	function jcms.mission_SetStartDelay(delay)
