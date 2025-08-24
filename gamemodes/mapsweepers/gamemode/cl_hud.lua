@@ -225,7 +225,7 @@
 		if jcms.hud_targetAnim > 1 and not IsValid(jcms.hud_target) then
 			jcms.hud_targetAnim = jcms.hud_targetAnim - FrameTime()
 		else
-			jcms.hud_targetAnim = (jcms.hud_targetAnim * 8 + (IsValid(jcms.hud_target) and 1.5 or 0)) / 9
+			jcms.hud_targetAnim = (jcms.hud_targetAnim * 8 + (not IsValid(me:GetNWEntity("jcms_vehicle")) and IsValid(jcms.hud_target) and 1.5 or 0)) / 9
 		end
 
 		jcms.hud_spawnmenuAnim = (jcms.hud_spawnmenuAnim * 6 + (jcms.spawnmenu_isOpen and 1 or 0)) / 7
@@ -2185,12 +2185,6 @@
 				hudUnshift()
 			end
 		end,
-
-		["jcms_cache"] = function(ent)
-		end,
-
-		["jcms_terminal"] = function(ent)
-		end,
 		
 		["jcms_shieldcharger"] = function(ent, blend)
 
@@ -2362,6 +2356,18 @@
 				jcms.hud_DrawStripedRect(x2 + healthWidth*healthFrac, -230, healthWidth*(1-healthFrac), 24-4)
 			render.OverrideBlend(false)
 
+			surface.SetAlphaMultiplier(1)
+		end,
+
+		["jcms_apc"] = function(ent, blend)
+			surface.SetAlphaMultiplier(blend)
+			local y = -450 - 100*blend
+			local count = ent:GetPassengerCount()
+			local str1, str2 = "#jcms.apc_passengers", count .. "/4"
+			draw.SimpleText(str1, "jcms_hud_medium", 0, y, jcms.color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
+			draw.SimpleText(str2, "jcms_hud_huge", 0, y, jcms.color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+			draw.SimpleText(str1, "jcms_hud_medium", 0, y-4, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
+			draw.SimpleText(str2, "jcms_hud_huge", 0, y-4, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
 			surface.SetAlphaMultiplier(1)
 		end
 	}

@@ -78,10 +78,12 @@ function ENT:Initialize()
 		end
 
 		constraint.Keepupright( self, angle_zero, 0, 3 )
+		self.PassengersAPC = {}
 	end
 end
 
 function ENT:SetupDataTables()
+	self:NetworkVar("Int", 0, "PassengerCount")
 	self:NetworkVar("Float", 0, "HealthFraction")
 	self:NetworkVar("Float", 1, "ShieldPower")
 	self:NetworkVar("Bool", 0, "IsDestroyed")
@@ -195,6 +197,29 @@ if SERVER then
 				if math.abs(roll) > 160 then
 					jcms.director_TryShowTip(driver, jcms.HINT_FLIPOVER)
 				end
+			end
+
+			for i=#self.PassengersAPC, 1, -1 do
+				local ply = self.PassengersAPC[i]
+				if IsValid(ply) then
+					if ply:KeyDown(IN_USE) then
+						self:RemovePassenger(ply)
+					else
+						ply:SetPos(self:GetPos())
+					
+						local wep = ply:GetActiveWeapon()
+						if IsValid(wep) then
+							wep:SetNextPrimaryFire( CurTime() + 1 )
+							wep:SetNextSecondaryFire( CurTime() + 1 )
+						end
+					end
+				else
+					table.remove(self.PassengersAPC, i)
+				end
+			end
+
+			if self:GetPassengerCount() ~= #self.PassengersAPC then
+				self:SetPassengerCount(#self.PassengersAPC)
 			end
 
 			local t = CurTime()
@@ -426,15 +451,60 @@ if SERVER then
 	end
 	
 	function ENT:Use(activator)
-		if (not self.jcms_destroyed) and (CurTime() > self.nextInteract) and (not (IsValid(self.driver) and self.driver:IsPlayer())) then
-			self:SetDriver(activator)
-			self.nextInteract = CurTime() + 1
+		if (not self.jcms_destroyed) then
+			if (not (IsValid(self.driver) and self.driver:IsPlayer())) then
+				if (CurTime() > self.nextInteract) then
+					self:SetDriver(activator)
+					self.nextInteract = CurTime() + 1
+				end
+			elseif activator ~= self.driver then
+				self:TryEnterAsPassenger(activator)
+			end
 		end
 	end
 
-	function ENT:GetExitPos()
+	function ENT:TryEnterAsPassenger(ply)
+		local passengers = self.PassengersAPC
+
+		if #passengers < 4 and not table.HasValue(passengers, ply) then
+			table.insert(passengers, ply)
+			
+			ply:DrawViewModel(false)
+			ply:DrawWorldModel(false)
+			ply:SetNoDraw(true)
+			ply:SetNWEntity("jcms_vehicle", self)
+			ply:SetEyeAngles(self:GetAngles())
+			ply:SetMoveType( MOVETYPE_NOCLIP )
+
+			self:SetPassengerCount(#passengers)
+		end
+	end
+
+	function ENT:RemovePassenger(ply)
+		local passengers = self.PassengersAPC
+		table.RemoveByValue(passengers, ply)
+
+		ply:DrawViewModel(true)
+		ply:DrawWorldModel(true)
+		ply:SetNoDraw(false)
+		ply:SetNWEntity("jcms_vehicle", NULL)
+		ply:SetMoveType(MOVETYPE_WALK)
+
+		ply:SetPos(self:GetExitPos(ply))
+	end
+
+	function ENT:GetExitPos(forPly)
 		-- Hull traces
-		local filter = { self, self.driver }
+		local filter = { self, forPly }
+		if IsValid(self.driver) then
+			table.insert(filter, self.driver)
+		end
+		for i, passenger in ipairs(self.PassengersAPC) do
+			if IsValid(passenger) then
+				table.insert(filter, passenger)
+			end
+		end
+
 		local angle = self:GetAngles()
 		local pos = self:WorldSpaceCenter()
 		for i=0, 3 do
@@ -443,7 +513,7 @@ if SERVER then
 			
 			local v = pos + angle:Right()*(cos*120) + angle:Forward()*(sin*150)
 			local tr = util.TraceHull {
-				start = pos, endpos = v, filter = filter, mins = self.driver:OBBMins(), maxs = self.driver:OBBMaxs()
+				start = pos, endpos = v, filter = filter, mins = forPly:OBBMins(), maxs = forPly:OBBMaxs()
 			}
 
 			if tr.Fraction > 0.85 then
@@ -452,14 +522,14 @@ if SERVER then
 		end
 
 		local uptrace = util.TraceHull {
-			start = pos, endpos = pos + Vector(0, 0, 62), filter = filter, mins = self.driver:OBBMins(), maxs = self.driver:OBBMaxs()
+			start = pos, endpos = pos + Vector(0, 0, 62), filter = filter, mins = forPly:OBBMins(), maxs = forPly:OBBMaxs()
 		}
 
 		if uptrace.Fraction > 0.5 then
 			return uptrace.HitPos
 		else
 			uptrace = util.TraceHull {
-				start = pos, endpos = pos + Vector(0, 0, -100), filter = filter, mins = self.driver:OBBMins(), maxs = self.driver:OBBMaxs()
+				start = pos, endpos = pos + Vector(0, 0, -100), filter = filter, mins = forPly:OBBMins(), maxs = forPly:OBBMaxs()
 			}
 			if uptrace.Fraction > 0.5 then
 				return uptrace.HitPos
@@ -484,7 +554,7 @@ if SERVER then
 			self.driver:SetMoveType(MOVETYPE_WALK)
 			
 			if ply == nil then
-				self.driver:SetPos(self:GetExitPos())
+				self.driver:SetPos(self:GetExitPos(self.driver))
 			end
 
 			local ea = self.driver:EyeAngles()
@@ -651,6 +721,8 @@ if CLIENT then
 		local str3 = language.GetPhrase("jcms.apc_tip_active")
 		local str4 = language.GetPhrase("jcms.apc_tip_charging")
 		local str = string.format(str1, shieldActive and str3 or (shieldFrac >= 1 and str2 or str4))
+		local str_passengers = language.GetPhrase("jcms.apc_passengers")
+		local str_passengerscount = self:GetPassengerCount() .. "/4"
 
 		surface.SetDrawColor(jcms.color_dark_alt)
 		surface.DrawRect(-healthWidth/2 + 200, -114-64, healthWidth - 128, 32)
@@ -659,6 +731,9 @@ if CLIENT then
 		end
 		surface.DrawRect(-healthWidth/2, -114, healthWidth, 32)
 		draw.SimpleText(str, "jcms_hud_medium", -healthWidth/2 + 200, -114-64-8, jcms.color_dark_alt, TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM)
+
+		local tw,th = draw.SimpleText(str_passengerscount, "jcms_hud_huge", -healthWidth/2 + 150, -114-32, jcms.color_dark, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM)
+		draw.SimpleText(str_passengers, "jcms_hud_small", -healthWidth/2 + 150 - tw/2, -114-32-th, jcms.color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
 
 		render.OverrideBlend(true, BLEND_SRC_ALPHA, BLEND_ONE, BLENDFUNC_ADD)
 			surface.SetDrawColor(jcms.color_pulsing)
@@ -678,6 +753,9 @@ if CLIENT then
 			jcms.hud_DrawStripedRect(-healthWidth/2, -114-off+2, healthWidth, 32-4, 128, shieldActive and CurTime()*-32 or 0)
 			surface.DrawRect(-healthWidth/2, -114-off, healthWidth*healthFrac, 32)
 			draw.SimpleText(str, "jcms_hud_medium", -healthWidth/2 + 200, -114-64-8-off, jcms.color_bright_alt, TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM)
+		
+			draw.SimpleText(str_passengerscount, "jcms_hud_huge", -healthWidth/2 + 150, -114-32-6, jcms.color_bright, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM)
+			draw.SimpleText(str_passengers, "jcms_hud_small", -healthWidth/2 + 150 - tw/2, -114-32-th-4, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
 		render.OverrideBlend(false)
 	end
 	

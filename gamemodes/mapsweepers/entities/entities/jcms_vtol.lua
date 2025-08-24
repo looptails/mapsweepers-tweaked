@@ -667,6 +667,10 @@ if SERVER then
 			self:EmitSound("physics/body/body_medium_impact_soft4.wav")
 		end
 	end
+
+	function ENT:RedirectDamage(driver, dmg)
+		dmg:SetDamage(0)
+	end
 end
 
 if CLIENT then
