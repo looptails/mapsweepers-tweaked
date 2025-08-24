@@ -773,13 +773,13 @@ jcms.MAPGEN_CONSTRUCT_DIAMETER = math.sqrt(82411875)
 			end
 		end
 
-		timer.Simple(1, function()
+		--[[timer.Simple(1, function()
 			for pt1,cs in pairs(connections) do
 				for i, pt2 in ipairs(cs) do
 					debugoverlay.Line(pt1, pt2, 1, ColorRand(), true)
 				end
 			end
-		end)
+		end)]]
 
 		return connections, chunks
 	end
