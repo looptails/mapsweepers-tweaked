@@ -55,6 +55,14 @@ function ENT:SetupDataTables()
 	self:NetworkVar("Float", 0, "Heat")
 end
 
+function ENT:SetDriver(v)
+	return self:SetMan(v)
+end
+
+function ENT:GetDriver()
+	return self:GetMan()
+end
+
 function ENT:Initialize()
 	self:SetModel("models/jcms/jcorp_emplacement.mdl")
 	if SERVER then
@@ -194,10 +202,6 @@ if SERVER then
 				tr.Entity:DispatchTraceAttack(dmg, tr)
 			end
 		end
-	end
-
-	function ENT:GetDriver()
-		return self:GetMan()
 	end
 
 	function ENT:Think()

@@ -202,7 +202,7 @@ if SERVER then
 			for i=#self.PassengersAPC, 1, -1 do
 				local ply = self.PassengersAPC[i]
 				if IsValid(ply) then
-					if ply:KeyDown(IN_USE) then
+					if ply:KeyDown(IN_USE) and (CurTime() - (ply.jcms_lastEnteredAsPassenger or 0)) > 1 then
 						self:RemovePassenger(ply)
 					else
 						ply:SetPos(self:GetPos())
@@ -479,6 +479,7 @@ if SERVER then
 			ply:SetMoveType( MOVETYPE_NOCLIP )
 
 			self:SetPassengerCount(#passengers)
+			ply.jcms_lastEnteredAsPassenger = CurTime()
 		end
 	end
 
