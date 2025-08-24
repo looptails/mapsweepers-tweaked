@@ -675,6 +675,7 @@ jcms.MAPGEN_CONSTRUCT_DIAMETER = math.sqrt(82411875)
 		connectionDist = math.max(1, tonumber(connectionDist) or subdivisionSize * 1.9)
 		assert( connectionDist < subdivisionSize * 4, "[jcms.mapgen_VectorGrid] Connection distance is too high, your PC wouldn't like it." )
 
+		local extremePoints = {}
 		local subdiv = subdivisionSize
 		local connectionDist2 = connectionDist * connectionDist
 		for i, area in ipairs(areas) do
@@ -691,9 +692,13 @@ jcms.MAPGEN_CONSTRUCT_DIAMETER = math.sqrt(82411875)
 					vx = xSubdivCount==1 and (vx + areaSizeX/2) or (vx + subdiv * (x-1))
 					vy = ySubdivCount==1 and (vy + areaSizeY/2) or (vy + subdiv * (y-1))
 					v:SetUnpacked(vx, vy, vz)
-					v.z = area:GetZ(v) 
+					v.z = area:GetZ(v)
 					if bit.band(util.PointContents(v), CONTENTS_SOLID) == 0 then
 						table.insert(getChunkTable(vx, vy, v.z), v)
+
+						if (x==1 or x==xSubdivCount) and (y==1 or y==ySubdivCount) then
+							extremePoints[v] = area
+						end
 					end
 				end
 			end
@@ -727,13 +732,22 @@ jcms.MAPGEN_CONSTRUCT_DIAMETER = math.sqrt(82411875)
 							local zDiminishDist2 = (ptx - optx)^2 + (pty - opty)^2 + ((ptz - optz)*0.25)^2
 							
 							if zDiminishDist2 <= connectionDist2 then
-								vStart:SetUnpacked( ptx, pty, ptz + subdiv/2 )
-								vEnd:SetUnpacked( optx, opty, optz + subdiv )
-								tr_data.start = vStart
-								tr_data.endpos = vEnd
-								util.TraceLine(tr_data)
+								local shouldConnect = false
+								if extremePoints[pt] and extremePoints[opt] and extremePoints[pt] ~= extremePoints[opt] then
+									shouldConnect = true
+								else
+									vStart:SetUnpacked( ptx, pty, ptz + subdiv/2 )
+									vEnd:SetUnpacked( optx, opty, optz + subdiv )
+									tr_data.start = vStart
+									tr_data.endpos = vEnd
+									util.TraceLine(tr_data)
 
-								if not tr_res.Hit then
+									if not tr_res.Hit then
+										shouldConnect = true
+									end
+								end
+
+								if shouldConnect then
 									if not connections[pt] then
 										connections[pt] = { opt }
 									else
@@ -758,6 +772,14 @@ jcms.MAPGEN_CONSTRUCT_DIAMETER = math.sqrt(82411875)
 				chunks[chunkId] = nil
 			end
 		end
+
+		timer.Simple(1, function()
+			for pt1,cs in pairs(connections) do
+				for i, pt2 in ipairs(cs) do
+					debugoverlay.Line(pt1, pt2, 1, ColorRand(), true)
+				end
+			end
+		end)
 
 		return connections, chunks
 	end
