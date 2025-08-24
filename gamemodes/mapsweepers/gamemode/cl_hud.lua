@@ -2560,15 +2560,19 @@
 				draw.SimpleText("#jcms.spectating", "jcms_hud_medium", 0, -256, jcms.color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
 				local nickwidth = draw.SimpleText(tg:Nick(), "jcms_hud_huge", 32, -256, jcms.color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
 				surface.SetDrawColor(jcms.color_dark)
-				surface.SetMaterial(jcms.hud_myclassMat)
-				surface.DrawTexturedRectRotated(-24 - nickwidth/2, -256+64, 96, 96, 0)
+				if not jcms.hud_myclassMat:IsError() then
+					surface.SetMaterial(jcms.hud_myclassMat)
+					surface.DrawTexturedRectRotated(-24 - nickwidth/2, -256+64, 96, 96, 0)
+				end
 				
 				local off = 4
 				draw.SimpleText("#jcms.spectating", "jcms_hud_medium", 0, -256-off, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
 				draw.SimpleText(tg:Nick(), "jcms_hud_huge", 32, -256-off, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
 				surface.SetDrawColor(jcms.color_bright)
-				surface.SetMaterial(jcms.hud_myclassMat)
-				surface.DrawTexturedRectRotated(-24 - nickwidth/2, -256+64-off, 96, 96, 0)
+				if not jcms.hud_myclassMat:IsError() then
+					surface.SetMaterial(jcms.hud_myclassMat)
+					surface.DrawTexturedRectRotated(-24 - nickwidth/2, -256+64-off, 96, 96, 0)
+				end
 				
 				local sw = jcms.scrW
 				local healthWidth = math.min( sw, tg:GetMaxHealth() * 4 )

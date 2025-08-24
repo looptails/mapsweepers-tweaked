@@ -414,9 +414,11 @@
 			end
 
 			surface.SetDrawColor(col)
-			surface.SetMaterial(jcms.classmats[ tgclass ])
 			local tw = draw.SimpleText(language.GetPhrase("jcms.spectating") .. " " .. tg:Nick(), "jcms_big", ScrW()/2 + 16, ScrH() - 84, col, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
-			surface.DrawTexturedRectRotated(ScrW()/2 - tw/2 - 16, ScrH() - 84 - 16, 32, 32, 0)
+			if not jcms.classmats[ tgclass ]:IsError() then
+				surface.SetMaterial(jcms.classmats[ tgclass ])
+				surface.DrawTexturedRectRotated(ScrW()/2 - tw/2 - 16, ScrH() - 84 - 16, 32, 32, 0)
+			end
 		
 			local healthFrac = math.Clamp(tg:Health() / tg:GetMaxHealth(), 0, 1)
 			local armorFrac = math.Clamp(tg:Armor() / tg:GetMaxArmor(), 0, 1)
