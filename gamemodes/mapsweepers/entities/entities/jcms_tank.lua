@@ -437,6 +437,8 @@ if SERVER then
 	end
 	
 	function ENT:Use(activator)
+		if IsValid(activator) and activator:IsPlayer() and (not jcms.team_JCorp_player(activator)) then return end
+		
 		if (not self:GetTankIsTower()) and (not self.jcms_destroyed) and (CurTime() > self.nextInteract) and (not (IsValid(self.driver) and self.driver:IsPlayer())) then
 			self:SetDriver(activator)
 			self.nextInteract = CurTime() + 1

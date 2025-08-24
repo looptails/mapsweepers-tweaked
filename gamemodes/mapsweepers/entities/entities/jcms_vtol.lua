@@ -538,6 +538,8 @@ if SERVER then
 	end
 	
 	function ENT:Use(activator)
+		if IsValid(activator) and activator:IsPlayer() and (not jcms.team_JCorp_player(activator)) then return end
+		
 		if not IsValid(activator:GetNWEntity("jcms_vehicle")) and (not self.jcms_destroyed) and (self:GetIsWorking()) then
 			local driver = self:GetDriver()
 			if IsValid(driver) then
