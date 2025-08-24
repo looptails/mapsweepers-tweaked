@@ -200,7 +200,7 @@
 			jcms.classmats = {}
 		end
 		
-		local scoreboardAnim = jcms.hud_scoreboard
+		local scoreboardAnim = 0
 
 		local sw = ScrW()
 		local sweepers = {}

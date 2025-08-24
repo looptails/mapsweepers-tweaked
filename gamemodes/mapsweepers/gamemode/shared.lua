@@ -1291,6 +1291,10 @@ jcms.vectorOne = Vector(1, 1, 1)
 		return game.GetWorld():GetNWInt("jcms_winstreak", 0)
 	end
 
+	function jcms.util_GetCurrentDifficulty()
+		return game.GetWorld():GetNWFloat("jcms_difficulty", 0)
+	end
+
 -- }}}
 
 -- Licenses {{{

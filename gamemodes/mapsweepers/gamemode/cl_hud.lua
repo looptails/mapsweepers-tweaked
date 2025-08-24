@@ -169,9 +169,6 @@
 
 	jcms.hud_pulsingAlpha = 100
 
-	jcms.hud_scoreboardOpen = false
-	jcms.hud_scoreboard = 0
-
 	jcms.hud_target = NULL 
 	jcms.hud_targetLast = NULL 
 	jcms.hud_targetAnim = 0
@@ -219,8 +216,6 @@
 		else
 			jcms.hud_dead = math.max(0, jcms.hud_dead) + FrameTime()
 		end
-
-		jcms.hud_scoreboard = (jcms.hud_scoreboard * 8 + (jcms.hud_scoreboardOpen and 1 or 0)) / 9
 
 		if jcms.hud_targetAnim > 1 and not IsValid(jcms.hud_target) then
 			jcms.hud_targetAnim = jcms.hud_targetAnim - FrameTime()
@@ -877,190 +872,6 @@
 		render.OverrideBlend( false )
 	end
 
-	function jcms.draw_ScoreboardSweeper(ply, x, y)
-		local alphamul = surface.GetAlphaMultiplier()
-		local color, colorDark = jcms.color_bright, jcms.color_dark
-		if ply == jcms.locPly then
-			color, colorDark = jcms.color_bright_alt, jcms.color_dark_alt
-		end
-
-		local dead = ply:GetObserverMode() == OBS_MODE_CHASE or not ply:Alive()
-		local evacuated = ply:GetNWBool("jcms_evacuated", false)
-		local w, h = 1500, 134
-
-		if not jcms.classmats then
-			jcms.classmats = {}
-		end
-		
-		local class = ply:GetNWString("jcms_class", "infantry")
-		if not jcms.classmats[ class ] then
-			jcms.classmats[ class ] = Material("jcms/classes/"..class..".png")
-		end
-
-		if dead then
-			surface.SetAlphaMultiplier(alphamul*0.75)
-		end
-
-		surface.SetDrawColor(colorDark)
-		jcms.hud_DrawFilledPolyButton(x-w/2, y-h/2, w, h, 32)
-
-		local healthWidth = ply:GetMaxHealth()*3
-		local healthFrac = math.Clamp(ply:Health() / ply:GetMaxHealth(), 0, 1)
-		local armorWidth = ply:GetMaxArmor()*3
-		local armorFrac = math.Clamp(ply:Armor() / ply:GetMaxArmor(), 0, 1)
-		local pingString = ply:IsBot() and "BOT" or ply:Ping() .. "ms"
-		local cashString = jcms.util_CashFormat( ply:GetNWInt("jcms_cash", 0) )
-		local nick = ply:Nick()
-
-		if dead and not evacuated then
-			x = x + math.Rand(-5, 5)
-			y = y + math.Rand(-5, 5)
-		end
-
-		render.OverrideBlend( true, BLEND_SRC_ALPHA, BLEND_ONE, BLENDFUNC_ADD )
-			if dead then
-				surface.SetAlphaMultiplier(alphamul*0.33)
-			end
-			surface.SetDrawColor(color)
-
-			if dead and evacuated then
-				surface.SetMaterial(jcms.mat_evac)
-				surface.DrawTexturedRectRotated(x-w/2+h/2+4, y, 96, 96, 0)
-			else
-				local cmat = jcms.classmats[ class ]
-				surface.SetMaterial(cmat)
-				surface.DrawTexturedRectRotated(x-w/2+h/2+4, y, 96, 96, 0)
-			end
-
-			draw.SimpleText(nick, "jcms_hud_medium", x - w/2 + h, y, color, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
-			
-			local cashLineX = x + w/2 - h + 26
-			draw.SimpleText(cashString, #cashString >= 8 and "jcms_hud_small" or "jcms_hud_medium", cashLineX, y-26, color, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
-			jcms.draw_IconCash_optimised(cashLineX+38, y-26, 16, 16, color)
-			draw.SimpleText(pingString, "jcms_hud_medium", cashLineX+8, y+26, color, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
-			surface.SetAlphaMultiplier(alphamul)
-
-			if not dead then
-				surface.SetDrawColor(jcms.color_bright)
-				surface.DrawRect(x - 48, y-32, healthWidth*healthFrac, 24)
-				jcms.hud_DrawStripedRect(x - 48 + healthWidth*healthFrac, y-32, healthWidth*(1-healthFrac), 24, 100)
-
-				surface.SetDrawColor(jcms.color_bright_alt)
-				surface.DrawRect(x - 48, y, armorWidth*armorFrac, 24)
-				jcms.hud_DrawStripedRect(x - 48 + armorWidth*armorFrac, y, armorWidth*(1-armorFrac), 24, 100)
-			end
-		render.OverrideBlend( false )
-	end
-
-	function jcms.draw_ScoreboardEnemy(ply, x, y, isNPC)
-		local alphamul = surface.GetAlphaMultiplier()
-		local color, colorDark = jcms.color_bright, jcms.color_dark
-		if ply == jcms.locPly then
-			color, colorDark = jcms.color_bright_alt, jcms.color_dark_alt
-		end
-
-		local w, h = 800, 72
-		local pingString = ply:IsBot() and "BOT" or ply:Ping()
-		local nick = ply:Nick()
-
-		if isNPC then
-			local evacuated = ply:GetNWBool("jcms_evacuated", false)
-			surface.SetDrawColor(colorDark)
-			jcms.hud_DrawFilledPolyButton(x-w/2, y-h/2, w, h, 32)
-
-			if evacuated then
-				surface.SetMaterial(jcms.mat_evac)
-				surface.SetDrawColor(jcms.color_bright)
-				surface.DrawTexturedRectRotated(x + w/2 - h, y, 48, 48, 0)
-			end
-		else
-			draw.SimpleText(nick, "jcms_hud_medium", x - w/2 + h, y + 4, colorDark, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
-			draw.SimpleText(pingString, "jcms_hud_medium", x + w/2 - h - 32, y + 4, colorDark, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
-			surface.SetAlphaMultiplier(0.33*alphamul)
-		end
-
-		render.OverrideBlend( true, BLEND_SRC_ALPHA, BLEND_ONE, BLENDFUNC_ADD )
-			draw.SimpleText(nick, "jcms_hud_medium", x - w/2 + h, y, color, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
-			draw.SimpleText(pingString, "jcms_hud_medium", x + w/2 - h - 32, y, color, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
-		render.OverrideBlend( false )
-
-		surface.SetAlphaMultiplier(alphamul)
-	end
-
-	function jcms.draw_Scoreboard()
-		local me = jcms.locPly
-		if not(IsValid(me) and me:Alive()) then return end
-
-		local level, exp = jcms.statistics_GetLevelAndEXP()
-		local nextLevelExp = jcms.statistics_GetEXPForNextLevel(level + 1)
-
-		local blend = jcms.hud_scoreboard
-		local matrix = Matrix()
-		matrix:Translate(Vector(0, -400 + (1-blend)*-400 - 4*player.GetCount(), -8+blend*8))
-		cam.PushModelMatrix(matrix, true)
-			local R,G,B = jcms.color_bright:Unpack()
-
-			local time = string.FormattedTime( jcms.util_GetMissionTime() )
-			local formatted = string.format("%02i:%02i:%02i", time.h, time.m, time.s)
-			local levelX, levelY = -640, -404
-
-			surface.SetAlphaMultiplier(blend)
-			draw.SimpleText(game.GetMap(), "jcms_hud_huge", 0, -472, jcms.color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
-			draw.SimpleText(GetHostName(), "jcms_hud_medium", 0, -460 - 128, jcms.color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
-			draw.SimpleText(formatted, "jcms_hud_big", 0, -460 - 324, jcms.color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
-
-			local expString = string.format("%s / %s EXP", jcms.util_CashFormat(exp), jcms.util_CashFormat(nextLevelExp))
-			surface.SetDrawColor(jcms.color_dark)
-			surface.DrawRect(levelX, levelY + 8, 200, 128)
-			surface.DrawRect(levelX + 200 + 16, levelY + 128 - 24 + 8, -levelX + 416, 24)
-			draw.SimpleText(expString, "jcms_hud_medium", levelX + 200 + 16, levelY + 128 - 32, jcms.color_dark, TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM)
-
-			surface.SetDrawColor(R*blend, G*blend, B*blend)
-			render.OverrideBlend( true, BLEND_SRC_ALPHA, BLEND_ONE, BLENDFUNC_ADD )
-				surface.DrawRect(-400,-420-24,800,8)
-				surface.DrawRect(-800,-420-8,600,4)
-				surface.DrawRect(200,-420-8,600,4)
-				surface.DrawRect(-800+100,-250,600,4)
-				surface.DrawRect(200-100,-250,600,4)
-				surface.DrawRect(-250,-460-324,500,8)
-
-				local expFraction = jcms.statistics_GetEXP()
-				surface.DrawRect(levelX, levelY, 200, 128)
-				surface.DrawRect(levelX + 200 + 16, levelY + 128 - 24, (-levelX + 416) * (exp / nextLevelExp) * blend, 24)
-
-				draw.SimpleText(game.GetMap(), "jcms_hud_huge", 0, -472 - 4, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
-				draw.SimpleText(GetHostName(), "jcms_hud_medium", 0, -460 - 128 - 3, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
-				draw.SimpleText(formatted, "jcms_hud_big", 0, -460 - 324 - 4, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
-				draw.SimpleText(expString, "jcms_hud_medium", levelX + 200 + 16, levelY + 128 - 32 - 4, jcms.color_bright, TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM)
-			render.OverrideBlend( false )
-
-			draw.SimpleText(level, level >= 1000 and "jcms_hud_medium" or "jcms_hud_big", levelX + 100, levelY + 64, jcms.color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-
-			local i_sweepers = 0
-			local i_npcs = 0
-			for i, ply in ipairs( player.GetAll() ) do
-				local desiredTeam = ply:GetNWInt("jcms_desiredteam")
-
-				if desiredTeam == 1 then
-					jcms.draw_ScoreboardSweeper(ply, -500, i_sweepers*144 - 96)
-					i_sweepers = i_sweepers + 1
-				elseif desiredTeam == 2 then
-					jcms.draw_ScoreboardEnemy(ply, 700, i_npcs*96 - 84, true)
-					i_npcs = i_npcs + 1
-				end
-			end
-
-			for i, ply in ipairs( player.GetAll() ) do
-				if ply:GetNWInt("jcms_desiredteam") == 0 then
-					jcms.draw_ScoreboardEnemy(ply, 760, i_npcs*96 - 48, false)
-					i_npcs = i_npcs + 1
-				end
-			end
-
-			surface.SetAlphaMultiplier(1)
-		cam.PopModelMatrix()
-	end
-
 	jcms.draw_crosshairStyleFuncs = {
 		-- T-shaped
 		[1] = function(off, wide, long, down, blend, r, g, b)
@@ -1174,7 +985,7 @@
 		else
 			jcms.hud_playedBoostSound = false
 
-			local blend_sb = 1-jcms.hud_scoreboard
+			local blend_sb = 1
 			local blend_fov = math.Clamp(1-(75-jcms.util_GetRealFOV())/5,0,1)
 			local blend = math.min(blend_sb, blend_fov)
 
@@ -2523,11 +2334,7 @@
 		cam.End3D2D()
 
 		setup3d2dCentral("center")
-			if jcms.hud_scoreboard > 0.01 then
-				jcms.draw_Scoreboard()
-			end
-
-			if jcms.hud_scoreboard < 0.99 and jcms.hud_spawnmenuAnim < 0.05 then
+			if jcms.hud_spawnmenuAnim < 0.05 then
 				if not IsValid(vehicle) then
 					jcms.draw_Crosshair()
 				end
@@ -2677,12 +2484,6 @@
 		
 		setup3d2dDiagonal(true, false)
 			jcms.draw_Notifs()
-		cam.End3D2D()
-
-		setup3d2dCentral("center")
-			if jcms.hud_scoreboard > 0.01 then
-				jcms.draw_Scoreboard()
-			end
 		cam.End3D2D()
 
 		local f2 = math.ease.InOutCubic(jcms.hud_dead)
@@ -3099,14 +2900,6 @@
 	function GM:HUDWeaponPickedUp(weapon)
 		jcms.hud_AddNotifAmmo( tostring(weapon.PrintName or language.GetPhrase(weapon:GetClass())), 0 )
 		return true
-	end
-
-	function GM:ScoreboardShow()
-		jcms.hud_scoreboardOpen = jcms.hud_beginsequencet >= 8
-	end
-
-	function GM:ScoreboardHide()
-		jcms.hud_scoreboardOpen = false
 	end
 
 -- // }}}

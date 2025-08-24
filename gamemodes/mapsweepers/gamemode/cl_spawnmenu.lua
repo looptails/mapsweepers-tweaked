@@ -443,6 +443,8 @@ end
 		p:SetKeyboardInputEnabled(false)
 		p:SetCursor("crosshair")
 		p.Paint = jcms.spawnmenu_PaintMouseCapture
+
+		return jcms.spawnmenu_mouseCapturePanel
 	end
 
 	function GM:OnSpawnMenuOpen()
@@ -509,6 +511,257 @@ end
 			end
 		end
 
+		if IsValid(jcms.spawnmenu_mouseCapturePanel) then
+			jcms.spawnmenu_mouseCapturePanel:Remove()
+		end
+	end
+
+-- // }}}
+
+-- // Scoreboard {{{
+
+	function jcms.paint_scoreboard_PanelPlayers(p, w, h)
+		surface.SetDrawColor(jcms.color_dark.r, jcms.color_dark.g, jcms.color_dark.b, 230)
+		jcms.hud_DrawFilledPolyButton(0, 0, w, h)
+		
+		surface.SetDrawColor(jcms.color_bright)
+		jcms.hud_DrawHollowPolyButton(0, 0, w, h)
+
+		local str = language.GetPhrase("jcms.online"):format(player.GetCount(), game.MaxPlayers())
+		draw.SimpleText(str, "jcms_small_bolder", 8, 12, jcms.color_bright, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+	end
+
+	function jcms.paint_scoreboard_PanelServerInfo(p, w, h)
+		surface.SetDrawColor(jcms.color_dark.r, jcms.color_dark.g, jcms.color_dark.b, 230)
+		jcms.hud_DrawFilledPolyButton(0, 0, w, h)
+		
+		surface.SetDrawColor(jcms.color_bright)
+		jcms.hud_DrawHollowPolyButton(0, 0, w, h)
+
+		local name = GetHostName()
+		surface.SetFont("jcms_medium")
+		local tw = surface.GetTextSize(name)
+		draw.SimpleText(name, tw>=w*0.9 and "jcms_small_bolder" or "jcms_medium", w/2, 4, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+		draw.SimpleText(game.GetMap(), "jcms_small_bolder", w/2, 28, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+		
+		surface.SetDrawColor(jcms.color_pulsing)
+		surface.DrawRect(16, 52, w-32, 1)
+		surface.DrawRect(24, 74, w-48, 1)
+
+		draw.SimpleText("#jcms."..jcms.util_GetMissionType(), "jcms_small_bolder", 20, (52+74)/2, jcms.color_bright, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+		draw.SimpleText("#jcms."..jcms.util_GetMissionFaction(), "jcms_small_bolder", w-20, (52+74)/2, jcms.color_bright, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+
+		local time = string.FormattedTime( jcms.util_GetMissionTime() )
+		local formatted = string.format("%02i:%02i:%02i", time.h, time.m, time.s)
+		draw.SimpleText(formatted, "jcms_small_bolder", w/2, (52+74)/2, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+	
+		draw.SimpleText("#jcms.winstreak", "jcms_small_bolder", w/4, 100, jcms.color_bright_alt, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+		draw.SimpleText("x"..jcms.util_GetCurrentWinstreak(), "jcms_big", w/4, 112, jcms.color_bright_alt, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+		draw.SimpleText("#jcms.difficulty", "jcms_small_bolder", w*3/4, 100, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+		draw.SimpleText(string.format("%d%%", jcms.util_GetCurrentDifficulty()*100), "jcms_big", w*3/4, 112, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+	end
+
+	function jcms.paint_scoreboard_ScrollPanel(p, w, h)
+		surface.SetDrawColor(jcms.color_pulsing)
+		jcms.hud_DrawHollowPolyButton(0, 0, w, h)
+	end
+
+	function jcms.paint_scoreboard_Player(p, w, h)
+		local i, ply = p.i, p.ply
+		surface.SetDrawColor(jcms.color_bright)
+		surface.DrawRect(16, h-1, w-32, 1)
+
+		local isSweeper = ply:Team() == 1
+		local isNPC = ply:Team() == 2
+		local dead = not ply:Alive() or ply:GetObserverMode() == OBS_MODE_CHASE
+		local ox, oy = dead and math.Rand(-1, 1) or 0, dead and math.Rand(-1, 1) or 0
+
+		if dead then
+			surface.SetAlphaMultiplier(0.5)
+		end
+
+		local classmat = jcms.classmats[ ply:GetNWString("jcms_class") ]
+		if classmat and not classmat:IsError() then
+			surface.SetMaterial(classmat)
+			surface.SetDrawColor(jcms.color_bright)
+			surface.DrawTexturedRect(5+ox, 2+oy, 16, 16)
+		end
+
+		local nick = ply:Nick()
+		surface.SetFont("jcms_small_bolder")
+		local nw = surface.GetTextSize(nick)
+		draw.SimpleText(nick, nw >= 100 and "DefaultVerySmall" or "jcms_small_bolder", 25+ox, h/2-1+oy, jcms.color_bright, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+
+		local pingString = ply:IsBot() and "BOT" or ply:Ping().."ms"
+		local cashString = jcms.util_CashFormat(ply:GetNWInt("jcms_cash", 0)) .. "J"
+		draw.SimpleText(pingString, "jcms_small", w - 4 + ox, h/2-1 + oy, jcms.color_pulsing, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+		if isSweeper then
+			draw.SimpleText(cashString, "jcms_small", w - 4 - 58 + ox, h/2-1 + oy, jcms.color_bright, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+		elseif isNPC then
+			draw.SimpleText("NPC", "jcms_small", w - 4 - 58 + ox, h/2-1 + oy, jcms.color_bright, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+		end
+
+		local vol = ply:VoiceVolume()
+		if vol > 0 and ply:IsSpeaking() then
+			render.OverrideBlend( true, BLEND_SRC_ALPHA, BLEND_ONE, BLENDFUNC_ADD )
+			jcms.hud_DrawNoiseRect(0, 0, vol*w, h)
+			render.OverrideBlend( false )
+		end
+		
+		if not dead and isSweeper then
+			local healthWidth = ply:GetMaxHealth()/2
+			local healthFrac = math.Clamp(ply:Health() / ply:GetMaxHealth(), 0, 1)
+			local armorWidth = ply:GetMaxArmor()/2
+			local armorFrac = math.Clamp(ply:Armor() / ply:GetMaxArmor(), 0, 1)
+
+			surface.SetDrawColor(jcms.color_bright)
+			surface.DrawRect(140, 5, healthWidth*healthFrac, 4)
+			if healthFrac<1 then
+				jcms.hud_DrawStripedRect(140+healthWidth*healthFrac, 5, healthWidth*(1-healthFrac), 4, 16)
+			end
+
+			surface.SetDrawColor(jcms.color_bright_alt)
+			surface.DrawRect(140, 11, armorWidth*armorFrac, 4)
+			if armorFrac<1 then
+				jcms.hud_DrawStripedRect(140+armorWidth*armorFrac, 11, armorWidth*(1-armorFrac), 4, 16)
+			end
+		end
+
+		surface.SetAlphaMultiplier(1)
+		return true
+	end
+
+	function jcms.paint_scoreboard_Controls(p, w, h)
+		surface.SetDrawColor(jcms.color_pulsing)
+		jcms.hud_DrawHollowPolyButton(0, 0, w, h)
+	end
+
+	function jcms.scoreboard_SetupPlayerElement(elem)
+		function elem:DoClick()
+			local m = DermaMenu()
+			m:AddOption("#jcms.scoreboard_profile", function()
+				if IsValid(elem) and IsValid(elem.ply) then
+					elem.ply:ShowProfile()
+				end
+			end)
+
+			m:AddOption(elem.ply:IsMuted() and "#jcms.scoreboard_unmute" or "#jcms.scoreboard_mute", function()
+				if IsValid(elem) and IsValid(elem.ply) then
+					elem.ply:SetMuted(not elem.ply:IsMuted())
+				end
+			end):SetIcon(elem.ply:IsMuted() and "materials/icon16/sound.png" or "materials/icon16/sound_mute.png")
+
+			if jcms.locPly:IsAdmin() then
+				m:AddSpacer()
+				m:AddOption("#jcms.scoreboard_respawn", function()
+					if IsValid(elem) and IsValid(elem.ply) then
+						RunConsoleCommand("jcms_forcerespawn", elem.ply:EntIndex())
+					end
+				end):SetIcon("icon16/shield.png")
+				local sm, sm_parent = m:AddSubMenu("#jcms.scoreboard_givecash")
+				sm_parent:SetIcon("icon16/shield.png")
+
+				for i, count in ipairs { 100, 500, 1000, 5000, 10000 } do
+					sm:AddOption("+"..count, function()
+						if IsValid(elem) and IsValid(elem.ply) then
+							RunConsoleCommand("jcms_givecash", count, elem.ply:EntIndex())
+						end
+					end)
+				end
+			end
+			m:Open()
+		end
+	end
+
+	function GM:ScoreboardShow()
+		local pnl = jcms.spawnmenu_MakeMouseCapturePanel()
+		local cx, cy = ScrW()/2, ScrH()/2
+
+		local p_left = pnl:Add("DPanel")
+		p_left:SetSize(390, 470)
+		p_left:SetPos(cx - p_left:GetWide() - 48, cy - p_left:GetTall()/2)
+		p_left.Paint = jcms.paint_scoreboard_PanelPlayers
+		p_left.plyDict = {}
+		p_left:DockPadding(8, 24, 8, 8)
+
+		local sweepers = p_left:Add("DScrollPanel")
+		sweepers:Dock(TOP)
+		sweepers:SetTall(250)
+		sweepers:DockMargin(0, 0, 0, 4)
+		sweepers.Paint = jcms.paint_scoreboard_ScrollPanel
+		if IsValid(sweepers.VBar) then
+			sweepers.VBar.Paint = BLANK_DRAW
+			sweepers.VBar:SetHideButtons(true)
+			sweepers.VBar.btnGrip.Paint = jcms.paint_ScrollGrip
+		end
+
+		local npcs = p_left:Add("DScrollPanel")
+		npcs:Dock(FILL)
+		npcs.Paint = jcms.paint_scoreboard_ScrollPanel
+		if IsValid(npcs.VBar) then
+			npcs.VBar.Paint = BLANK_DRAW
+			npcs.VBar:SetHideButtons(true)
+			npcs.VBar.btnGrip.Paint = jcms.paint_ScrollGrip
+		end
+
+		function p_left.Think()
+			for ply, elem in pairs(p_left.plyDict) do
+				if not IsValid(ply) or not IsValid(elem) then
+					elem:Remove()
+					p_left.plyDict[ply] = nil
+				end
+			end
+
+			for i, ply in ipairs(player.GetAll()) do
+				local team = ply:GetNWInt("jcms_desiredteam", 0)
+				local elem = p_left.plyDict[ ply ]
+				local intendedParent
+				
+				if team == 1 then
+					intendedParent = sweepers
+				else
+					intendedParent = npcs
+				end
+
+				if not elem or not IsValid(elem) then
+					elem = intendedParent:Add("DButton")
+					elem:Dock(TOP)
+					elem:DockMargin(2, 2, 2, 0)
+					elem.Paint = jcms.paint_scoreboard_Player
+					jcms.scoreboard_SetupPlayerElement(elem)
+					p_left.plyDict[ ply ] = elem
+				else
+					elem:SetParent(intendedParent)
+					elem:Dock(TOP)
+				end
+
+				elem.ply = ply
+				elem.i = i
+			end
+		end
+
+		local p_right = pnl:Add("DPanel")
+		p_right:SetSize(390, 340)
+		p_right:SetPos(cx + 48, cy - p_right:GetTall()/2)
+		p_right.Paint = jcms.paint_scoreboard_PanelServerInfo
+		p_right:DockPadding(8, 24, 8, 8)
+
+		local controls = p_right:Add("DScrollPanel")
+		controls:Dock(BOTTOM)
+		controls:DockMargin(4, 0, 4, 4)
+		controls:SetTall(170)
+		controls.Paint = jcms.paint_scoreboard_Controls
+		controls:DockPadding(4, 4, 4, 4)
+		if IsValid(controls.VBar) then
+			controls.VBar.Paint = BLANK_DRAW
+			controls.VBar:SetHideButtons(true)
+			controls.VBar.btnGrip.Paint = jcms.paint_ScrollGrip
+		end
+
+		hook.Run("MapSweepersScoreboardControls", controls) -- Use this to add your own buttons to the scoreboard.
+	end
+
+	function GM:ScoreboardHide()
 		if IsValid(jcms.spawnmenu_mouseCapturePanel) then
 			jcms.spawnmenu_mouseCapturePanel:Remove()
 		end

@@ -560,7 +560,9 @@ end
 
 	function jcms.runprogress_CalculateDifficultyFromWinstreak(winstreak, totalWins)
 		local newPlayerScalar = 1 - math.max((6 - totalWins), 0) * 0.06
-		return (0.9 + winstreak * 0.175) * newPlayerScalar
+		local final = (0.9 + winstreak * 0.175) * newPlayerScalar
+		game.GetWorld():SetNWFloat("jcms_difficulty", final)
+		return final
 		
 		--Winstreaks increase difficulty (17.5% per mission).
 		--Being new to the game (having fewer than 5 wins) also reduces your difficulty. This scales from 25% to 0% reduction
@@ -616,7 +618,7 @@ end
 	function jcms.runprogress_UpdateAllPlayers()
 		for i, ply in ipairs(player.GetAll()) do 
 			ply:SetNWInt("jcms_cash", jcms.runprogress_GetStartingCash(ply))
-			print(jcms.runprogress_GetStartingCash(ply))
+			--print(jcms.runprogress_GetStartingCash(ply))
 		end
 	end
 
@@ -2131,10 +2133,15 @@ end
 -- // Console Commands {{{
 
 	concommand.Add("jcms_givecash", function(ply, cmd, args)
-		local oldCash = ply:GetNWInt("jcms_cash")
-		local giving = math.floor(tonumber(args[1]) or 0)
-		ply:SetNWInt("jcms_cash", oldCash + giving)
-		print( ("Giving %d cash to %s (%d -> %d)"):format(giving, ply:Nick(), oldCash, oldCash+giving) )
+		local tgIndex = tonumber(args[2]) or ply:EntIndex()
+		local target = Entity(tgIndex)
+
+		if IsValid(target) and target:IsPlayer() and (target == ply or (not ply:IsPlayer() or ply:IsAdmin())) then
+			local oldCash = target:GetNWInt("jcms_cash")
+			local giving = math.floor(tonumber(args[1]) or 0)
+			target:SetNWInt("jcms_cash", oldCash + giving)
+			print( ("Giving %d cash to %s (%d -> %d)"):format(giving, target:Nick(), oldCash, oldCash+giving) )
+		end
 	end, nil, "Give yourself J Corp Cash.", FCVAR_CHEAT)
 	
 	concommand.Add("jcms_hack", function(ply, cmd, args)
@@ -2223,6 +2230,16 @@ end
 		if not jcms.director and (not ply:IsPlayer() or ply:IsAdmin()) then
 			-- TODO We can force-start the mission even if nobody is ready, which is going to start the mission without anyone at all.
 			jcms.mission_StartFromCVar()
+		end
+	end)
+
+	concommand.Add("jcms_forcerespawn", function(ply, cmd, args)
+		if jcms.director and (not ply:IsPlayer() or ply:IsAdmin()) then
+			local resPly = Entity(args[1])
+			if IsValid(resPly) and resPly:IsPlayer() and ply:GetNWInt("jcms_desiredteam") == 1 and (ply:GetObserverMode() == OBS_MODE_CHASE or not ply:Alive()) then
+				jcms.playerspawn_RespawnAs(ply, "sweeper")
+				jcms.printf("Respawned %s", ply)
+			end
 		end
 	end)
 
