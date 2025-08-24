@@ -559,6 +559,17 @@ end
 		draw.SimpleText("x"..jcms.util_GetCurrentWinstreak(), "jcms_big", w/4, 112, jcms.color_bright_alt, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
 		draw.SimpleText("#jcms.difficulty", "jcms_small_bolder", w*3/4, 100, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		draw.SimpleText(string.format("%d%%", jcms.util_GetCurrentDifficulty()*100), "jcms_big", w*3/4, 112, jcms.color_bright, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+	
+		local level, exp = jcms.statistics_GetLevelAndEXP()
+		local nextLevelExp = jcms.statistics_GetEXPForNextLevel(level + 1)
+
+		surface.SetDrawColor(jcms.color_pulsing)
+		surface.DrawOutlinedRect(18+48+8, 186, w-(18*2+48+8), 10)
+		surface.SetDrawColor(jcms.color_bright)
+		surface.DrawRect(18, 168, 48, 28)
+		surface.DrawRect(18+48+8, 186, (w-(18*2+48+8))*math.Clamp(exp/nextLevelExp, 0, 1), 10)
+		draw.SimpleText(("%s / %s EXP"):format(jcms.util_CashFormat(exp), jcms.util_CashFormat(nextLevelExp)), "jcms_small_bolder", 18+48+8, 184, jcms.color_bright, TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM)
+		draw.SimpleText(level, level>9999 and "jcms_small_bolder" or "jcms_medium", 18+48/2, 168+14, jcms.color_dark, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 	end
 
 	function jcms.paint_scoreboard_ScrollPanel(p, w, h)
@@ -751,7 +762,7 @@ end
 		end
 
 		local p_right = pnl:Add("DPanel")
-		p_right:SetSize(390, 340)
+		p_right:SetSize(390, 420)
 		p_right:SetPos(cx + 48, cy - p_right:GetTall()/2)
 		p_right.Paint = jcms.paint_scoreboard_PanelServerInfo
 		p_right:DockPadding(8, 24, 8, 8)
@@ -759,7 +770,7 @@ end
 		local controls = p_right:Add("DScrollPanel")
 		controls:Dock(BOTTOM)
 		controls:DockMargin(4, 0, 4, 4)
-		controls:SetTall(170)
+		controls:SetTall(190)
 		controls.Paint = jcms.paint_scoreboard_Controls
 		controls:DockPadding(4, 4, 4, 4)
 		if IsValid(controls.VBar) then
