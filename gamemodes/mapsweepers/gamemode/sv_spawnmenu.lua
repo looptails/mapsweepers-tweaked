@@ -974,6 +974,10 @@
 		if orderData then
 			local costMult, coolDownMult = jcms.class_GetCostMultipliers(jcms.class_GetData(ply), orderData)
 			local cost = orderData.cost_override or orderData.cost
+			if cost <= 0 then
+				return false, 0
+			end
+
 			local cooldown = orderData.cooldown_override or orderData.cooldown
 
 			if ply:GetNWInt("jcms_cash") < math.ceil(cost*costMult) then 
@@ -1045,6 +1049,12 @@
 								if type(override.cooldown) == "number" and override.cooldown ~= orderData.cooldown then
 									jcms.orders[orderId].cooldown_override = math.Clamp(override.cooldown, 0, 4095)
 								end
+
+								if override.cost == 0 then
+									jcms.net_RemoveOrder(orderId)
+								else
+									jcms.net_SendOrder(orderId, orderData)
+								end
 							end
 						end
 					end
@@ -1058,8 +1068,8 @@
 			for orderId, orderData in pairs(jcms.orders) do
 				if orderData.cost_override or orderData.cooldown_override then
 					overrides[ orderId ] = {
-						cost = tonumber(orderData.cost_override) or 0,
-						cooldown = tonumber(orderData.cooldown_override) or 0
+						cost = tonumber(orderData.cost_override),
+						cooldown = tonumber(orderData.cooldown_override)
 					}
 				end
 			end
