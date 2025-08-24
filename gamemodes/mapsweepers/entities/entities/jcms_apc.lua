@@ -247,6 +247,7 @@ if SERVER then
 	
 	function ENT:OnRemove()
 		self:SetDriver()
+		self:RemoveAllPassengers()
 		self:StopMotionController()
 
 		if self.soundEngine then
@@ -304,6 +305,7 @@ if SERVER then
 			if IsValid(self:GetDriver()) then
 				self:SetDriver()
 			end
+			self:RemoveAllPassengers()
 			return
 		end
 
@@ -480,6 +482,13 @@ if SERVER then
 		end
 	end
 
+	function ENT:RemoveAllPassengers()
+		for i=#self.PassengersAPC, 1, -1 do
+			self:RemovePassenger(self.PassengersAPC[i])
+		end
+		self:SetPassengerCount(0)
+	end
+
 	function ENT:RemovePassenger(ply)
 		local passengers = self.PassengersAPC
 		table.RemoveByValue(passengers, ply)
@@ -641,7 +650,7 @@ if CLIENT then
 		self:DrawModel()
 		if not self:GetIsDestroyed() and FrameTime() > 0 and jcms.performanceEstimate >= 30 then
 			local e = self.emitter
-			if not e then
+			if not e or not IsValid(e) then
 				e = ParticleEmitter(self:WorldSpaceCenter())
 				self.emitter = e
 			end

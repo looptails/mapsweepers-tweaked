@@ -196,11 +196,23 @@ if SERVER then
 		end
 	end
 
+	function ENT:GetDriver()
+		return self:GetMan()
+	end
+
 	function ENT:Think()
 		local man = self:GetMan()
 		
-		if IsValid(man) and not self:CheckInRange(man) then
-			self:SetMan()
+		if IsValid(man) then
+			if not self:CheckInRange(man) then
+				self:SetMan()
+			else
+				local wep = man:GetActiveWeapon()
+				if IsValid(wep) then
+					wep:SetNextPrimaryFire( CurTime() + 1 )
+					wep:SetNextSecondaryFire( CurTime() + 1 )
+				end
+			end
 		end
 
 		local shouldFire = IsValid(man) and self.attacking1

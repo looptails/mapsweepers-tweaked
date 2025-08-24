@@ -88,8 +88,10 @@ do
 		if SERVER then
 			local jVehicle = ply:GetNWEntity("jcms_vehicle")
 			if IsValid(jVehicle) then
-				jVehicle.attacking1 = bit.band( cmd:GetButtons(), IN_ATTACK) > 0
-				jVehicle.attacking2 = bit.band( cmd:GetButtons(), IN_ATTACK2) > 0
+				if jVehicle:GetDriver() == ply then
+					jVehicle.attacking1 = bit.band( cmd:GetButtons(), IN_ATTACK) > 0
+					jVehicle.attacking2 = bit.band( cmd:GetButtons(), IN_ATTACK2) > 0
+				end
 				
 				cmd:RemoveKey(IN_ATTACK)
 				cmd:RemoveKey(IN_ATTACK2)
