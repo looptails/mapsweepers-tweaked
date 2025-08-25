@@ -302,7 +302,7 @@
 						jcms.net_SendCashBonuses(ply, bonuses, oldStartingCash, newStartingCash)
 					end
 				end
-			else
+			elseif not jcms.serverExtension_forcedEvac then
 				for i, pd in ipairs( postMissionStats.players ) do
 					local sid64 = pd.sid64
 
