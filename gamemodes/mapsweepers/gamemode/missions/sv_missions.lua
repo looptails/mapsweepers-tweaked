@@ -146,6 +146,9 @@
 			if shouldEnd then 
 				timer.Remove("jcms_mission_run")
 				game.GetWorld():SetNWFloat("jcms_mapgen_progress", 1)
+
+				game.GetWorld():SetNWFloat("jcms_difficulty", jcms.runprogress_GetDifficulty())
+				game.GetWorld():SetNWInt("jcms_winstreak", jcms.runprogress.winstreak)
 			end
 		end)
 	end
