@@ -114,6 +114,8 @@ jcms.MAPGEN_CONSTRUCT_DIAMETER = math.sqrt(82411875)
 -- // }}}
 
 -- // Util {{{
+	local JCMS_MASK_SOLIDNOCLIPS = bit.bor(CONTENTS_SOLID, CONTENTS_WINDOW, CONTENTS_GRATE, CONTENTS_OPAQUE, CONTENTS_MOVEABLE)
+	--Note: CONTENTS_DETAIL includes playerclips. Perhaps detail includes anything that doesn't split visleaves?
 	function jcms.mapgen_ValidArea(area)
 		--Are we a trigger_hurt or underwater
 		if jcms.mapdata and not(jcms.mapdata.validAreaDict[area] == nil) then return jcms.mapdata.validAreaDict[area] end --Optimisation, going to be using this func outside mapgen in future.
@@ -143,10 +145,10 @@ jcms.MAPGEN_CONSTRUCT_DIAMETER = math.sqrt(82411875)
 		local floorCheck = util.TraceLine({
 			start = centre,
 			endpos = centre - Vector(0,0,10),
-			mask = MASK_NPCSOLID_BRUSHONLY
+			mask = JCMS_MASK_SOLIDNOCLIPS
 		})
 
-		if floorCheck.HitNoDraw then 
+		if floorCheck.HitNoDraw then
 			return false
 		end
 
@@ -154,7 +156,7 @@ jcms.MAPGEN_CONSTRUCT_DIAMETER = math.sqrt(82411875)
 		local tr = util.TraceLine({
 			start = centre,
 			endpos = centre + Vector(0,0,32000), 
-			mask = MASK_NPCSOLID_BRUSHONLY
+			mask = JCMS_MASK_SOLIDNOCLIPS
 		})
 
 		if tr.HitNoDraw then --We've hit the bottom of a nodraw brush, and are probably under a road (or some other brush poking through a displacement)
@@ -164,7 +166,7 @@ jcms.MAPGEN_CONSTRUCT_DIAMETER = math.sqrt(82411875)
 		local backTrace = util.TraceLine({
 			start = tr.HitPos,
 			endpos = centre,
-			mask = MASK_NPCWORLDSTATIC
+			mask = JCMS_MASK_SOLIDNOCLIPS
 		})
 		
 		if centre:DistToSqr(backTrace.HitPos) > 5^2 then
