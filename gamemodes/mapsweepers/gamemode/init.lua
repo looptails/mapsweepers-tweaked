@@ -578,6 +578,7 @@ end
 		rp.totalWins = rp.totalWins + 1
 		rp.difficulty = jcms.runprogress_CalculateDifficultyFromWinstreak(rp.winstreak, rp.totalWins)
 		game.GetWorld():SetNWInt("jcms_winstreak", rp.winstreak)
+		game.GetWorld():SetNWInt("jcms_difficulty", rp.difficulty)
 	end
 
 	function jcms.runprogress_AddStartingCash(ply_or_sid64, amount)
@@ -635,6 +636,7 @@ end
 		rp.difficulty = jcms.runprogress_CalculateDifficultyFromWinstreak(rp.winstreak, rp.totalWins)
 		table.Empty(jcms.runprogress.playerStartingCash)
 		game.GetWorld():SetNWInt("jcms_winstreak", rp.winstreak)
+		game.GetWorld():SetNWInt("jcms_difficulty", rp.difficulty)
 	end
 
 	function jcms.runprogress_GetLastMissionTypes()
@@ -2877,6 +2879,8 @@ end
 
 				table.Merge(jcms.runprogress, dataTbl, true)
 				jcms.runprogress_UpdateAllPlayers()
+				game.GetWorld():SetNWInt("jcms_winstreak", jcms.runprogress.winstreak)
+				game.GetWorld():SetNWInt("jcms_difficulty", jcms.runprogress.difficulty)
 			end
 		end)
 
