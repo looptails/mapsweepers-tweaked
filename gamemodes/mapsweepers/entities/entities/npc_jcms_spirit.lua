@@ -96,6 +96,11 @@ if SERVER then
 		--and target:IsNPC() --Removed because we use a whitelist now.
 		return IsValid(target) and self.GrabWhitelist[target:GetClass()] and target ~= self and (target:Health() > 0) and (not IsValid(target:GetParent())) and (not target.jcms_danger or target.jcms_danger < jcms.NPC_DANGER_BOSS) and (target:GetMoveType() > MOVETYPE_NONE) and jcms.team_SameTeam(self, target)
 	end
+	
+	function ENT:IsGoodGrabTarget_optimised(selfTbl, target)
+		local targetTbl = target:GetTable()
+		return IsValid(target) and selfTbl.GrabWhitelist[target:GetClass()] and (target:Health() > 0) and (not IsValid(target:GetParent())) and (not targetTbl.jcms_danger or targetTbl.jcms_danger < jcms.NPC_DANGER_BOSS) and jcms.team_SameTeam(self, target)
+	end
 
 	function ENT:OnTakeDamage(dmg)
 		if self:GetIsDying() then return 0 end
@@ -129,23 +134,25 @@ if SERVER then
 	end
 
 	function ENT:SelectSchedule()
-		if self:GetIsDying() then return end
+		local selfTbl = self:GetTable()
+		if selfTbl:GetIsDying() then return end
 
 		local enemy = self:GetEnemy()
 		if IsValid(enemy) then
 			local enemyPos = enemy:GetPos()
+			local selfPos = self:GetPos()
 			
-			if enemyPos:DistToSqr(self:GetPos()) < (self.DeployDistance/2)^2 then 
+			if enemyPos:DistToSqr(selfPos) < (selfTbl.DeployDistance/2)^2 then 
 				self:SetSchedule(SCHED_RUN_FROM_ENEMY)
 				return
 			end
 
-			local canMove = not self.nextMove or CurTime() > self.nextMove
+			local canMove = not selfTbl.nextMove or CurTime() > selfTbl.nextMove
 			local npcs = ents.FindByClass("npc_*")
 
-			local bestDist2, furthest = self.MinGrabDist^2
+			local bestDist2, furthest = selfTbl.MinGrabDist^2
 			for i, npc in ipairs(npcs) do
-				if not self:IsGoodGrabTarget(npc) or self:IsUnreachable( npc ) then continue end
+				if not selfTbl.IsGoodGrabTarget_optimised(self, selfTbl, npc) or self:IsUnreachable( npc ) then continue end
 
 				local dist2 = npc:GetPos():DistToSqr(enemyPos)
 				if dist2 > bestDist2 then
@@ -153,24 +160,24 @@ if SERVER then
 				end
 			end
 
-			if self.wantToCarry then
+			if selfTbl.wantToCarry then
 				if IsValid(furthest) then
 					if self:GetPathTimeToGoal() == 0 then --This happens if the target's unreachable
 						self:RememberUnreachable(furthest, 60)
 					end
-					if canMove or furthest:GetPos():DistToSqr( self:GetGoalPos() ) >= (self.GrabDistance/2)^2 then
+					if canMove or furthest:GetPos():DistToSqr( self:GetGoalPos() ) >= (selfTbl.GrabDistance/2)^2 then
 						self:NavSetGoalPos( furthest:GetPos() )
 						self:StartEngineTask(48, 0)
-						debugoverlay.Line(self:GetPos(), self:GetGoalPos(), 0.2, Color(0, 255, 129))
-						debugoverlay.Line(furthest:GetPos(), self:GetGoalPos(), 0.2, Color(0, 255, 0))
-						self.nextMove = CurTime() + 5
+						--debugoverlay.Line(selfPos, self:GetGoalPos(), 0.2, Color(0, 255, 129))
+						--debugoverlay.Line(furthest:GetPos(), self:GetGoalPos(), 0.2, Color(0, 255, 0))
+						selfTbl.nextMove = CurTime() + 5
 					end
 				else
-					self.wantToCarry = false
+					selfTbl.wantToCarry = false
 				end
 			else
 				if IsValid(furthest) and self:GetCarriedNPCCount() <= 0 then
-					self.wantToCarry = true
+					selfTbl.wantToCarry = true
 				elseif self:GetCarriedNPCCount() > 0 and self:GetCurrentSchedule() ~= SCHED_CHASE_ENEMY then
 					self:SetSchedule(SCHED_CHASE_ENEMY)
 				elseif self:GetCurrentSchedule() ~= SCHED_PATROL_RUN then
@@ -179,7 +186,7 @@ if SERVER then
 				end
 			end
 		else
-			self.wantToCarry = true
+			selfTbl.wantToCarry = true
 			self:SetSchedule(SCHED_PATROL_RUN)
 		end
 	end
