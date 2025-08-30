@@ -40,8 +40,12 @@ function ENT:Initialize()
 
 		local nextNode = self:GetNextNode()
 		if IsValid(nextNode) then
-			local r = self:BoundingRadius()
-			self:SetRenderBoundsWS(self:WorldSpaceCenter(), nextNode:WorldSpaceCenter(), Vector(r,r,r))
+			local r = self:BoundingRadius() + 24 + (self:GetIsPowerful() and 64 or 0)
+			local v1, v2 = self:WorldSpaceCenter(), nextNode:WorldSpaceCenter()
+			for i=1, 3 do
+				v1[i], v2[i] = math.min(v1[i], v2[i]) - r, math.max(v1[i], v2[i]) + r
+			end
+			self:SetRenderBoundsWS(v1, v2)
 		end
 
 		self.trackPosition = self:GetTrackPosition() --Optimisation
@@ -51,6 +55,7 @@ end
 function ENT:SetupDataTables()
 	self:NetworkVar("Entity", "NextNode")
 	self:NetworkVar("Bool", 0, "IsEnabled")
+	self:NetworkVar("Bool", 1, "IsPowerful")
 	self:NetworkVar("Float", 0, "Altitude")
 	self:NetworkVar("Vector", 0, "EnergyColour")
 
@@ -93,7 +98,6 @@ if CLIENT then
 		local eyeDist = jcms.EyePos_lowAccuracy:DistToSqr(emt.GetTable(self).trackPosition)
 		if eyeDist < 1500^2 then 
 			emt.DrawModel(self)
-			--self:DrawModel()
 		end
 	end
 
@@ -117,16 +121,30 @@ if CLIENT then
 
 		
 		render.OverrideBlend( true, BLEND_SRC_ALPHA, BLEND_ONE, BLENDFUNC_ADD )
-			if distToEyes < 600 then
-				local ps = isEnabled and 0 or 8
-				render.DrawSprite(trackPos, 32 + ps + math.random()*4, 24 + ps + math.random()*4, selfTbl.colourBeam)
-				
-				if distToEyes < 400 then
-					render.DrawSprite(trackPos, 20 + ps + math.random()*4, 20 + ps + math.random()*4, selfTbl.colourCore)
-				end
+			local nextNode = selfTbl:GetNextNode()
+			local isPowerOrb = self:GetIsPowerful()
+			local noBasicOrb = not IsValid(nextNode) and isPowerOrb
+
+			if isPowerOrb then
+				local pos = IsValid(nextNode) and nextNode.trackPosition or trackPos
+				render.DrawSprite(pos, 128 + math.random()*16, 100 + math.random()*16, selfTbl.colourBeam)
+				render.DrawSprite(pos, 48 + math.random()*16, 32 + math.random()*16, selfTbl.colourCore)
+				render.SetMaterial(jcms.mat_circle)
+				render.DrawSprite(pos, 12 + math.random()*2, 12 + math.random()*2, selfTbl.colourBeam)
+				render.DrawSprite(pos, 4 + math.random(), 4 + math.random(), color_white)
 			end
 
-			local nextNode = selfTbl:GetNextNode()
+			if not noBasicOrb then
+				if distToEyes < 600 then
+					render.SetMaterial(selfTbl.MatGlow)
+					local ps = isEnabled and 0 or 8
+					render.DrawSprite(trackPos, 32 + ps + math.random()*4, 24 + ps + math.random()*4, selfTbl.colourBeam)
+					
+					if distToEyes < 400 then
+						render.DrawSprite(trackPos, 20 + ps + math.random()*4, 20 + ps + math.random()*4, selfTbl.colourCore)
+					end
+				end
+			end
 
 			if IsValid(nextNode) then
 				local scale = math.max(1, distToEyes / 1000)

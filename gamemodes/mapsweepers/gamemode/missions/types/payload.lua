@@ -211,6 +211,7 @@
 			
 			track[1]:SetModel("models/props_combine/combine_mine01.mdl")
 			track[#track]:SetModel("models/props_combine/combine_mine01.mdl")
+			track[#track]:SetIsPowerful(true)
 
 			local payload = ents.Create("jcms_payload")
 			payload:SetPos(track[1]:GetTrackPosition())

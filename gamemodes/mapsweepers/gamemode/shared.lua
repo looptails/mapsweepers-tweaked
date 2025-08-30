@@ -983,6 +983,13 @@ jcms.vectorOne = Vector(1, 1, 1)
 		end
 	end
 
+	function jcms.util_ReverseTable(t) -- Doesn't copy the table unlike table.Reverse
+		local len = #t
+		for i=1, math.floor(#t/2) do
+			t[i], t[len-i+1] = t[len-i+1], t[i]
+		end
+	end
+
 	function jcms.util_ToDistance(len, format)
 		if CLIENT and jcms.cvar_imperial:GetBool() then
 			return jcms.util_ToFeet(len, format)

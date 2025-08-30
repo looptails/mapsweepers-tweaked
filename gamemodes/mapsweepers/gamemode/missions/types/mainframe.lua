@@ -33,156 +33,316 @@
 		local prevTerminal 
 		local terminals = {} 
 
-		for i=1, nodeCount, 1 do 
-			local distToNode = (sectorDistance / nodeCount) * i
-			local nodeAngleYaw = (360 / totalSectors) * chosenSector
-			local nodeAngle = Angle(0, nodeAngleYaw, 0)
-			
-			local nodePos = mapCentre + nodeAngle:Forward() * distToNode --A random position in the sector, getting further and further out.
+		-- Path gen attempt #1 {{{
+			for i=1, nodeCount, 1 do 
+				local distToNode = (sectorDistance / nodeCount) * i
+				local nodeAngleYaw = (360 / totalSectors) * chosenSector
+				local nodeAngle = Angle(0, nodeAngleYaw, 0)
+				
+				local nodePos = mapCentre + nodeAngle:Forward() * distToNode --A random position in the sector, getting further and further out.
 
-			local areaWeights = {}
-			-- // Calculating weights {{{
-				local validAreas = jcms.mapdata.validAreas 
-				for i, area in ipairs(validAreas) do 							-- =Sector weights =
-					if areaSectors[area] == chosenSector then 					--The sector we're in
-						areaWeights[area] = 1
-					elseif math.abs(areaSectors[area] - chosenSector) == 1 then	--Low chance for adjacent sectors.
-						areaWeights[area] = 0.00000001
-					else 														--Every other sector
-						areaWeights[area] = 0
-					end
-				end
-
-				for i, area in ipairs(validAreas) do 							-- =Only in our zone=
-					if not(zoneDict[area] == mainframeZone) then 
-						areaWeights[area] = 0
-					end
-				end
-
-				for i, area in ipairs(validAreas) do 							-- =Node-position-weights=
-					local fac = 1 / area:GetCenter():DistToSqr(nodePos)
-					areaWeights[area] = areaWeights[area] * fac
-				end
-
-				for i, area in ipairs(validAreas) do 							-- =Distancing from other objects=
-					local closestDist = 3000 --Doesn't matter after 3k
-					for i, mEnt in ipairs(missionObjects) do 
-						local dist = mEnt:GetPos():Distance(area:GetCenter())
-						closestDist = (closestDist > dist and dist) or closestDist
-					end
-
-					areaWeights[area] = areaWeights[area] * closestDist/3000
-				end
-
-				local tr_data = { 
-					--start = centre + Vector(0,0,height),
-					mins = Vector(1, 1, 15), 
-					maxs = Vector(1, 1, 15), 
-					mask = MASK_PLAYERSOLID_BRUSHONLY
-				}
-				for i, area in ipairs(validAreas) do 							-- =Stop us spawning in an unhackable spot=
-					tr_data.start = area:GetCenter() + Vector(0,0,20)
-					
-					for i, tr in ipairs(jcms.mapgen_WallTraces(8, 35, tr_data)) do 
-						if tr.Fraction < 1 then  
-							areaWeights[area] = nil
-						end
-					end
-				end
-			-- // }}}
-
-			local targetArea 
-			local path -- Actual vectors (payload-style) path.
-			-- Generating the path {{{
-			for j=1, 10 do 
-				--[[todo: for loop is a Suboptmial/Bandaid solution so we can release sooner.
-					The payload-style navigation function doesn't reliably connect valid navarea paths.
-					This should be fixable, but doing so will take a while.
-				--]]
-
-				targetArea = jcms.util_ChooseByWeight(areaWeights)
-				local navSuccess, pathAreas = jcms.mapgen_Navigate(prevArea, targetArea)
-
-				do
-					local expandedPathAreas = jcms.mapgen_ExpandedAreaList(pathAreas)
-					local connections, chunks = jcms.mapgen_VectorGrid(expandedPathAreas, 90, 170)
-					local costs = jcms.mapgen_VectorGridCosts_WallProximity(connections, chunks, 256, 15000, true)
-					
-					-- We can only navigate though points in 'connections' table.
-					-- We must navigate from a center of a CNavArea to a center of another one.
-					-- Therefore we look for the closest-matching vector in the 'connections' table.
-					local from, to = pathAreas[1]:GetCenter(), pathAreas[#pathAreas]:GetCenter()
-					local closestA, closestDist2A
-					local closestB, closestDist2B
-
-					for chunkId, chunk in pairs(chunks) do
-						for i, pt in ipairs(chunk) do
-							local dist2A, dist2B = pt:DistToSqr(from), pt:DistToSqr(to)
-							
-							if (not closestA) or (dist2A < closestDist2A) then
-								closestA, closestDist2A = pt, dist2A
-							end
-
-							if (not closestB) or (dist2B < closestDist2B) then
-								closestB, closestDist2B = pt, dist2B
-							end
+				local areaWeights = {}
+				-- // Calculating weights {{{
+					local validAreas = jcms.mapdata.validAreas 
+					for i, area in ipairs(validAreas) do 							-- =Sector weights =
+						if areaSectors[area] == chosenSector then 					--The sector we're in
+							areaWeights[area] = 1
+						elseif math.abs(areaSectors[area] - chosenSector) == 1 then	--Low chance for adjacent sectors.
+							areaWeights[area] = 0.00000001
+						else 														--Every other sector
+							areaWeights[area] = 0
 						end
 					end
 
-					from, to = closestA, closestB -- We found closest-matching vectors.
-					path = jcms.pathfinder.navigateVectorGrid(connections, costs, from, to)
+					for i, area in ipairs(validAreas) do 							-- =Only in our zone=
+						if not(zoneDict[area] == mainframeZone) then 
+							areaWeights[area] = 0
+						end
+					end
 
-					jcms.mapgen_Wait( 0.15 + (i/nodeCount) * 0.85 )
+					for i, area in ipairs(validAreas) do 							-- =Node-position-weights=
+						local fac = 1 / area:GetCenter():DistToSqr(nodePos)
+						areaWeights[area] = areaWeights[area] * fac
+					end
 
-					if not path then continue end
+					for i, area in ipairs(validAreas) do 							-- =Distancing from other objects=
+						local closestDist = 3000 --Doesn't matter after 3k
+						for i, mEnt in ipairs(missionObjects) do 
+							local dist = mEnt:GetPos():Distance(area:GetCenter())
+							closestDist = (closestDist > dist and dist) or closestDist
+						end
 
-					jcms.mapgen_OptimiseVectorPath( path )
-					break
+						areaWeights[area] = areaWeights[area] * closestDist/3000
+					end
+
+					local tr_data = { 
+						--start = centre + Vector(0,0,height),
+						mins = Vector(1, 1, 15), 
+						maxs = Vector(1, 1, 15), 
+						mask = MASK_PLAYERSOLID_BRUSHONLY
+					}
+					for i, area in ipairs(validAreas) do 							-- =Stop us spawning in an unhackable spot=
+						tr_data.start = area:GetCenter() + Vector(0,0,20)
+						
+						for i, tr in ipairs(jcms.mapgen_WallTraces(8, 35, tr_data)) do 
+							if tr.Fraction < 1 then  
+								areaWeights[area] = nil
+							end
+						end
+					end
+				-- // }}}
+
+				local targetArea 
+				local path -- Actual vectors (payload-style) path.
+				
+				for attempt=1, 5 do 
+					targetArea = jcms.util_ChooseByWeight(areaWeights)
+					local navSuccess, pathAreas = jcms.mapgen_Navigate(prevArea, targetArea)
+
+					if navSuccess then
+						local expandedPathAreas = jcms.mapgen_ExpandedAreaList(pathAreas)
+						local connections, chunks = jcms.mapgen_VectorGrid(expandedPathAreas, 90 - attempt*2, 170)
+						local costs = jcms.mapgen_VectorGridCosts_WallProximity(connections, chunks, 256, 15000, true)
+						
+						-- We can only navigate though points in 'connections' table.
+						-- We must navigate from a center of a CNavArea to a center of another one.
+						-- Therefore we look for the closest-matching vector in the 'connections' table.
+						local from, to = pathAreas[1]:GetCenter(), pathAreas[#pathAreas]:GetCenter()
+						local closestA, closestDist2A
+						local closestB, closestDist2B
+
+						for chunkId, chunk in pairs(chunks) do
+							for i, pt in ipairs(chunk) do
+								local dist2A, dist2B = pt:DistToSqr(from), pt:DistToSqr(to)
+								
+								if (not closestA) or (dist2A < closestDist2A) then
+									closestA, closestDist2A = pt, dist2A
+								end
+
+								if (not closestB) or (dist2B < closestDist2B) then
+									closestB, closestDist2B = pt, dist2B
+								end
+							end
+						end
+
+						from, to = closestA, closestB -- We found closest-matching vectors.
+						path = jcms.pathfinder.navigateVectorGrid(connections, costs, from, to)
+
+						jcms.mapgen_Wait( 0.15 + (i/nodeCount) * 0.85 )
+
+						if not path then continue end
+
+						jcms.mapgen_OptimiseVectorPath( path )
+						break
+					end
 				end
+
+				if targetArea and path then
+					prevArea = targetArea
+					
+					local terminal = ents.Create("jcms_terminal")
+					terminal:SetPos(targetArea:GetCenter())
+					terminal:Spawn()
+
+					table.insert(missionObjects, terminal)
+					table.insert(terminals, terminal)
+					
+					local purpleFrac = math.min(((i-1) * 0.3), 1)
+					local purpleVector = LerpVector(purpleFrac, Vector(162/255, 81/255, 1), Vector(20/255,11/255,114/255) )
+					local lastNodeEnt = NULL
+					local nodes = {}
+					for j, point in ipairs(path) do
+						local nodeEnt = ents.Create("jcms_node")
+						nodeEnt:SetPos(point) 
+						nodeEnt:Spawn()
+
+						if j == #path then
+							nodeEnt:SetIsPowerful(true)
+							nodeEnt:SetPos(terminal:GetPos() + Vector(0, 0, 32))
+							local goodFacing, facingAngle = jcms.mapgen_PickBestFacingDirection(nodeEnt:GetPos(), 150, { terminal, nodeEnt }, MASK_PLAYERSOLID_BRUSHONLY)
+							terminal:SetAngles(facingAngle)
+						end
+
+						nodeEnt:SetEnergyColour(purpleVector)
+						if IsValid(lastNodeEnt) then
+							lastNodeEnt:ConnectNode(nodeEnt)
+						end
+						
+						table.insert(nodes, nodeEnt)
+						lastNodeEnt = nodeEnt
+					end
+
+					terminal.track = nodes
+					terminal.dependents = {}
+					terminal.prevTerminal = prevTerminal
+
+					if IsValid(prevTerminal) then 
+						table.insert(prevTerminal.dependents, terminal)
+					end
+					prevTerminal = terminal
+					--tracks[terminal] = nodes
+				end
+
+				jcms.mapgen_Wait( 0.15 + (i/nodeCount) * 0.85 )
 			end
-			assert(path, "Can't generate a path.")
-			-- }}}
+		-- }}}
 
-			prevArea = targetArea
-			
-			local terminal = ents.Create("jcms_terminal")
-			terminal:SetPos(targetArea:GetCenter())
-			terminal:Spawn()
+		-- Path gen attempt #2 (Payload-style, less fancy but more reliable) {{{
+		if #terminals == 0 then
+			jcms.printf("A mainframe track failed to generate using old algo, using new one")
 
-			table.insert(missionObjects, terminal)
-			table.insert(terminals, terminal)
-			
-			local purpleFrac = math.min(((i-1) * 0.3), 1) 
-			--local purpleVector = LerpVector(purpleFrac, Vector(162/255, 81/255, 1), Vector(41/255,21/255,142/255) )
-			local purpleVector = LerpVector(purpleFrac, Vector(162/255, 81/255, 1), Vector(20/255,11/255,114/255) )
-			local lastNodeEnt = NULL
-			local nodes = {}
-			for j, point in ipairs(path) do
-				local nodeEnt = ents.Create("jcms_node")
-				nodeEnt:SetPos(point) 
-				nodeEnt:Spawn()
-
-				nodeEnt:SetEnergyColour(purpleVector)
-				if IsValid(lastNodeEnt) then
-					lastNodeEnt:ConnectNode(nodeEnt)
+			do
+				local areaSectorsList = {}
+				for area, sectorId in pairs(areaSectors) do
+					if sectorId == chosenSector then
+						table.insert(areaSectorsList, area)
+					end
 				end
 				
-				table.insert(nodes, nodeEnt)
-				lastNodeEnt = nodeEnt
+				local track
+				for attempt=1, 3 do
+					track = jcms.mapgen_GenLongPath(areaSectorsList, 256, 15000, mapCentre)
+
+					jcms.mapgen_Wait(0.15)
+					if not track then continue end
+					jcms.util_ReverseTable(track)
+
+					targetArea = navmesh.GetNearestNavArea(track[#track], true)
+
+					jcms.mapgen_OptimiseVectorPath( track )
+					break
+				end
+
+				if track then
+					local hackNodes = {}
+					if #track > 7 then
+						local hackNodesCount = nodeCount
+						local everySteps = math.Round( #track / (hackNodesCount + 1) )
+						local baseStep = math.random(1, math.ceil(everySteps/2))
+						
+						for i = 1, hackNodesCount do
+							if hackNodesCount == i then
+								hackNodes[ #track ] = true
+							else
+								hackNodes[ baseStep + everySteps * i ] = true
+							end
+						end
+					elseif #track >= 5 then
+						local presets = {
+							[5] = { 3, 5 },
+							[6] = { math.random(3, 4), 6 },
+							[7] = math.random() < 0.5 and { 4, 7 } or { 5, 7 }
+						}
+
+						for i, index in ipairs(presets[ #track ]) do
+							hackNodes[index] = true
+						end
+					else
+						hackNodes[#track] = true
+					end
+
+					local lastNodeEnt = NULL
+					local prevTerminal
+					local nodes = {}
+					local hackNodesSoFar = {}
+					for j=0, #track do
+						local purpleFrac = math.Clamp(j/#track+0.3, 0, 1)
+						local purpleVector = LerpVector(purpleFrac, Vector(162/255, 81/255, 1), Vector(20/255,11/255,114/255) )
+						local point = j==0 and mapCentre or track[j]
+						local nodeEnt = ents.Create("jcms_node")
+						nodeEnt:SetPos(point) 
+						nodeEnt:Spawn()
+						table.insert(hackNodesSoFar, nodeEnt)
+
+						nodeEnt:SetEnergyColour(purpleVector)
+						if IsValid(lastNodeEnt) then
+							lastNodeEnt:ConnectNode(nodeEnt)
+						end
+						
+						table.insert(nodes, nodeEnt)
+
+						if hackNodes[j] then
+							local terminal = ents.Create("jcms_terminal")
+							local nodeVec = nodeEnt:GetPos()
+							terminal:SetPos(nodeVec)
+							terminal:Spawn()
+
+							local goodFacing, facingAngle = jcms.mapgen_PickBestFacingDirection(nodeVec, 150, { terminal, nodeEnt }, MASK_PLAYERSOLID_BRUSHONLY)
+							nodeVec.z = nodeVec.z + 32
+							if IsValid(lastNodeEnt) then
+								lastNodeEnt:SetIsPowerful(true)
+							else
+								nodeEnt:SetIsPowerful(true)
+							end
+							nodeEnt:SetPos(nodeVec)
+							terminal:SetAngles(facingAngle)
+
+							table.insert(missionObjects, terminal)
+							table.insert(terminals, terminal)
+
+							terminal.track = hackNodesSoFar
+							terminal.dependents = {}
+							terminal.prevTerminal = prevTerminal
+
+							if IsValid(prevTerminal) then 
+								table.insert(prevTerminal.dependents, terminal)
+							end
+
+							prevTerminal = terminal
+							hackNodesSoFar = { nodeEnt }
+						end
+
+						lastNodeEnt = nodeEnt
+					end
+				end
 			end
-
-			terminal.track = nodes
-			terminal.dependents = {}
-			terminal.prevTerminal = prevTerminal
-
-			if IsValid(prevTerminal) then 
-				table.insert(prevTerminal.dependents, terminal)
-			end
-			prevTerminal = terminal
-			--tracks[terminal] = nodes
-
-			jcms.mapgen_Wait( 0.15 + (i/nodeCount) * 0.85 )
 		end
+		-- }}}
+
+		-- Path gen attempt #3 (This map sucks) {{{
+		if #terminals == 0 then
+			jcms.printf("A mainframe track failed to generate using even the new algorithm, using a VERY BAD one")
+			local pos = mainframeArea:GetCenter()
+			
+			local node1 = ents.Create("jcms_node")
+			node1:SetPos(pos) 
+			node1:Spawn()
+			node1:SetEnergyColour(Vector(0, 1, 0))
+
+			local terminal = ents.Create("jcms_terminal")
+
+			local zoneList = jcms.mapgen_ZoneList()[ mainframeZone ]
+			local randomArea = zoneList[ math.random(1, #zoneList) ]
+			if randomArea then
+				pos = jcms.mapgen_AreaPointAwayFromEdges(randomArea, 150)
+				local goodFacing, facingAngle = jcms.mapgen_PickBestFacingDirection(pos, 150, { terminal, node1 }, MASK_PLAYERSOLID_BRUSHONLY)
+				terminal:SetAngles(facingAngle)
+				terminal:SetPos(pos)
+			else
+				local ang = math.random()*math.pi*2
+				local cos, sin = math.cos(ang), math.sin(ang)
+				local mag = 128
+				pos:Add(Vector(cos*mag, sin*mag, -4))
+				terminal:SetAngles(Angle(0, ang/math.pi*180, 0))
+				terminal:SetPos(pos)
+			end
+			
+			nodeVec = Vector(pos.x, pos.y, pos.z + 32)
+			local node2 = ents.Create("jcms_node")
+			node2:SetIsPowerful(true)
+			node2:SetPos(nodeVec)
+			node2:Spawn()
+			node2:SetEnergyColour(Vector(1, 0, 1))
+			node2:ConnectNode(node1)
+
+			terminal:Spawn()
+			table.insert(missionObjects, terminal)
+			table.insert(terminals, terminal)
+
+			terminal.track = { node1, node2 }
+			terminal.dependents = {}
+		end
+		-- }}}
 
 		return terminals
 	end
