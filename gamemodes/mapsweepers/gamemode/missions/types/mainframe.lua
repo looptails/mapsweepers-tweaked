@@ -371,7 +371,7 @@
 
 						local dist = 32000 * tr.Fraction
 						if dist < 200 then 
-							midWeights[area] = midWeights[area] * 0.0000001
+							midWeights[area] = midWeights[area] * 0.0001
 						elseif not tr.HitSky then 
 							midWeights[area] = midWeights[area] * 0.001
 						end
@@ -390,11 +390,12 @@
 						end
 
 						if area:GetSizeX() < 50 or area:GetSizeY() < 50 then 
-							midWeights[area] = midWeights[area] * 0.0000001
+							midWeights[area] = midWeights[area] * 0.0001
 						end
 					end
 				end
-				mainframeArea = jcms.util_ChooseByWeight(midWeights)
+
+				mainframeArea = jcms.util_ChooseByWeight(midWeights) or next(midWeights)
 
 				if IsValid(mainframeArea) then
 					local worked, mainframe = jcms.prefab_TryStamp("rgg_mainframe", mainframeArea)

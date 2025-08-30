@@ -188,7 +188,7 @@ jcms.MAPGEN_CONSTRUCT_DIAMETER = math.sqrt(82411875)
 		for i, area in ipairs(areasToCheck or navmesh.GetAllNavAreas()) do
 			--local depth = jcms.mapdata.areaDepths[area]
 			--if depth and depth > avgDepth then
-				local score = 1/jcms.mapgen_GetDistanceFromCenterRelative( area:GetCenter() )
+				local score = 1 / math.max(1, jcms.mapgen_GetDistanceFromCenterRelative( area:GetCenter() ))
 				midAreaWeights[ area ] = score
 			--end
 		end
