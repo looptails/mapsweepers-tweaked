@@ -136,7 +136,7 @@ if SERVER then
 		local hasEpisodes = jcms.HasEpisodes()
 		
 		for npctype, data in pairs(jcms.npc_types) do
-			if data.portalSpawnWeight and data.faction == self:GetSpawnerType() and (not data.episodes or hasEpisodes) then
+			if data.portalSpawnWeight and (data.faction == "everyone" or data.faction == self:GetSpawnerType()) and (not data.episodes or hasEpisodes) then
 				weights[npctype] = data.portalSpawnWeight
 			end
 		end

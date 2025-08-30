@@ -22,7 +22,7 @@
 -- Hell {{{
 
 	jcms.missions.hell = {
-		faction = "antlion",
+		faction = "everyone",
 		
 		phrasesOverride = {
 			["ambient/explosions/exp1.wav"] = 1,

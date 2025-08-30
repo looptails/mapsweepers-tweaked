@@ -99,7 +99,7 @@ jcms.npcSquadSize = 4 -- Let's see if smaller squads fix their strange behavior.
 		local options = {}
 		
 		for className, classData in pairs(jcms.classes) do
-			if classData.faction == faction and not classData.jcorp then
+			if (classData.faction == faction or faction == "everyone") and not classData.jcorp then
 				table.insert(options, className)
 			end
 		end

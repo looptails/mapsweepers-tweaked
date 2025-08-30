@@ -955,7 +955,7 @@ jcms.npc_types.rebel_odessa = {
 }
 
 jcms.npc_types.rebel_alyx = { --todo: Stun when hit w/stunstick
-	portalSpawnWeight = 0.2,
+	portalSpawnWeight = 0,
 	faction = "rebel",
 	
 	danger = jcms.NPC_DANGER_STRONG,

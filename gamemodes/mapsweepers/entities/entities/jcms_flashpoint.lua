@@ -91,7 +91,7 @@ if SERVER then
 		for npcType, data in pairs(jcms.npc_types) do
 			if (not hasEpisodes and data.episodes) then continue end
 			
-			if data.faction == self.faction and (not data.check or data.check()) then
+			if (data.faction == "everyone" or data.faction == self.faction) and (not data.check or data.check()) then
 				validTypes[ npcType ] = data.swarmWeight or 1
 			end
 		end

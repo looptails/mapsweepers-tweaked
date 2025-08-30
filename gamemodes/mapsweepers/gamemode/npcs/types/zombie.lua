@@ -672,7 +672,7 @@ jcms.npc_types.zombie_minitank = {
 }
 
 jcms.npc_types.zombie_boomer = {
-	portalSpawnWeight = 0.5,
+	portalSpawnWeight = 0,
 	faction = "zombie",
 
 	danger = jcms.NPC_DANGER_STRONG,
@@ -746,7 +746,7 @@ jcms.npc_types.zombie_combine = {
 }
 
 jcms.npc_types.zombie_spirit = {
-	portalSpawnWeight = 0.04,
+	portalSpawnWeight = 0,
 	faction = "zombie",
 
 	danger = jcms.NPC_DANGER_STRONG,

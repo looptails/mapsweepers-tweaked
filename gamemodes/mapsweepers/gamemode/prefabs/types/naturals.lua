@@ -281,7 +281,7 @@ local prefabs = jcms.prefabs
 			local ent = ents.Create("jcms_npcportal")
 			if not IsValid(ent) then return end
 
-			if not jcms.director or math.random() < 0.006 then
+			if not jcms.director or math.random() < 0.1 or jcms.director.faction == "everyone" then
 				local factionNames = jcms.factions_GetOrder()
 				ent:SetSpawnerType(factionNames[ math.random(1, #factionNames) ])
 			else
