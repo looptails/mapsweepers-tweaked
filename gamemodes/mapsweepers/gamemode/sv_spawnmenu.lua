@@ -646,6 +646,7 @@
 				crate:SetOwnerNickname( ply:Nick() )
 				crate:SetLocalAngularVelocity( AngleRand(48, 128) )
 				crate:SetColor(col)
+				crate:SetMaterial("models/jcms/jcorp_crate_heal")
 				jcms.announcer_SpeakChance(0.4, jcms.ANNOUNCER_SUPPLIES)
 				jcms.net_NotifyGeneric(ply, jcms.NOTIFY_ORDERED, "#jcms.firstaid")
 				if CPPI then
@@ -662,7 +663,7 @@
 			argparser = "orbital_fixed",
 			
 			func = function(ply, pos, angle)
-				local col = Color(255, 32, 32)
+				local col = Color(255, 0, 0)
 				local boosted = jcms.isPlayerEngineer(ply)
 				local crate, flare = jcms.spawnmenu_Airdrop(pos, "jcms_restock", 10, "#jcms.restock", col)
 				crate:SetAmmoCashInside( 400 + (boosted and 200 or 0) )
@@ -670,6 +671,7 @@
 				crate:SetOwnerNickname( ply:Nick() )
 				crate:SetLocalAngularVelocity( AngleRand(48, 128) )
 				crate:SetColor(col)
+				crate:SetMaterial("models/jcms/jcorp_crate_ammo")
 				jcms.announcer_SpeakChance(0.4, jcms.ANNOUNCER_SUPPLIES_AMMO)
 				jcms.net_NotifyGeneric(ply, jcms.NOTIFY_ORDERED, "#jcms.restock")
 				if CPPI then

@@ -2,5 +2,6 @@
 {
 	"$basetexture" "models/jcms/jcorp_crate_heal"
 	"$bumpmap" "models/jcms/jcorp_crate_heal_normal"
+	"$notint" "1"
 }
 
