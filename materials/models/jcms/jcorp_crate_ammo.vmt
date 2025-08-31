@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/jcms/jcorp_crate_ammo"
+	"$bumpmap" "models/jcms/jcorp_crate_ammo_normal"
+}
+
