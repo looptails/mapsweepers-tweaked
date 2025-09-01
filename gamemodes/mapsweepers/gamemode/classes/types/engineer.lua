@@ -27,14 +27,14 @@ class.mdl = "models/player/swat.mdl"
 class.footstepSfx = "NPC_MetroPolice.RunFootstep"
 
 class.health = 75
-class.shield = 50
-class.shieldRegen = 5
-class.shieldDelay = 7
+class.shield = 45
+class.shieldRegen = 4 -- nerfed from 5
+class.shieldDelay = 5 -- buffed from 7
 
 class.damage = 1
 class.hurtMul = 1
 class.hurtReduce = 1
-class.speedMul = 1
+class.speedMul = 0.9 -- Slightly slower
 
 class.matOverrides = { 
 	["models/cstrike/ct_gign"] = "models/jcms/player/engineer", 
@@ -47,18 +47,20 @@ end
 
 --Engineer's cost offset behaviours.
 class.engineer_discounts = {
-	[jcms.SPAWNCAT_ORBITALS] = 0.5,
-	[jcms.SPAWNCAT_MINES] = 0.5
+	[jcms.SPAWNCAT_ORBITALS] = 0.7, -- nerfed from 0.5
+	[jcms.SPAWNCAT_MINES] = 0.5,
+	[jcms.SPAWNCAT_MOBILITY] = 0.5, -- cheaper vehicles
+	[jcms.SPAWNCAT_SUPPLIES] = 0.7 -- slightly cheaper supplies
 }
 
 class.engineer_cooldowns = {
 	[jcms.SPAWNCAT_TURRETS] = 0.5,
 	[jcms.SPAWNCAT_ORBITALS] = 0.5,
-	[jcms.SPAWNCAT_MOBILITY] = 0.5,
 	[jcms.SPAWNCAT_SUPPLIES] = 0.5,
 	[jcms.SPAWNCAT_MINES] = 0.5,
 	[jcms.SPAWNCAT_DEFENSIVE] = 0.5,
 	[jcms.SPAWNCAT_UTILITY] = 0.5
+	-- [jcms.SPAWNCAT_MOBILITY] = 0.5 -- removed lower vehicle cooldown
 }
 
 function class.getCostMult(orderData)
