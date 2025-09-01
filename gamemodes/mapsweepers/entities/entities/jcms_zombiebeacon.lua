@@ -51,7 +51,7 @@ if SERVER then
 		self:SetModel("models/jcms/jcorp_nuke.mdl")
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
 
-		self:SetMaxHealth(3000)
+		self:SetMaxHealth(4500)
 		self:SetHealth(self:GetMaxHealth())
 		
 		jcms.terminal_Setup(self, "jcorpnuke", "jcorp")
