@@ -40,7 +40,7 @@
 			missionData.stormController:Spawn()
 			missionData.stormController:SetEnabled(false)
 			
-			missionData.nextStorm = CurTime() + 120
+			missionData.nextStorm = CurTime() + 90 -- down from 120
 
 			missionData.storming = true
 			missionData.stormEnd = 0
@@ -160,7 +160,7 @@
 
 				md.storming = true
 				md.stormEnd = CurTime() + (90 * md.stormMult)
-				md.nextStorm = md.stormEnd + 180
+				md.nextStorm = md.stormEnd + 150 -- down from 180
 				
 				md.stormController:SetEnabled(true)
 			elseif md.storming then 
