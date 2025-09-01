@@ -57,8 +57,8 @@ function ENT:Initialize()
 		self.soundTurbo:ChangePitch(12)
 		self.soundWater = CreateSound(self, "vehicles/airboat/pontoon_fast_water_loop1.wav")
 		
-		self:SetMaxHealth(1250)
-		self:SetHealth(1250)
+		self:SetMaxHealth(1750) -- up from 1250
+		self:SetHealth(1750)
 
 		self:AddEFlags(EFL_DONTBLOCKLOS)
 
@@ -269,9 +269,9 @@ if SERVER then
 		speed = speed:Length()
 		local shieldOn = self:GetShieldActive()
 
-		if speed > 120 and data.HitEntity:Health() > 0 then
+		if speed > 90 and data.HitEntity:Health() > 0 then -- speed down from 120
 			local dmg = DamageInfo()
-			dmg:SetDamage(math.sqrt(speed) / 10 + 5)
+			dmg:SetDamage(math.sqrt(speed) / 8 + 10) -- 10 minimum damage, up from 5; divided by 8 instead of 10 now
 			dmg:SetAttacker(self:GetDriver() or self)
 			dmg:SetInflictor(self)
 			dmg:SetDamageType(bit.bor(DMG_CRUSH, DMG_VEHICLE))
