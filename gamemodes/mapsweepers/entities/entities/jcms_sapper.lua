@@ -84,7 +84,7 @@ if SERVER then
 						local dmgInfo = DamageInfo()
 						dmgInfo:SetAttacker(self)
 						dmgInfo:SetInflictor(self)
-						dmgInfo:SetDamage(20)
+						dmgInfo:SetDamage(40) -- doubled damage
 						dmgInfo:SetDamageType( DMG_SHOCK )
 						dmgInfo:SetReportedPosition(selfPos)
 						dmgInfo:SetDamagePosition(selfPos)
