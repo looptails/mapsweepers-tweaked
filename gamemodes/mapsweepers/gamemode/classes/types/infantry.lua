@@ -31,10 +31,10 @@ class.shield = 75
 class.shieldRegen = 7
 class.shieldDelay = 7
 
-class.damage = 1.25 -- This unit deals 25% more damage than others
+class.damage = 1 -- No longer deals 25% more damage
 class.hurtMul = 1
 class.hurtReduce = 1
-class.speedMul = 1
+class.speedMul = 1.1 -- Slight speed buff
 
 class.matOverrides = {
 	["models/cstrike/ct_gsg9"] = "models/jcms/player/infantry"
@@ -57,7 +57,7 @@ function class.Think(ply)
 			else
 				local restored = 0
 				for i=clip, wep.lastClip1-1 do
-					if util.SharedRandom("InfantryAmmoRestore", 0, 1) >= 0.5 then
+					if util.SharedRandom("InfantryAmmoRestore", 0, 1) >= 0.6 then -- nerfed to 40% chance down from 50%
 						restored = restored + 1
 					end
 				end
