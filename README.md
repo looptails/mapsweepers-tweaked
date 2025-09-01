@@ -1,5 +1,19 @@
 ![Map Sweepers Header Image](https://media.discordapp.net/attachments/778220642210152460/1393239976615084153/image.png?ex=68727357&is=687121d7&hm=ea7ea5df08f65925ee38ae270677db1220fc94b525f5edef84e313c8badd4386&=&format=webp&quality=lossless "Map Sweepers Header Image")
 
+**Map Sweepers Tweaked**
+
+This is a simple fork of the original map sweepers which seeks to touch up on the gameplay aspect of things in order to make them more fun and engaging to deal with, including but not limited to;
+- Rebalances to weapons, classes, vehicles, gamemodes and more.
+- QOL features to improve the gameplay experience.
+- Integrated server addon features.
+- Other random features and tweaks I thought were either fun or cool.
+
+All credit goes to octanis addons, I own nothing.
+
+
+
+Original Description:
+
 Map Sweepers
 ===========
 
