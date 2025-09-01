@@ -99,7 +99,7 @@
 		end,
 
 		think = function(director)
-			director.totalWar = true
+			director.totalWar = false
 			
 			if not director.swarmNext or director.swarmNext < 60 then
 				director.swarmNext = 60
