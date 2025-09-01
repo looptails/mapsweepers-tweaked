@@ -37,7 +37,7 @@ function ENT:SetupDataTables()
 		local areaMult, volMult, densityMult, avgSizeMult = jcms.mapgen_GetMapSizeMultiplier()
 		local sizeMult = math.min(areaMult, volMult)
 		local densityMult = avgSizeMult / densityMult
-		self:SetCloudRange(1250 * sizeMult * densityMult)
+		self:SetCloudRange(900 * sizeMult * densityMult) -- down from 1250
 	end
 end
 
@@ -73,7 +73,7 @@ if SERVER then
 		self.jcms_ignoreStraggling = true
 
 		self:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
-		self:SetCloudRange(1250 * sizeMult * densityMult)
+		self:SetCloudRange(900 * sizeMult * densityMult) -- down from 1250
 		self:SetBloodColor(BLOOD_COLOR_RED)
 
 		self.jcms_dontScaleDmg = true
@@ -249,7 +249,7 @@ if CLIENT then
 			selfTbl.nextPart = CurTime() + 0.5*1.5
 
 			local function sharedPartStats(part)
-				part:SetStartAlpha(165)
+				part:SetStartAlpha(120) -- made more transparent, down from 165
 				part:SetEndAlpha(0)
 
 				part:SetColor( 105 + math.random(0,10), 35, 0 )
