@@ -26,10 +26,10 @@ jcms.class_Add("sentinel", class, true)
 class.mdl = "models/player/gasmask.mdl"
 class.footstepSfx = "NPC_CombineS.RunFootstep"
 
-class.health = 100
-class.shield = 150
+class.health = 75
+class.shield = 175
 class.shieldRegen = 25
-class.shieldDelay = 15
+class.shieldDelay = 20
 
 class.damage = 1
 class.hurtMul = 1
@@ -37,7 +37,7 @@ class.hurtReduce = 1
 class.speedMul = 0.75
 class.walkSpeed = 160
 class.runSpeed = 160
-class.boostedRunSpeed = 250
+class.boostedRunSpeed = 220
 class.disallowSprintAttacking = true
 
 class.matOverrides = { 
@@ -107,6 +107,7 @@ if SERVER then
 
 		-- // Panic teleport {{{
 			ply.sentinel_invulnTime = ply.sentinel_invulnTime or 0
+			ply.sentinel_cooldownTime = ply.sentinel_cooldownTime or 0
 
 			if CurTime() < ply.sentinel_invulnTime then 
 				dmg:SetDamage(0)
@@ -114,7 +115,7 @@ if SERVER then
 			end
 
 			local armour = ply:Armor()
-			ply.sentinel_canTeleport = ply.sentinel_canTeleport or armour > 20 --Are we allowed to panic?
+			ply.sentinel_canTeleport = (ply.sentinel_canTeleport or armour > 20) and (not ply.sentinel_cooldownTime > 0) --Are we allowed to panic?
 
 			if armour < 15 and ply.sentinel_canTeleport and not ply.sentinel_isTeleporting then 
 				ply:EmitSound("buttons/blip2.wav", 65, 150)
@@ -138,7 +139,7 @@ if SERVER then
 						--TODO: ABSOLUTELY NEEDS TO BE INDICATED. Should be some large-text saying "ANCHORED" + some smaller text elaborating a bit
 						--(Telling people they won't teleport / that it's buildings causing this)
 						--This should ideally display whenever they're close to a building.
-						for i, ent in ipairs(ents.FindInSphere(ply:WorldSpaceCenter(), 200)) do
+						for i, ent in ipairs(ents.FindInSphere(ply:WorldSpaceCenter(), 400)) do
 							if ent.SentinelAnchor and (not ent.GetHackedByRebels or not ent:GetHackedByRebels()) then 
 								return --Don't teleport us if we're near a friendly building.
 							end
@@ -229,6 +230,7 @@ if SERVER then
 
 						ply:EmitSound("ambient/machines/teleport4.wav")
 						ply.sentinel_invulnTime = CurTime() + 1.5 --1.5s of invincibility after teleporting
+						ply.sentinel_cooldownTime = CurTime() + 90 --90s cooldown after teleporting
 						ply.sentinel_canTeleport = false
 					end)
 				end)
@@ -274,7 +276,7 @@ if SERVER then
 			end
 		else
 			--Shield charge on kill.
-			local charge = math.ceil((npc.jcms_bounty or 1) / 30) --We receive some shield even if our target has no bounty.
+			local charge = math.ceil((npc.jcms_bounty or 1) / 25) --We receive some shield even if our target has no bounty.
 		
 			if charge > 0 then
 				local oldArmor = ply:Armor()
