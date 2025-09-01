@@ -772,7 +772,8 @@ jcms.vectorOne = Vector(1, 1, 1)
 
 		local ammoEfficiency = math.max(damagePer / ammoCost, 1)
 		local starterClipCost = math.max(stats.clipsize, 1) * ammoCost
-
+		local ammoFactor = math.max(stats.clipsize, 1)
+		if dmgShot >= 70 then ammoFactor = 40 end
 		local accuracyFac = math.log(math.max(stats.accuracy, 1) + 2, 2) -- <1 deg inaccuracy ignored (has an exaggerated effect)
 
 		-- // Damage per Second and Kills per Second {{{
@@ -782,6 +783,7 @@ jcms.vectorOne = Vector(1, 1, 1)
 			if jcms.weapon_ammoExplosive[stats.ammotype] then --If we (probably) have splash damage, KPS should be high.
 				dpsCost = dpsCost * accuracyFac --If we're AOE we probably don't care much about accuracy
 				kps = dpsCost  --(Yes I know this is ridiculously large).
+				ammoFactor = math.max(ammoFactor * 8, 40) --changes ammo factor for weapons with explosive ammo to be much higher
 			end
 			kps = math.min(kps, 200) --Beyond a certain point it doesn't really matter any more.
 		-- // }}}
@@ -791,7 +793,7 @@ jcms.vectorOne = Vector(1, 1, 1)
 		local scaledEfficiencyCost = ammoEfficiency^(2/3)
 
 		--Final cost.
-		local cost = (scaledDPSCost * scaledEfficiencyCost + starterClipCost) * 2.75
+		local cost = (scaledDPSCost * scaledEfficiencyCost * (ammoFactor/30) + starterClipCost) * 2.75 -- ammo factor is now included in final price 
 
 		local divider = 5		-- Never noticed this, but I like it -J.
 		if cost >= 2000 then
