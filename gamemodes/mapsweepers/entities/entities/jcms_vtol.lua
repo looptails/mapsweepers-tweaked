@@ -28,8 +28,8 @@ ENT.Category = "Map Sweepers"
 ENT.Spawnable = false
 ENT.RenderGroup = RENDERGROUP_BOTH
 
-ENT.Damage = 15
-ENT.Firerate = 0.07
+ENT.Damage = 8 -- down from 15
+ENT.Firerate = 0.03 -- down from 0.07
 ENT.Spread = 1.7
 
 function ENT:Initialize()
@@ -79,7 +79,7 @@ function ENT:SetupDataTables()
 		self:SetJetMode(false)
 		self:SetIsWorking(true)
 		self:SetHealthFraction(1)
-		self:SetMachinegunAmmo(400)
+		self:SetMachinegunAmmo(1000) -- up from 400
 		
 		for i=1, 6 do
 			self["SetSeatOccupied" .. i](false)
