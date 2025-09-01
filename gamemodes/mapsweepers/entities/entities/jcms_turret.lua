@@ -110,10 +110,10 @@ if SERVER then
 			
 			boosted = { --engineer.
 				attackPattern = { 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0 },
-				firerate = 0.068
-				--I can't think of anything other than generic stat boosts, since it's just a generalist.
-				--I picked changes that were the most visually obvious.
-				--If you can think of anything better it'd be appreciated, this is a bit underwhelming. Not the end of the world though.
+				firerate = 0.068,
+				--I gotchu
+				turnSpeedYaw = 270,
+				turnSpeedPitch = 70 -- buffed turning speed by 50%~
 			}
 		},
 		
@@ -387,6 +387,7 @@ function ENT:Initialize()
 		self.keepupright = constraint.Keepupright(self, self:GetAngles(), 0, 32)
 		
 		self:AddCallback("PhysicsCollide", self.PhysicsCollide)
+		self:GetPhysicsObject():SetMass(150) -- make them FAT
 		self:GetPhysicsObject():Wake()
 		self:SetUseType(SIMPLE_USE)
 	end
@@ -774,6 +775,7 @@ if SERVER then
 		launchVector.z = launchVector.z + math.random(200, 500)
 		
 		local phys = self:GetPhysicsObject()
+		self:GetPhysicsObject():SetMass(50)
 		phys:AddVelocity(launchVector)
 		phys:AddAngleVelocity(VectorRand(-200, 200))
 		
