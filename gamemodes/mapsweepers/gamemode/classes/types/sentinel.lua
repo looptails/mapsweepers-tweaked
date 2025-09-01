@@ -230,7 +230,7 @@ if SERVER then
 
 						ply:EmitSound("ambient/machines/teleport4.wav")
 						ply.sentinel_invulnTime = CurTime() + 1.5 --1.5s of invincibility after teleporting
-						ply.sentinel_cooldownTime = CurTime() + 90 --90s cooldown after teleporting
+						ply.sentinel_cooldownTime = CurTime() + 180 --180s cooldown after teleporting
 						ply.sentinel_canTeleport = false
 					end)
 				end)
