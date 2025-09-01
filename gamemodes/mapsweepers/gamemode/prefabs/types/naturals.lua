@@ -40,7 +40,11 @@ local prefabs = jcms.prefabs
 				local rng = math.random(#wallspots)
 				return true, { pos = wallspots[rng], normal = normals[rng] }
 			else
-				return false
+				limit = 1
+				check = function(area)
+					return ( area:GetSizeX()*area:GetSizeY() ) > 400
+				end
+				return true, { pos = jcms.mapgen_AreaPointAwayFromEdges(area, 64), normal = 0 }
 			end
 		end,
 
