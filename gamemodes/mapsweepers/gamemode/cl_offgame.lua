@@ -934,8 +934,8 @@ jcms.offgame = jcms.offgame or NULL
 				tab.loadoutPnl.shop = tab.loadoutPnl.shopScroller:Add("DListLayout")
 				tab.loadoutPnl.shop:SetPos(0, 0)
 				tab.loadoutPnl.shop:SetSize(tab.loadoutPnl.shopScroller:GetSize())
-				tab.loadoutPnl.shop.catMode = 1
-				tab.loadoutPnl.shop.sortMode = 1
+				tab.loadoutPnl.shop.catMode = 2 -- sorts by ammo by default now
+				tab.loadoutPnl.shop.sortMode = 2 -- sorts by price by default now
 				tab.loadoutPnl.shop.sortReverse = false
 				tab.loadoutPnl.shop.weaponButtons = {}
 				function tab.loadoutPnl.shop:CategorizeGun(class)
