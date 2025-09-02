@@ -41,8 +41,10 @@ jcms.ANNOUNCER_HA = 18
 jcms.announcer_vo = {}
 jcms.announcer_vo_weights = {}
 local vo = jcms.announcer_vo
+local vog = jcms.announcer_vo
 local voW = jcms.announcer_vo_weights
-jcms.announcer_vo_types = {["default"] = {["vo"] = vo, ["voW"] = voW}}
+local vogW = jcms.announcer_vo_weights
+jcms.announcer_vo_types = {["default"] = {["vo"] = vo, ["voW"] = voW}, ["gambler"] = {["vog"] = vog, ["vogW"] = vogW}}
 
 function jcms.announcer_Set(name)
 	local voType = jcms.announcer_vo_types[name]
@@ -77,6 +79,7 @@ end)
 --Set our announcer to whatever the stored announcer value is
 jcms.announcer_Set(jcms.cvar_announcer_type:GetString())
 
+-- // Default Announcer {{{
 -- {{{
 	vo[jcms.ANNOUNCER_FAILED] = {
 		"youareawasteofmoney",
@@ -330,8 +333,113 @@ jcms.announcer_Set(jcms.cvar_announcer_type:GetString())
 		"weactuallydidntsendanyone"
 	}
 -- }}}
+-- // }}}
+
+--  // Gambler's Announcer {{{
+-- -- {{{
+-- 	vog[jcms.ANNOUNCER_FAILED] = {
+
+-- 	}
+-- -- }}}
+
+-- -- {{{
+-- 	vog[jcms.ANNOUNCER_VICTORY] = {
+
+-- 	}
+-- -- }}}
+
+-- -- {{{
+-- 	vog[jcms.ANNOUNCER_EXITPOD1] = {
+
+-- 	}
+
+-- 	vog[jcms.ANNOUNCER_EXITPOD2] = {
+
+-- 	}
+-- -- }}}
+
+-- -- {{{
+-- 	vog[jcms.ANNOUNCER_SWARM] = {
+	
+-- 	}
+-- -- }}}
+
+-- -- {{{
+-- 	vog[jcms.ANNOUNCER_SWARM_BIG] = {
+
+-- 	}
+-- -- }}}
+
+-- -- {{{
+-- 	vo[jcms.ANNOUNCER_SUPPLIES] = {
+
+-- 	}
+
+-- 	vo[jcms.ANNOUNCER_SUPPLIES_AMMO] = {
+	
+-- 	}
+-- -- }}}
+
+-- -- {{{
+-- 	vog[jcms.ANNOUNCER_IDLE] = {
+		
+-- 	}
+-- -- }}}
+
+-- -- {{{
+-- 	vog[jcms.ANNOUNCER_AMMO_WASTE] = {
+		
+-- 	}
+-- -- }}}
+
+-- -- {{{
+-- 	vog[jcms.ANNOUNCER_FRIENDLYFIRE] = {
+		
+-- 	}
+
+-- 	vog[jcms.ANNOUNCER_FRIENDLYFIRE_KILL] = {
+		
+-- 	}
+-- -- }}}
+
+-- -- {{{
+-- 	vog[jcms.ANNOUNCER_DEAD] = {
+		
+-- 	}
+-- -- }}}
+
+-- -- {{{
+-- 	vog[jcms.ANNOUNCER_SHELLING] = {
+		
+-- 	}
+
+-- 	vog[jcms.ANNOUNCER_ORBITALBEAM] = {
+		
+-- 	}
+-- -- }}}
+
+-- -- {{{
+-- 	vog[jcms.ANNOUNCER_DONTTOUCH] = {
+		
+-- 	}
+
+-- 	vog[jcms.ANNOUNCER_HA] = {
+		
+-- 	}
+-- -- }}}
+
+-- -- {{{
+-- 	vog[jcms.ANNOUNCER_JOIN] = {
+		
+-- 	}
+-- -- }}}
+--  // }}}
+
+
 
 table.Add(vo[jcms.ANNOUNCER_SUPPLIES_AMMO], vo[jcms.ANNOUNCER_SUPPLIES])
+-- no clue why we're doing this but ok
+table.Add(vog[jcms.ANNOUNCER_SUPPLIES_AMMO], vog[jcms.ANNOUNCER_SUPPLIES])
 
 if CLIENT then
 	jcms.announcer_nextSpeak = 0
@@ -353,7 +461,8 @@ if CLIENT then
 			--Tracking number of uses on both client and server sounds like a pain, so I'm not going to do that.
 
 			if jcms.cvar_announcer:GetBool() then
-				EmitSound("vo/jcms/" .. chosenLine .. ".mp3", vector_origin, 0, CHAN_VOICE2, 1, 0, 0, 100, 0)
+				EmitSound("vo/jcms/" .. id .. "/" .. chosenLine .. ".mp3", vector_origin, 0, CHAN_VOICE2, 1, 0, 0, 100, 0)
+				-- now requires another folder of depth to allow for an increased number of lines, repeated file names, and less confusion
 			end
 		end)
 	end
