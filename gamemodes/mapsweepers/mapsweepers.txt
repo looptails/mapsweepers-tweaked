@@ -1,11 +1,11 @@
 "mapsweepers"
 {
 	"base"			"base"
-	"title"			"Map Sweepers"
+	"title"			"Map Sweepers Tweaked"
 	"maps"			"^jcms_|^mapsweepers_"
 	"category"		"pve"
 	"menusystem"	"1"
-	"workshopid"	"3523033966"
+	"workshopid"	"3560822069"
 
 	"settings"
 	{
@@ -15,7 +15,7 @@
 			"text"		"Starting cash"
 			"help"		"How much cash Sweepers start with"
 			"type"		"Numeric"
-			"default"	"600"
+			"default"	"400"
 			"singleplayer"	"1"
 		}
 		
