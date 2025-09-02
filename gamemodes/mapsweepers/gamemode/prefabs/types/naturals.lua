@@ -40,27 +40,20 @@ local prefabs = jcms.prefabs
 				local rng = math.random(#wallspots)
 				return true, { pos = wallspots[rng], normal = normals[rng] }
 			else
-				limit = 1
-				check = function(area)
-					return ( area:GetSizeX()*area:GetSizeY() ) > 400
-				end
-				if check then
-					return true, { pos = jcms.mapgen_AreaPointAwayFromEdges(area, 64), normals[rng] }
-				else
-					return false
-				end
+				return false
 			end
 		end,
 
 		stamp = function(area, data)
 			local ent = ents.Create("jcms_shop")
 			if not IsValid(ent) then return end
-
+			
 			data.pos = data.pos + data.normal * 14
 			ent:SetPos(data.pos)
 			ent:DropToFloor()
 			ent:SetAngles(data.normal:Angle())
 			ent:Spawn()
+			print("WE SPAWNED A SHOP")
 			return ent
 		end
 	}

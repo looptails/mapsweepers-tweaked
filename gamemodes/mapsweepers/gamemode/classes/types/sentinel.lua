@@ -108,6 +108,7 @@ if SERVER then
 		-- // Panic teleport {{{
 			ply.sentinel_invulnTime = ply.sentinel_invulnTime or 0
 			ply.sentinel_cooldownTime = ply.sentinel_cooldownTime or 0
+			print(ply.sentinel_cooldownTime)
 
 			if CurTime() < ply.sentinel_invulnTime then 
 				dmg:SetDamage(0)
@@ -115,7 +116,8 @@ if SERVER then
 			end
 
 			local armour = ply:Armor()
-			ply.sentinel_canTeleport = (ply.sentinel_canTeleport or armour > 20) and not (ply.sentinel_cooldownTime > 0) --Are we allowed to panic?
+			ply.sentinel_canTeleport = (ply.sentinel_canTeleport or armour > 20) and (CurTime() > ply.sentinel_cooldownTime) --Are we allowed to panic?
+			print("Can we teleport? ", ply.sentinel_canTeleport)
 
 			if armour < 15 and ply.sentinel_canTeleport and not ply.sentinel_isTeleporting then 
 				ply:EmitSound("buttons/blip2.wav", 65, 150)
@@ -136,9 +138,6 @@ if SERVER then
 						ply.sentinel_teleportSound:Stop()
 						ply.sentinel_isTeleporting = false
 
-						--TODO: ABSOLUTELY NEEDS TO BE INDICATED. Should be some large-text saying "ANCHORED" + some smaller text elaborating a bit
-						--(Telling people they won't teleport / that it's buildings causing this)
-						--This should ideally display whenever they're close to a building.
 						for i, ent in ipairs(ents.FindInSphere(ply:WorldSpaceCenter(), 400)) do
 							if ent.SentinelAnchor and (not ent.GetHackedByRebels or not ent:GetHackedByRebels()) then 
 								return --Don't teleport us if we're near a friendly building.

@@ -1412,7 +1412,8 @@ jcms.MAPGEN_CONSTRUCT_DIAMETER = math.sqrt(82411875)
 				prefabType = jcms.util_ChooseByWeight(naturalWeights)
 
 				local prefabData = jcms.prefabs[prefabType]
-				if prefabData.limit and (naturalCounts[prefabType] or 0) >= (isfunction(prefabData.limit) and prefabData.limit() or prefabData.limit) * math.Round(prefabData.limitMulBySize and mapSizeMul or 1) then
+				--print("In order:",prefabData,prefabData.limit,naturalCounts[prefabType],isfunction(prefabData.limit),prefabData.limit(),prefabData.limitMulBySize,mapSizeMul)
+				if prefabData.limit and (naturalCounts[prefabType] or 0) >= (isfunction(prefabData.limit) and prefabData.limit() or prefabData.limit) * math.max(math.Round(prefabData.limitMulBySize and mapSizeMul or 1),1) then
 					naturalWeights[prefabType] = nil
 				else
 					break
