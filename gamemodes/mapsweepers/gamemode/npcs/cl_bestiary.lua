@@ -231,3 +231,32 @@ jcms.bestiary = {}
 	}
 
 -- // }}}
+
+-- // Turrets {{{
+
+	jcms.bestiary.turret_smg = {
+		faction = "turret", bounty = 0, health = 150,
+		mdl = "models/jcms/jcorp_turret.mdl", bodygroups = { [1] = 1 }, camfov = 25
+	}
+
+	jcms.bestiary.turret_bolter = {
+		faction = "turret", bounty = 0, health = 150,
+		mdl = "models/jcms/jcorp_turret.mdl", bodygroups = { [1] = 2 }, camfov = 25
+	}
+
+	jcms.bestiary.turret_shotgun = {
+		faction = "turret", bounty = 0, health = 150,
+		mdl = "models/jcms/jcorp_turret.mdl", bodygroups = { [1] = 4 }, camfov = 25
+	}
+
+	jcms.bestiary.turret_gatling = {
+		faction = "turret", bounty = 0, health = 150,
+		mdl = "models/jcms/jcorp_turret.mdl", bodygroups = { [1] = 3 }, camfov = 25
+	}
+
+	jcms.bestiary.turret_rocket = {
+		faction = "turret", bounty = 0, health = 300,
+		mdl = "models/jcms/jcorp_smrls.mdl", camfov = 30
+	}
+
+-- // }}}
