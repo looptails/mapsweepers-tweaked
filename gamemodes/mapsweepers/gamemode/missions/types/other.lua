@@ -95,7 +95,11 @@
 		end,
 
 		swarmCalcBossCount = function(d, swarmCost)
-			return 1
+			return 2
+		end,
+
+		swarmCalcCooldown = function(d, baseCooldown, swarmCost)
+			return baseCooldown / 2
 		end,
 
 		think = function(director)
