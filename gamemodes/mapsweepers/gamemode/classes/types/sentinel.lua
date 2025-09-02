@@ -37,7 +37,7 @@ class.hurtReduce = 1
 class.speedMul = 0.75
 class.walkSpeed = 160
 class.runSpeed = 160
-class.boostedRunSpeed = 220
+class.boostedRunSpeed = 250
 class.disallowSprintAttacking = true
 
 class.matOverrides = { 
