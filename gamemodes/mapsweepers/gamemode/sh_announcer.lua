@@ -40,6 +40,7 @@ jcms.ANNOUNCER_HA = 18
 
 jcms.announcer_vo = {}
 jcms.announcer_vo_weights = {}
+local announcerName
 local vo = jcms.announcer_vo
 local vog = jcms.announcer_vo
 local voW = jcms.announcer_vo_weights
@@ -47,10 +48,12 @@ local vogW = jcms.announcer_vo_weights
 jcms.announcer_vo_types = {["default"] = {["vo"] = vo, ["voW"] = voW}, ["gambler"] = {["vog"] = vog, ["vogW"] = vogW}}
 
 function jcms.announcer_Set(name)
+	announcerName = name
 	local voType = jcms.announcer_vo_types[name]
 
 	if not voType then
 		voType = jcms.announcer_vo_types["default"]
+		announcername = "default"
 	end
 
 	jcms.announcer_vo = voType["vo"]
@@ -461,7 +464,7 @@ if CLIENT then
 			--Tracking number of uses on both client and server sounds like a pain, so I'm not going to do that.
 
 			if jcms.cvar_announcer:GetBool() then
-				EmitSound("vo/jcms/" .. id .. "/" .. chosenLine .. ".mp3", vector_origin, 0, CHAN_VOICE2, 1, 0, 0, 100, 0)
+				EmitSound("vo/jcms/" .. announcerName .. "/" .. chosenLine .. ".mp3", vector_origin, 0, CHAN_VOICE2, 1, 0, 0, 100, 0)
 				-- now requires another folder of depth to allow for an increased number of lines, repeated file names, and less confusion
 			end
 		end)
