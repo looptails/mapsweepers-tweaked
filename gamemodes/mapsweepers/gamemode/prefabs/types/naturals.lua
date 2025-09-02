@@ -53,7 +53,7 @@ local prefabs = jcms.prefabs
 			ent:DropToFloor()
 			ent:SetAngles(data.normal:Angle())
 			ent:Spawn()
-			print("WE SPAWNED A SHOP")
+			--print("WE SPAWNED A SHOP")
 			return ent
 		end
 	}
