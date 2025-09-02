@@ -45,7 +45,7 @@ local prefabs = jcms.prefabs
 					return ( area:GetSizeX()*area:GetSizeY() ) > 400
 				end
 				if check then
-					return true, { pos = jcms.mapgen_AreaPointAwayFromEdges(area, 64), normal = 0 }
+					return true, { pos = jcms.mapgen_AreaPointAwayFromEdges(area, 64), normals[rng] }
 				else
 					return false
 				end
