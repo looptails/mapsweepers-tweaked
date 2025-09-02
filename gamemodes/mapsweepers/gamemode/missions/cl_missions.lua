@@ -48,7 +48,7 @@
 		
 		hell = {
 			faction = "everyone",
-			tags = { "rarebosses" }
+			tags = { "rarebosses", "infighting" }
 		},
 
 		violenceflashpoints = {
