@@ -115,7 +115,7 @@ if SERVER then
 			end
 
 			local armour = ply:Armor()
-			ply.sentinel_canTeleport = (ply.sentinel_canTeleport or armour > 20) and (not ply.sentinel_cooldownTime > 0) --Are we allowed to panic?
+			ply.sentinel_canTeleport = (ply.sentinel_canTeleport or armour > 20) and not (ply.sentinel_cooldownTime > 0) --Are we allowed to panic?
 
 			if armour < 15 and ply.sentinel_canTeleport and not ply.sentinel_isTeleporting then 
 				ply:EmitSound("buttons/blip2.wav", 65, 150)
