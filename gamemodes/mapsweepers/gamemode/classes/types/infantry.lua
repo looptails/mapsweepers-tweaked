@@ -27,7 +27,7 @@ class.mdl = "models/player/riot.mdl"
 class.footstepSfx = "NPC_MetroPolice.RunFootstep"
 
 class.health = 100
-class.shield = 75
+class.shield = 100 -- shield buff
 class.shieldRegen = 7
 class.shieldDelay = 7
 
@@ -57,7 +57,7 @@ function class.Think(ply)
 			else
 				local restored = 0
 				for i=clip, wep.lastClip1-1 do
-					if util.SharedRandom("InfantryAmmoRestore", 0, 1) >= 0.6 then -- nerfed to 40% chance down from 50%
+					if util.SharedRandom("InfantryAmmoRestore", 0, 1) >= 0.5 then -- returned back to 50% chance
 						restored = restored + 1
 					end
 				end
