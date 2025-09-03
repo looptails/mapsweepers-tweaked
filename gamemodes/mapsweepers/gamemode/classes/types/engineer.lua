@@ -47,10 +47,10 @@ end
 
 --Engineer's cost offset behaviours.
 class.engineer_discounts = {
-	[jcms.SPAWNCAT_ORBITALS] = 0.7, -- nerfed from 0.5
+	[jcms.SPAWNCAT_ORBITALS] = 0.75, -- nerfed from 0.5
 	[jcms.SPAWNCAT_MINES] = 0.5,
-	[jcms.SPAWNCAT_MOBILITY] = 0.5, -- cheaper vehicles
-	[jcms.SPAWNCAT_SUPPLIES] = 0.7 -- slightly cheaper supplies
+	[jcms.SPAWNCAT_MOBILITY] = 0.75, -- slightly cheaper vehicles
+	[jcms.SPAWNCAT_SUPPLIES] = 0.75 -- slightly cheaper supplies
 }
 
 class.engineer_cooldowns = {
