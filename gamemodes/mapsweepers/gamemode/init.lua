@@ -560,7 +560,8 @@ end
 
 	function jcms.runprogress_CalculateDifficultyFromWinstreak(winstreak, totalWins)
 		local newPlayerScalar = 1 - math.max((6 - totalWins), 0) * 0.06
-		local final = math.min(((0.9 + winstreak * 0.175) * newPlayerScalar),2) -- difficulty caps out at 200% to prevent unfair gameplay at ultra high winstreaks, may increase in the future
+		local arghh = (0.9 + winstreak * 0.175) * newPlayerScalar
+		local final = math.min(arghh, 3)
 		game.GetWorld():SetNWFloat("jcms_difficulty", final)
 		return final
 		
