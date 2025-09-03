@@ -892,7 +892,7 @@ if CLIENT then
 		surface.SetDrawColor(jcms.color_dark)
 		surface.DrawRect(-healthWidth/2, -114, healthWidth, 32)
 
-		local maxammo = 400
+		local maxammo = 1000
 		local ammoString = self:GetMachinegunAmmo() .. " / " .. maxammo
 		draw.SimpleText(ammoString, "jcms_hud_medium", 0, -150, jcms.color_dark_alt, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
 		
