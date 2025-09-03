@@ -18,7 +18,7 @@
 	See the full GNU GPL v3 in the LICENSE file.
 	Contact E-Mail: merekidorian@gmail.com
 --]]
-GM.Name = "Map Sweepers"
+GM.Name = "Map Sweepers Tweaked"
 GM.Author = "Octantis Addons"
 
 jcms = jcms or {}
@@ -793,7 +793,7 @@ jcms.vectorOne = Vector(1, 1, 1)
 		local scaledEfficiencyCost = ammoEfficiency^(2/3)
 
 		--Final cost.
-		local cost = (scaledDPSCost * scaledEfficiencyCost * (ammoFactor/30) + starterClipCost) * 2.75 -- ammo factor is now included in final price 
+		local cost = (scaledDPSCost * scaledEfficiencyCost * (ammoFactor/25) + starterClipCost) * 2.75 -- ammo factor is now included in final price 
 
 		local divider = 5		-- Never noticed this, but I like it -J.
 		if cost >= 2000 then
