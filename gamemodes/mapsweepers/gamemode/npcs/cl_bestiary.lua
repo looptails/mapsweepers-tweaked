@@ -260,3 +260,27 @@ jcms.bestiary = {}
 	}
 
 -- // }}}
+
+-- // Sweepers {{{
+
+	jcms.bestiary.sweeper_recon {
+		faction = "sweeper", bounty = 0, health = 75,
+		mdl = "models/player/urban.mdl", seq = 1, camfov = 30
+	}
+
+	jcms.bestiary.sweeper_infantry {
+		faction = "sweeper", bounty = 0, health = 100,
+		mdl = "models/player/riot.mdl", seq = 1, camfov = 30
+	}
+
+	jcms.bestiary.sweeper_sentinel {
+		faction = "sweeper", bounty = 0, health = 75,
+		mdl = "models/player/gasmask.mdl", seq = 1, camfov = 30
+	}
+
+	jcms.bestiary.sweeper_engineer {
+		faction = "sweeper", bounty = 0, health = 75,
+		mdl = "models/player/swat.mdl", seq = 1, camfov = 30
+	}
+
+-- // }}}
