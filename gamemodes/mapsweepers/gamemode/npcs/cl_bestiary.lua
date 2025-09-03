@@ -29,7 +29,7 @@ jcms.bestiary = {}
 	}
 
 	jcms.bestiary.antlion_drone = {
-		faction = "antlion", bounty = 15, health = 30,
+		faction = "antlion", bounty = 15, health = 25,
 		mdl = "models/antlion.mdl", camfov = 28
 	}
 
@@ -69,7 +69,7 @@ jcms.bestiary = {}
 
 	jcms.bestiary.combine_elite = {
 		faction = "combine", bounty = 95, health = 80,
-		mdl = "models/combine_super_soldier.mdl", camfov = 30
+		mdl = "models/combine_super_soldier.mdl", camfov = 25
 	}
 
 	jcms.bestiary.combine_gunship = {
@@ -84,27 +84,27 @@ jcms.bestiary = {}
 
 	jcms.bestiary.combine_metrocop = {
 		faction = "combine", bounty = 40, health = 40,
-		mdl = "models/police.mdl", camfov = 30
+		mdl = "models/police.mdl", camfov = 25
 	}
 
 	jcms.bestiary.combine_scanner = {
-		faction = "combine", bounty = 15, health = 30,
+		faction = "combine", bounty = 15, health = 25,
 		mdl = "models/combine_scanner.mdl", camfov = 20
 	}
 
 	jcms.bestiary.combine_sniper = {
 		faction = "combine", bounty = 75, health = 38,
-		mdl = "models/combine_soldier_prisonguard.mdl", skin = 1, camfov = 30
+		mdl = "models/combine_soldier_prisonguard.mdl", skin = 1, camfov = 25
 	}
 
 	jcms.bestiary.combine_soldier = {
 		faction = "combine", bounty = 70, health = 50,
-		mdl = "models/combine_soldier.mdl", camfov = 30
+		mdl = "models/combine_soldier.mdl", camfov = 25
 	}
 
 	jcms.bestiary.combine_suppressor = {
 		faction = "combine", bounty = 130, health = 90,
-		mdl = "models/combine_soldier_prisonguard.mdl", skin = 2, camfov = 30
+		mdl = "models/combine_soldier_prisonguard.mdl", skin = 2, camfov = 25
 	}
 
 -- // }}}
@@ -113,7 +113,7 @@ jcms.bestiary = {}
 
 	jcms.bestiary.rebel_alyx = {
 		faction = "rebel", bounty = 75, health = 45,
-		mdl = "models/alyx.mdl", camfov = 30, seq = 3
+		mdl = "models/alyx.mdl", camfov = 25, seq = 3
 	}
 
 	jcms.bestiary.rebel_dog = {
@@ -122,8 +122,8 @@ jcms.bestiary = {}
 	}
 
 	jcms.bestiary.rebel_fighter = {
-		faction = "rebel", bounty = 30, health = 45,
-		mdl = "models/humans/group03/male_07.mdl", seq = 1, camfov = 30
+		faction = "rebel", bounty = 25, health = 45,
+		mdl = "models/humans/group03/male_07.mdl", seq = 1, camfov = 25
 	}
 
 	jcms.bestiary.rebel_helicopter = {
@@ -133,7 +133,7 @@ jcms.bestiary = {}
 
 	jcms.bestiary.rebel_medic = {
 		faction = "rebel", bounty = 35, health = 40,
-		mdl = "models/humans/group03m/female_07.mdl", seq = 3, camfov = 30
+		mdl = "models/humans/group03m/female_07.mdl", seq = 3, camfov = 25
 	}
 
 	jcms.bestiary.rebel_megacopter = {
@@ -142,23 +142,23 @@ jcms.bestiary = {}
 	}
 
 	jcms.bestiary.rebel_odessa = {
-		faction = "rebel", bounty = 50, health = 30,
-		mdl = "models/odessa.mdl", seq = 7, camfov = 30
+		faction = "rebel", bounty = 50, health = 25,
+		mdl = "models/odessa.mdl", seq = 7, camfov = 25
 	}
 
 	jcms.bestiary.rebel_rgg = {
 		faction = "rebel", bounty = 25, health = 4,
-		mdl = "models/humans/group02/male_05.mdl", mats = { "models/shiny", "models/shiny", "models/shiny", "models/shiny", "models/shiny" }, seq = 14, camfov = 30, color = Color(195, 0, 255)
+		mdl = "models/humans/group02/male_05.mdl", mats = { "models/shiny", "models/shiny", "models/shiny", "models/shiny", "models/shiny" }, seq = 14, camfov = 25, color = Color(195, 0, 255)
 	}
 
 	jcms.bestiary.rebel_vanguard = {
 		faction = "rebel", bounty = 45, health = 65,
-		mdl = "models/humans/group03/male_05.mdl", seq = 1, camfov = 30, color = Color(90, 69, 110)
+		mdl = "models/humans/group03/male_05.mdl", seq = 1, camfov = 25, color = Color(90, 69, 110)
 	}
 
 	jcms.bestiary.rebel_vortigaunt = {
 		faction = "rebel", bounty = 90, health = 100,
-		mdl = "models/vortigaunt.mdl", camfov = 30
+		mdl = "models/vortigaunt.mdl", camfov = 25
 	}
 
 -- // }}}
@@ -167,12 +167,12 @@ jcms.bestiary = {}
 
 	jcms.bestiary.zombie_boomer = {
 		faction = "zombie", bounty = 25, health = 37,
-		mdl = "models/player/zombie_soldier.mdl", seq = 5, color = Color(200, 255, 200), camfov = 30
+		mdl = "models/player/zombie_soldier.mdl", seq = 5, color = Color(200, 255, 200), camfov = 25
 	}
 
 	jcms.bestiary.zombie_charple = {
 		faction = "zombie", bounty = 20, health = 25,
-		mdl = "models/zombie/fast.mdl", mats = { "models/charple/charple3_sheet" }, camfov = 30
+		mdl = "models/zombie/fast.mdl", mats = { "models/charple/charple3_sheet" }, camfov = 25
 	}
 
 	jcms.bestiary.zombie_combine = {
@@ -187,12 +187,12 @@ jcms.bestiary = {}
 
 	jcms.bestiary.zombie_fast = {
 		faction = "zombie", bounty = 28, health = 63,
-		mdl = "models/zombie/fast.mdl", bodygroups = { [1] = 1 }, camfov = 30
+		mdl = "models/zombie/fast.mdl", bodygroups = { [1] = 1 }, camfov = 25
 	}
 
 	jcms.bestiary.zombie_husk = {
 		faction = "zombie", bounty = 13, health = 75,
-		mdl = "models/zombie/classic.mdl", bodygroups = { [1] = 1 }, camfov = 30
+		mdl = "models/zombie/classic.mdl", bodygroups = { [1] = 1 }, camfov = 25
 	}
 
 	jcms.bestiary.zombie_minitank = {
@@ -202,7 +202,7 @@ jcms.bestiary = {}
 
 	jcms.bestiary.zombie_poison = {
 		faction = "zombie", bounty = 35, health = 263,
-		mdl = "models/zombie/poison.mdl", bodygroups = { 1, 1, 1, 1 }, camfov = 30
+		mdl = "models/zombie/poison.mdl", bodygroups = { 1, 1, 1, 1 }, camfov = 25
 	}
 
 	local polypMatrix = Matrix()
@@ -219,7 +219,7 @@ jcms.bestiary = {}
 
 	jcms.bestiary.zombie_spirit = {
 		faction = "zombie", bounty = 60, health = 80,
-		mdl = "models/zombie/fast.mdl", camfov = 30,
+		mdl = "models/zombie/fast.mdl", camfov = 25,
 		preDrawModel = function(ent)
 			render.OverrideBlend( true, BLEND_SRC_ALPHA, BLEND_ONE, BLENDFUNC_ADD )
 			render.SetColorModulation(15, 1, 1)
@@ -256,7 +256,7 @@ jcms.bestiary = {}
 
 	jcms.bestiary.turret_rocket = {
 		faction = "turret", bounty = 0, health = 300,
-		mdl = "models/jcms/jcorp_smrls.mdl", camfov = 30
+		mdl = "models/jcms/jcorp_smrls.mdl", camfov = 25
 	}
 
 -- // }}}
@@ -265,22 +265,22 @@ jcms.bestiary = {}
 
 	jcms.bestiary.sweeper_recon = {
 		faction = "sweeper", bounty = 0, health = 75,
-		mdl = "models/player/urban.mdl", seq = 1, camfov = 30
+		mdl = "models/player/urban.mdl", camfov = 25
 	}
 
 	jcms.bestiary.sweeper_infantry = {
 		faction = "sweeper", bounty = 0, health = 100,
-		mdl = "models/player/riot.mdl", seq = 1, camfov = 30
+		mdl = "models/player/riot.mdl", camfov = 25
 	}
 
 	jcms.bestiary.sweeper_sentinel = {
 		faction = "sweeper", bounty = 0, health = 75,
-		mdl = "models/player/gasmask.mdl", seq = 1, camfov = 30
+		mdl = "models/player/gasmask.mdl", camfov = 25
 	}
 
 	jcms.bestiary.sweeper_engineer = {
 		faction = "sweeper", bounty = 0, health = 75,
-		mdl = "models/player/swat.mdl", seq = 1, camfov = 30
+		mdl = "models/player/swat.mdl", camfov = 25
 	}
 
 -- // }}}
