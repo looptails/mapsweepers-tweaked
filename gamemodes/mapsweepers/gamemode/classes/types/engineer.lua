@@ -35,6 +35,7 @@ class.damage = 1
 class.hurtMul = 1
 class.hurtReduce = 1
 class.speedMul = 0.9 -- Slightly slower
+class.disallowSprintAttacking = true
 
 class.matOverrides = { 
 	["models/cstrike/ct_gign"] = "models/jcms/player/engineer", 
