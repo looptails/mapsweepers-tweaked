@@ -29,7 +29,7 @@ class.footstepSfx = "NPC_CombineS.RunFootstep"
 class.health = 75
 class.shield = 175
 class.shieldRegen = 25
-class.shieldDelay = 20
+class.shieldDelay = 20 -- nerfed from 15
 
 class.damage = 1
 class.hurtMul = 1
@@ -275,7 +275,7 @@ if SERVER then
 			end
 		else
 			--Shield charge on kill.
-			local charge = math.ceil((npc.jcms_bounty or 1) / 25) --We receive some shield even if our target has no bounty.
+			local charge = math.ceil((npc.jcms_bounty or 1) / 25) --We receive some shield even if our target has no bounty. Buffed from 30.
 		
 			if charge > 0 then
 				local oldArmor = ply:Armor()
