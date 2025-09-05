@@ -198,12 +198,31 @@ jcms.achievements = {
 }
 -- // }}}
 
+-- // Misc {{{
+
+jcms.achievements_neutralName = "achievement_name_failed"
+jcms.achievements_neutralType = "achievement_type_failed"
+jcms.achievements_neutralAmount = 1000000 -- for debugging purposes, if the amount can't be grabbed, resorts to 1 million
+
+
+-- // }}}
+
 -- // Functions {{{
 
 function jcms.achievements_GetOrder()
   local keys = table.GetKeys(jcms.achievements)
 	table.sort(keys)
 	return keys
+end
+
+function jcms.achievements_GetType(cheevoName)
+	local fd = jcms.achievements[ cheevoName ]
+	return fd and fd.type or jcms.achievements_neutralType
+end
+
+function jcms.achievements_GetAmount(cheevoName)
+	local fd = jcms.achievements[ cheevoName ]
+	return fd and fd.amount or jcms.achievements_neutralAmount
 end
 
 -- // }}}
