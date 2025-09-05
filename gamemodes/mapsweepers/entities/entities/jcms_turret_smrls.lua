@@ -46,7 +46,7 @@ function ENT:Initialize()
 		if jcms.npc_airCheck() then
 			self.startNode = jcms.pathfinder.getNearestNodePVS( self:GetTurretShootPos() )
 			if not self.startNode then 
-				jcms.pathfinder.getNearestNode( self:GetTurretShootPos() )
+				self.startNode = jcms.pathfinder.getNearestNode( self:GetTurretShootPos() )
 			end
 		end
 	end
