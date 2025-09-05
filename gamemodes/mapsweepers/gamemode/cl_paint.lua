@@ -1767,6 +1767,12 @@
 			draw.SimpleText("#jcms.upcoming", "jcms_big", w/2, h/2, jcms.color_pulsing, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		end
 
+		function jcms.offgame_paint_CompletedPanel(p, w, h)
+			surface.SetDrawColor(jcms.color_pulsing)
+			jcms.hud_DrawNoiseRect(4, 4, w-8, h-8)
+			draw.SimpleText("#jcms.completed", "jcms_big", w/2, h/2, jcms.color_pulsing, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+		end
+
 		function jcms.offgame_paint_CustomizeHUD(p, w, h)
 			surface.SetDrawColor(jcms.color_pulsing)
 			drawHollowPolyButton(0, -1, w, h+2)
