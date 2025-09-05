@@ -1437,7 +1437,7 @@ jcms.offgame = jcms.offgame or NULL
 							achievsTable.engineerKills = achievsTable.engineerKills + jcms.statistics_GetKillCount(factionName, "engineer")
 						end
 						-- get total mission count
-						for iter, misType in ipairs( jcms.mission_GetTypesByFaction("any") do
+						for iter, misType in ipairs( jcms.mission_GetTypesByFaction("any") ) do
 							achievsTable.totalMissions = achievsTable.totalMissions + jcms.statistics_GetMissionCount(misType, nil, true)
 						end
 						-- long string of code incoming because im too lazy to make it efficient (the inner machinations of my mind are an enigma)
