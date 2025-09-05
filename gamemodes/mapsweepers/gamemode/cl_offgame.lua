@@ -1216,7 +1216,7 @@ jcms.offgame = jcms.offgame or NULL
 				function filter:OnSelect(i, str, data)
 					surface.PlaySound("buttons/button15.wav")
 					stats.classFilter = data
-					stats:Rebuild()	
+					stats:Rebuild()
 				end
 				filter.Paint = jcms.paint_ComboBox
 				filter.PaintOver = BLANK_DRAW
@@ -1266,7 +1266,7 @@ jcms.offgame = jcms.offgame or NULL
 							indent = 1
 						})
 
-						killTableHeight = killTableHeight + 18
+						killTableHeight = killTableHeight + 50
 						killSectionHeight = math.max(killSectionHeight, killTableHeight)
 
 						if cnt > 0 then
@@ -1387,32 +1387,28 @@ jcms.offgame = jcms.offgame or NULL
 				end
 				
 				stats:Rebuild()
+			-- }}}
 
-			-- }}}
-			-- }}}
-			-- }}}
-			-- }}}
-			-- }}}
-			-- }}}
 			-- Achievements {{{
+			-- NOTE: This is some of the shittest code you've ever seen. Touch at your own risk.
 				local achievs = tab:Add("DPanel")
 				achievs:SetPos(lowres and 28 or 80, stats:GetY() + stats:GetTall() + (lowres and 8 or 32))
 				achievs:SetSize(500, tab:GetTall() - achievs:GetY() - (lowres and 8 or 32))
 				achievs.Paint = jcms.offgame_paint_PersonalPanel
 				achievs.jText = "#jcms.achievements"
 				local inner = achievs:Add("DScrollPanel")
-				inner:SetPos(8, 32)
+				inner:SetPos(8, 40)
 				inner:SetSize(achievs:GetWide() - 16, achievs:GetTall() - 40)
 				function achievs:Rebuild()
 					if IsValid(self.inner) then
 						self.inner:Clear()
 					end
-					local achievsTable = achievs.inner:add("DPanel")
-					achievsTable:SetPos(32, 4)
-					achievsTable:SetSize(achievs.inner:GetWide() - 64, 500)
+					local achievsTable = inner:Add("DPanel")
+					achievsTable:SetSize(inner:GetWide() - 48, 40)
+					achievsTable.Paint = jcms.offgame_paint_Table
 					achievsTable.tableRows = {}
-					achievsTable.tableColums = 3
-					achievsTable.tableColumnsOffset = 1
+					achievsTable.tableColumns = 2
+					achievsTable.tableColumnsOffset = 0.1
 					achievsTable.totalKills = 0
 					achievsTable.infantryKills = 0
 					achievsTable.reconKills = 0
@@ -1420,14 +1416,11 @@ jcms.offgame = jcms.offgame or NULL
 					achievsTable.engineerKills = 0
 					achievsTable.totalMissions = 0
 
-					local achievsTableHeight = 100
+					local achievsTableHeight = 10
 					local achievsSectionHeight = 90
-
-					for i, achievementName in ipairs(jcms.achievements_GetOrder()) do 
-						local completed = jcms.color_dark
-						local achievementType = jcms.achievements_GetType(achievementName)
-						local achievementAmount = jcms.achievements_GetAmount(achievementName)
-						-- get total kill count
+					local achievementOrder = jcms.achievements_GetOrder()
+					
+					-- get total kill count
 						for iter, factionName in ipairs(jcms.factions_GetOrder()) do
 							--local cnt = jcms.statistics_GetKillCount(factionName, true)
 							achievsTable.totalKills = achievsTable.totalKills + jcms.statistics_GetKillCount(factionName, nil)
@@ -1436,29 +1429,40 @@ jcms.offgame = jcms.offgame or NULL
 							achievsTable.sentinelKills = achievsTable.sentinelKills + jcms.statistics_GetKillCount(factionName, "sentinel")
 							achievsTable.engineerKills = achievsTable.engineerKills + jcms.statistics_GetKillCount(factionName, "engineer")
 						end
+						
 						-- get total mission count
 						for iter, misType in ipairs( jcms.mission_GetTypesByFaction("any") ) do
 							achievsTable.totalMissions = achievsTable.totalMissions + jcms.statistics_GetMissionCount(misType, nil, true)
 						end
+					
+					for i, achievementName in ipairs(achievementOrder) do 
+						--print("doing achievement " .. i)
+						local completed = Color(70, 70, 70)
+						local achievementType = jcms.achievements_GetType(achievementName)
+						local achievementAmount = jcms.achievements_GetAmount(achievementName)
 						-- long string of code incoming because im too lazy to make it efficient (the inner machinations of my mind are an enigma)
 						-- todo: figure out if you can call runprogress.winstreak or if i need to make a reuturn function for that.
-						local achievementStat = achievementType == "kills" and achievsTable.totalKills or achievementType == "missions" and achievsTable.totalMissions or achievementType == "kills_antlion" and jcms.statistics_GetKillCount("antlion", true) or achievementType == "kills_combine" and jcms.statistics_GetKillCount("combine", true) or achievementType == "kills_rebels" and jcms.statistics_GetKillCount("rebel", true) or achievementType == "kills_zombies" and jcms.statistics_GetKillCount("zombie", true) or achievementType == "kills_infantry" and achievsTable.infantryKills or achievementType == "kills_recon" and achievsTable.reconKills or achievementType == "kills_sentinel" and achievsTable.sentinelKills or achievementType == "kills_engineer" and achievsTable.engineerKills or achievementType == "level" and jcms.statistics_GetLevel() or achievementType == "kills_friendly" and jcms.statistics_GetOther("ffire", nil) or achievementType == "deaths" and jcms.statistics_GetOther("deaths", nil) or achievementType == "orders" and jcms.statistics_GetOther("orders", nil) or achievementType == "terminals" and jcms.statistics_GetOther("hacks", nil) or achievementType == "winstreak" and jcms.runprogress.winstreak or "i fucked up"
+						local achievementStat = achievementType == "kills" and achievsTable.totalKills or achievementType == "missions" and achievsTable.totalMissions or achievementType == "kills_antlion" and jcms.statistics_GetKillCount("antlion", true) or achievementType == "kills_combine" and jcms.statistics_GetKillCount("combine", true) or achievementType == "kills_rebels" and jcms.statistics_GetKillCount("rebel", true) or achievementType == "kills_zombies" and jcms.statistics_GetKillCount("zombie", true) or achievementType == "kills_infantry" and achievsTable.infantryKills or achievementType == "kills_recon" and achievsTable.reconKills or achievementType == "kills_sentinel" and achievsTable.sentinelKills or achievementType == "kills_engineer" and achievsTable.engineerKills or achievementType == "level" and jcms.statistics_GetLevel() or achievementType == "kills_friendly" and jcms.statistics_GetOther("ffire", nil) or achievementType == "deaths" and jcms.statistics_GetOther("deaths", nil) or achievementType == "orders" and jcms.statistics_GetOther("orders", nil) or achievementType == "terminals" and jcms.statistics_GetOther("hacks", nil) or achievementType == "winstreak" and game.GetWorld():GetNWInt("jcms_winstreak") or "i fucked up"
 						if achievementStat >= achievementAmount then -- make sure the stat doesnt go over the amount so it looks good
 							achievementStat = achievementAmount
 							completed = jcms.color_bright
 						end
+						--print(achievementName)
 						table.insert(achievsTable.tableRows, {
 							color = completed,
-							title = "#jcms." ... achievementName,
-							[1] = "#jcms." ... achievementName ... "_desc",
-							[2] = "Current: " ... achievementStat,
-							[3] = "Required: " ... achievementAmount,
-							indent = 0
+							title = "#jcms.achievement_" .. achievementName,
+							[1] = "#jcms.achievement_" .. achievementName .. "_desc",
+							[2] = "Progress: " .. achievementStat .. "/" .. achievementAmount,
+							indent = 3
 						})
-				end
-
-				achievsTable:SetTall( 28 + #tableMissions.tableRows * 90 + 16 )
+					end
+				achievsTable:SetTall(#achievsTable.tableRows * 42)
+				--print("Achievements should be building with " .. #achievsTable.tableRows .. " rows.")
+			end
+				
+				achievs:Rebuild()
 			-- }}}
+			
 		end
 
 		function jcms.offgame_CreateSocialPanel(parent, x, y, w, h)
