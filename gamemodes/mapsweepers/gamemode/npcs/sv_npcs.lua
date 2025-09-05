@@ -598,7 +598,7 @@ jcms.npcSquadSize = 4 -- Let's see if smaller squads fix their strange behavior.
 -- // Standardized NAV code {{{
 
 	function jcms.npc_airCheck(director) -- Check func for all air units
-		return #jcms.pathfinder.airNodes > 0
+		return jcms.pathfinder.airNodes and #jcms.pathfinder.airNodes > 0
 	end
 
 	-- // {{{ Enums for custom behaviours
@@ -662,6 +662,7 @@ jcms.npcSquadSize = 4 -- Let's see if smaller squads fix their strange behavior.
 	end
 
 	function jcms.npc_airThink(npc) 
+		if not jcms.pathfinder.airNodes then return end
 		local enemy = npc:GetEnemy()
 		local shouldPatrol = true
 
