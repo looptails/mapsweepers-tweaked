@@ -1603,12 +1603,12 @@
 			end
 		end
 
-		function jcms.offgame_paint_PersonalPanel(p, w, h)
+		function jcms.offgame_paint_PersonalPanel(p, w, h, legendd)
 			surface.SetDrawColor(jcms.color_pulsing)
 			drawHollowPolyButton(0, -1, w, h+2)
 			draw.SimpleText(p.jText or "", "jcms_medium", 16, 8, jcms.color_bright)
 
-			if IsValid(p.scrollPanel) and IsValid(p.scrollPanel.VBar) then
+			if IsValid(p.scrollPanel) and IsValid(p.scrollPanel.VBar) or legendd == true then
 				p.scrollPanel.VBar.Paint = BLANK_DRAW
 				p.scrollPanel.VBar:SetHideButtons(true)
 				p.scrollPanel.VBar.btnGrip.Paint = jcms.paint_ScrollGrip
@@ -1692,24 +1692,34 @@
 				for i, row in ipairs(rows) do
 					local ind = row.indent or 0
 					local col = row.color or jcms.color_bright
-					local font = ind==0 and "jcms_medium" or (ind==1 and "jcms_small_bolder" or "jcms_small")
+					local font = ind==0 and "jcms_medium" or ind==3 and "jcms_medium" or (ind==1 and "jcms_small_bolder" or "jcms_small")
 					
 					if ind == 1 then
 						surface.SetDrawColor(col)
 						jcms.hud_DrawNoiseRect(ind*8 - 4, y - 2, w, 16, 32)
 					end
 					
-					draw.SimpleText(row.title, font, ind*8, y, col, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
-					for j=1, columnCount do
-						draw.SimpleText(row[j] or "", font, w/columnCount*(j + columnOffset) - ind*4, y, col, TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
+					if ind == 3 then
+						surface.SetDrawColor(col)
+						-- had to apply an offset of +24 to everything, else it wouldn't lay out correctly
+						jcms.hud_DrawNoiseRect(4, y, w, 45, 32)
+						draw.SimpleText(row.title, "jcms_medium", 8, y+24, col, TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM)
+						draw.SimpleText(row[1] or "", "jcms_small_bolder", w/columnCount*(columnOffset) - 4, y+24, col, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+						draw.SimpleText(row[2] or "", "jcms_small_bolder", w/columnCount*(2.1) - 4, y+24, col, TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
+					else
+						draw.SimpleText(row.title, font, ind*8, y, col, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+						for j=1, columnCount do
+							draw.SimpleText(row[j] or "", font, w/columnCount*(j + columnOffset) - ind*4, y, col, TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
+						end
 					end
 
 					if ind == 2 then
 						surface.SetDrawColor(col)
 						surface.DrawRect(ind*8 - 4, y - 2, 1, 16)
 					end
+					
 
-					local height = (ind == 0 and 28 or 18)
+					local height = (ind == 0 and 28 or ind == 3 and 42 or 18)
 					y = y + height
 				end
 			end
