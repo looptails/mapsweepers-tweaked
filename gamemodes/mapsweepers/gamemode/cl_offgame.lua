@@ -1448,7 +1448,7 @@ jcms.offgame = jcms.offgame or NULL
 							completed = jcms.color_bright
 						end
 						table.insert(achievsTable.tableRows, {
-							color = completed
+							color = completed,
 							title = "#jcms." ... achievementName,
 							[1] = "#jcms." ... achievementName ... "_desc",
 							[2] = "Current: " ... achievementStat,
