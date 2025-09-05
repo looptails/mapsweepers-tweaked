@@ -922,7 +922,7 @@ end
 		if (ply:GetObserverMode() == OBS_MODE_FIXED or ply:GetObserverMode() == OBS_MODE_CHASE) then
 			local eIndex = ply:EntIndex()
 			local pos
-			if jcms.pathfinder.airNodes[eIndex] then --Airgraph is our best bet for reliability. I should make a better solution later.
+			if jcms.pathfinder.airNodes and jcms.pathfinder.airNodes[eIndex] then --Airgraph is our best bet for reliability. I should make a better solution later.
 				local node = jcms.pathfinder.airNodes[eIndex]
 				pos = node.pos
 			else
