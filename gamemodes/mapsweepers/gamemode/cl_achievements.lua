@@ -134,25 +134,25 @@ jcms.achievements = {
     name = "missions_1",
     type = "missions",
     amount = 5
-  ),
+  },
 
   missions_2 = {
     name = "missions_2",
     type = "missions",
     amount = 25
-  ),
+  },
 
   missions_3 = {
     name = "missions_3",
     type = "missions",
     amount = 100
-  ),
+  },
 
   missions_4 = {
     name = "missions_4",
     type = "missions",
     amount = 250
-  ),
+  },
 
   winstreak_1 = {
     name = "winstreak_1",
@@ -210,7 +210,10 @@ jcms.achievements_neutralAmount = 1000000 -- for debugging purposes, if the amou
 -- // Functions {{{
 
 function jcms.achievements_GetOrder()
-  local keys = table.GetKeys(jcms.achievements)
+	local keys = {}
+	for name, cheevo in pairs(jcms.achievements) do
+		table.insert(keys, name)
+	end
 	table.sort(keys)
 	return keys
 end
