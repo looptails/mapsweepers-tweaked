@@ -26,7 +26,7 @@ jcms.class_Add("sentinel", class, true)
 class.mdl = "models/player/gasmask.mdl"
 class.footstepSfx = "NPC_CombineS.RunFootstep"
 
-class.health = 75
+class.health = 50
 class.shield = 175
 class.shieldRegen = 25
 class.shieldDelay = 20 -- nerfed from 15
@@ -61,7 +61,7 @@ if SERVER then
 
 		if dmg:IsDamageType(DMG_NERVEGAS) then
 			ply.sentinel_lastDmgBlocked = CurTime()
-			dmg:SetDamage(0)
+			dmg:SetDamage(dmg:GetDamage()/2)
 			return
 		end
 
